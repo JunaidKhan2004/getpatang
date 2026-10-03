@@ -4,11 +4,11 @@ import Link from "next/link";
 import { ProductGrid } from "@/components/market/product-card";
 import { ShopCard } from "@/components/market/shop-card";
 import { PostCard } from "@/components/community/post-card";
+import { HomeHero } from "@/components/site/home-hero";
 import { KitePreview } from "@/components/designer/kite-preview";
 import { EventCard } from "@/components/events/event-card";
 import { TournamentCard } from "@/components/tournaments/tournament-card";
 import { ButtonLink } from "@/components/ui/button";
-import { KiteMark } from "@/components/ui/kite-mark";
 import { apiPage } from "@/lib/api";
 import type { ProductCard, ShopCard as Shop } from "@/lib/market";
 import type { PostView } from "@/lib/community";
@@ -41,30 +41,13 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="kite-pattern relative overflow-hidden bg-maroon-900 text-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[3fr_2fr]">
-          <div className="grid gap-6">
-            <p className="text-sm font-semibold tracking-[0.1em] text-maroon-100 uppercase">Pakistan’s kite platform</p>
-            <h1 className="max-w-2xl text-4xl leading-tight font-bold sm:text-5xl">
-              Kite shops, organised tournaments and the people who fly.
-            </h1>
-            <p className="max-w-xl text-lg text-maroon-100">
-              Buy from trusted sellers, register for approved competitions and follow official rankings, all in one place.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <ButtonLink href="/marketplace" size="lg" className="!bg-white !text-maroon-900 hover:!bg-maroon-100">
-                Browse the marketplace
-              </ButtonLink>
-              <ButtonLink href="/tournaments" size="lg" variant="secondary" className="!border-white/40 !bg-transparent !text-white hover:!bg-white/10">
-                See tournaments
-              </ButtonLink>
-            </div>
-          </div>
-          <div className="hidden justify-self-center lg:block">
-            <KiteMark size={260} body="#6b1a1a" wing="#9b3b3b" />
-          </div>
-        </div>
-      </section>
+      <HomeHero
+        stats={{
+          shops: shops?.meta.total,
+          products: products?.meta.total,
+          tournaments: tournaments?.meta.total,
+        }}
+      />
 
       <section aria-labelledby="pillars" className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <h2 id="pillars" className="mb-8 text-2xl font-semibold sm:text-3xl">Everything kite flying needs</h2>
