@@ -11,6 +11,7 @@ import '../application/cart_count.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
+import '../../../core/widgets/loaders.dart';
 
 /// Sends a guest to sign in and returns false; true when signed in.
 bool ensureSignedIn(BuildContext context, WidgetRef ref) {
@@ -235,7 +236,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     Text('Reviews', style: t.textTheme.titleLarge),
                     const SizedBox(height: 6),
                     reviews.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const ListRowSkeleton(kite: false),
                       error: (_, _) => Text('Reviews could not load.', style: t.textTheme.bodySmall),
                       data: (r) => r.items.isEmpty
                           ? Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/kite_mark.dart';
+import '../../../core/widgets/loaders.dart';
 
 /// Shown while the stored session is restored. The router moves on automatically.
 class SplashScreen extends StatelessWidget {
@@ -20,18 +21,13 @@ class SplashScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const KiteMark(size: 72, body: AppColors.white, wing: AppColors.maroon100),
+                const KiteLoader(size: 64, onDark: true),
                 const SizedBox(height: 20),
                 Text('GetPatang', style: t.textTheme.headlineMedium?.copyWith(color: AppColors.white)),
                 const SizedBox(height: 6),
                 Text(
                   'Shops · Tournaments · Community',
                   style: t.textTheme.bodyMedium?.copyWith(color: AppColors.maroon100),
-                ),
-                const SizedBox(height: 40),
-                const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.white),
                 ),
               ],
             ),

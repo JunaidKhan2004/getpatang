@@ -16,6 +16,7 @@ import '../marketplace/widgets/market_widgets.dart';
 import '../tournaments/presentation/tournaments_tab.dart' show StatusPill, formatWhen;
 import 'designer_repository.dart';
 import 'kite_design.dart';
+import '../../core/widgets/loaders.dart';
 
 Color _statusColor(CustomOrderData r) => r.quoteExpired
     ? AppColors.muted
@@ -180,7 +181,7 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
         actions: [if (signedIn) TextButton(onPressed: () => context.push('/designs'), child: const Text('My designs'))],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: KiteLoader(label: 'Opening your design…'))
           : Column(
               children: [
                 Container(
@@ -238,7 +239,7 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
                           OutlinedButton.icon(
                             onPressed: _uploading ? null : _pickImage,
                             icon: _uploading
-                                ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                                ? const KiteSpinner(size: 18)
                                 : const Icon(Icons.add_photo_alternate_outlined),
                             label: Text(_uploading ? 'Uploading…' : 'Add a logo'),
                           ),

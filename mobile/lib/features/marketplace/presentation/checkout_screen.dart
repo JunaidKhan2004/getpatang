@@ -12,6 +12,7 @@ import '../../auth/presentation/complete_profile_screen.dart' show pakistanCitie
 import '../application/cart_count.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
+import '../../../core/widgets/loaders.dart';
 
 /// Random UUID v4 so a retried "Place order" never creates duplicate orders.
 String _uuid() {
@@ -135,7 +136,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
       body: data.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: KiteLoader(label: 'Preparing checkout…')),
         error: (e, _) => EmptyState(
           icon: Icons.cloud_off_outlined,
           title: 'Checkout could not load',
@@ -284,7 +285,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ? Center(
                           child: _quoteError != null
                               ? Text(_quoteError!, style: const TextStyle(color: AppColors.danger))
-                              : const CircularProgressIndicator(),
+                              : const KiteSpinner(size: 24),
                         )
                       : Column(
                           children: [

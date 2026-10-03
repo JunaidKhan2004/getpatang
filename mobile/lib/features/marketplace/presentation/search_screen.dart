@@ -8,6 +8,7 @@ import '../../../core/widgets/feedback.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
+import '../../../core/widgets/loaders.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -87,7 +88,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         actions: const [SizedBox(width: 12)],
       ),
       body: _loading && r == null
-          ? const Center(child: CircularProgressIndicator())
+          ? CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: ProductGridSkeleton(gridDelegate: productGridDelegate(context)),
+                ),
+              ],
+            )
           : _error != null
           ? ErrorRetry(message: _error!, onRetry: _retry)
           : r == null

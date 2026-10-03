@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'loaders.dart';
 
 enum ToastKind { success, error, info }
 
@@ -24,12 +25,8 @@ class LoadingButton extends StatelessWidget {
   final bool loading;
 
   @override
-  Widget build(BuildContext context) => FilledButton(
-    onPressed: loading ? null : onPressed,
-    child: loading
-        ? const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2.4))
-        : Text(label),
-  );
+  Widget build(BuildContext context) =>
+      FilledButton(onPressed: loading ? null : onPressed, child: loading ? const KiteSpinner(size: 18) : Text(label));
 }
 
 /// Centered message for empty or not-yet-built sections.

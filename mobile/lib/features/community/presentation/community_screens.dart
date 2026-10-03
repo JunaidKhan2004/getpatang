@@ -14,6 +14,7 @@ import '../../marketplace/widgets/market_widgets.dart';
 import '../../shell/main_shell.dart';
 import '../data/community_repository.dart';
 import 'community_widgets.dart';
+import '../../../core/widgets/loaders.dart';
 
 class CommunityTab extends ConsumerStatefulWidget {
   const CommunityTab({super.key});
@@ -135,7 +136,7 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: _posting
-              ? const Center(child: SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2.4)))
+              ? const Center(child: KiteSpinner(size: 22))
               : FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size(72, 40)),
                   onPressed: _post,
@@ -335,9 +336,14 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                     const SizedBox(height: 8),
                     Text('Comments', style: Theme.of(context).textTheme.titleLarge),
                     comments.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(child: CircularProgressIndicator()),
+                      loading: () => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < 3; i++)
+                              const Padding(padding: EdgeInsets.only(bottom: 10), child: ListRowSkeleton(kite: false)),
+                          ],
+                        ),
                       ),
                       error: (_, _) =>
                           const Padding(padding: EdgeInsets.all(16), child: Text('Comments could not load.')),
@@ -400,9 +406,7 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                         IconButton(
                           tooltip: 'Send',
                           onPressed: _sending ? null : _send,
-                          icon: _sending
-                              ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.send),
+                          icon: _sending ? const KiteSpinner(size: 20) : const Icon(Icons.send),
                         ),
                       ],
                     ),

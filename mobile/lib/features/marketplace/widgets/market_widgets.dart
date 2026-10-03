@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/feedback.dart';
 import '../../../core/widgets/kite_mark.dart';
 import '../data/models.dart';
+import '../../../core/widgets/loaders.dart';
 
 /// Product photo, or the kite placeholder when the seller has not uploaded one.
 class ProductThumb extends StatelessWidget {
@@ -317,7 +318,7 @@ class AsyncBody<T> extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => value.when(
     data: builder,
-    loading: () => const Center(child: CircularProgressIndicator()),
+    loading: () => const Center(child: KiteLoader()),
     error: (e, _) => ErrorRetry(message: e is ApiException ? e.message : 'Something went wrong.', onRetry: onRetry),
   );
 }
@@ -431,11 +432,17 @@ class PagedViewState<T> extends State<PagedView<T>> {
             itemBuilder: (c, i) => widget.itemBuilder(c, _items[i]),
           ),
         ),
-      if (_loading)
+      // First page: skeletons shaped like the real content. Later pages: a small kite at the bottom.
+      if (_loading && _items.isEmpty)
+        SliverPadding(
+          padding: widget.padding,
+          sliver: widget.grid ? ProductGridSkeleton(gridDelegate: productGridDelegate(context)) : const ListSkeleton(),
+        )
+      else if (_loading)
         const SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: CircularProgressIndicator()),
+            padding: EdgeInsets.all(20),
+            child: Center(child: KiteSpinner(size: 26)),
           ),
         ),
       if (_error != null && _items.isNotEmpty)

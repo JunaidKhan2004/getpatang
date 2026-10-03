@@ -11,6 +11,7 @@ import '../../marketplace/presentation/product_screen.dart' show ensureSignedIn;
 import '../../marketplace/widgets/market_widgets.dart' show ProductThumb;
 import '../../marketplace/data/models.dart' show ImageRef;
 import '../data/community_repository.dart';
+import '../../../core/widgets/loaders.dart';
 
 /// Asks for a reason and sends a report about a post, comment or user.
 Future<void> showReportSheet(BuildContext context, WidgetRef ref, String targetType, String targetId) async {
@@ -111,7 +112,7 @@ class _VideoBoxState extends State<_VideoBox> {
         height: 220,
         color: Colors.black,
         alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
+        child: const KiteLoader(size: 36, onDark: true),
       );
     }
     return AspectRatio(

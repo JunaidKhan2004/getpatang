@@ -9,6 +9,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../shell/main_shell.dart';
 import '../data/marketplace_repository.dart';
 import '../widgets/market_widgets.dart';
+import '../../../core/widgets/loaders.dart';
 
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
@@ -161,7 +162,10 @@ class HomeTab extends ConsumerWidget {
             ),
             ...feed.when(
               loading: () => [
-                const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator())),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  sliver: ProductGridSkeleton(gridDelegate: productGridDelegate(context), count: 4),
+                ),
               ],
               error: (e, _) => [
                 SliverFillRemaining(

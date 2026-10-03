@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/widgets/feedback.dart';
+import '../../core/widgets/loaders.dart';
 
 /// Staff-written public pages (about, contact, faq, terms, privacy), from Admin → Content.
 const contentPageTitles = {
@@ -71,7 +72,7 @@ class ContentPageScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(page.value?.title ?? fallback)),
       body: page.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(padding: EdgeInsets.all(20), child: TextSkeleton()),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
