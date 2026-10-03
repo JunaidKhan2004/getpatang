@@ -38,7 +38,7 @@ async function bootstrap() {
 
   if (!isProd) {
     const doc = new DocumentBuilder()
-      .setTitle('Kite Platform API')
+      .setTitle('GetPatang API')
       .setDescription('Marketplace, tournaments and community API. All responses use { data } / { error } envelopes.')
       .setVersion('1.0')
       .addBearerAuth()

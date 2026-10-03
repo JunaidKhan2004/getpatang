@@ -111,11 +111,11 @@ export class AdminOrdersService {
       const moved = await tx.order.updateMany({ where: { id: order.id, status: order.status }, data: { status: OrderStatus.CANCELLED } });
       if (!moved.count) throw new AppException('STATUS_CONFLICT', 'This order was just updated. Refresh and try again.', HttpStatus.CONFLICT);
       await restockOrder(tx, order.items);
-      await closeOrderPayments(tx, order, `Cancelled by Kite Platform: ${dto.reason}`);
-      await tx.orderStatusEvent.create({ data: { orderId: order.id, status: OrderStatus.CANCELLED, note: `Cancelled by Kite Platform: ${dto.reason}`, actorId: actor.id } });
+      await closeOrderPayments(tx, order, `Cancelled by GetPatang: ${dto.reason}`);
+      await tx.orderStatusEvent.create({ data: { orderId: order.id, status: OrderStatus.CANCELLED, note: `Cancelled by GetPatang: ${dto.reason}`, actorId: actor.id } });
     });
     await this.audit.log({ actorId: actor.id, action: 'order.admin_cancel', entityType: 'order', entityId: order.id, metadata: { from: order.status, reason: dto.reason }, meta });
-    const body = `Kite Platform cancelled order ${orderNumber}: ${dto.reason}`;
+    const body = `GetPatang cancelled order ${orderNumber}: ${dto.reason}`;
     this.notifications.send({ userIds: order.userId, category: 'orders', type: 'order.admin_cancelled', title: `Order ${orderNumber} was cancelled`, body: `${body}${order.paymentStatus === PaymentStatus.PAID ? ' Your refund is being processed.' : ''}`, link: `/account/orders/${orderNumber}` });
     this.notifications.send({ userIds: order.shop.ownerId, category: 'shop', type: 'order.admin_cancelled', title: `Order ${orderNumber} was cancelled`, body, link: `/seller/orders/${orderNumber}` });
     return this.detail(orderNumber);

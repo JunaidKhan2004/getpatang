@@ -67,7 +67,7 @@ class HomeTab extends ConsumerWidget {
                                         ),
                                       Text(
                                         user == null
-                                            ? 'Welcome to Kite Platform'
+                                            ? 'Welcome to GetPatang'
                                             : 'Assalam o Alaikum, ${user.profile?.displayName ?? user.fullName}',
                                         style: t.textTheme.titleLarge?.copyWith(color: AppColors.white),
                                         maxLines: 1,

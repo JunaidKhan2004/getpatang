@@ -4,27 +4,27 @@
 #   docker compose --env-file .env.production up -d --build
 #   docker compose --env-file .env.production run --rm api seed     # first deploy only
 
-name: kite-platform
+name: getpatang
 
 services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kite_platform}
-      POSTGRES_USER: ${POSTGRES_USER:-kite}
+      POSTGRES_DB: ${POSTGRES_DB:-getpatang}
+      POSTGRES_USER: ${POSTGRES_USER:-getpatang}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kite} -d ${POSTGRES_DB:-kite_platform}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-getpatang} -d ${POSTGRES_DB:-getpatang}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   api:
     build: ./backend
-    image: kite-platform-api
+    image: getpatang-api
     restart: unless-stopped
     depends_on:
       db:
@@ -32,7 +32,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-kite}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kite_platform}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-getpatang}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-getpatang}?schema=public
       CORS_ORIGINS: https://${WEB_DOMAIN:?Set WEB_DOMAIN}
       PUBLIC_API_ORIGIN: https://${API_DOMAIN:?Set API_DOMAIN}
       WEB_ORIGIN: https://${WEB_DOMAIN}
@@ -54,7 +54,7 @@ services:
 
   web:
     build: ./web
-    image: kite-platform-web
+    image: getpatang-web
     restart: unless-stopped
     depends_on:
       api:

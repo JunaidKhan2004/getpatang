@@ -53,7 +53,7 @@ describe('Notifications & payments (e2e)', () => {
     shopId = (await prisma.shop.create({ data: { ownerId: owner.id, name: 'Patang Ghar', slug: 'patang-ghar', city: 'Lahore', status: ShopStatus.APPROVED } })).id;
     seller = (await api().post('/api/v1/auth/login').send({ identifier: owner.email, password: 'flyHigh2027' })).body.data.tokens.accessToken;
     await prisma.setting.create({
-      data: { key: 'payments.bank_transfer', value: { enabled: true, bankName: 'Test Bank', accountTitle: 'Kite Platform', iban: 'PK36SCBL0000001123456702' } },
+      data: { key: 'payments.bank_transfer', value: { enabled: true, bankName: 'Test Bank', accountTitle: 'GetPatang', iban: 'PK36SCBL0000001123456702' } },
     });
   });
 

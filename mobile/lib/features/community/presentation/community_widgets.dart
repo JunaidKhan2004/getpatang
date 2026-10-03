@@ -175,7 +175,7 @@ class _PostTileState extends ConsumerState<PostTile> {
       final r = await ref.read(communityRepositoryProvider).share(_p.id);
       if (mounted) setState(() => _p = _p.copyWith(shareCount: r.shareCount));
       await SharePlus.instance.share(
-        ShareParams(text: 'Post by ${_p.author.name} on Kite Platform: ${Env.webBaseUrl}${r.path}'),
+        ShareParams(text: 'Post by ${_p.author.name} on GetPatang: ${Env.webBaseUrl}${r.path}'),
       );
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);

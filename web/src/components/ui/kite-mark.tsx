@@ -29,7 +29,7 @@ export function Logo({ inverted = false }: { inverted?: boolean }) {
         wing={inverted ? "#f2e4e4" : "var(--highlight)"}
       />
       <span className={`font-display text-lg font-semibold ${inverted ? "text-white" : "text-ink"}`}>
-        Kite Platform
+        GetPatang
       </span>
     </span>
   );

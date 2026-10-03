@@ -163,7 +163,7 @@ export default async function HomePage() {
           <div className="grid gap-2">
             <h2 id="safety" className="text-2xl font-semibold">Safety comes first</h2>
             <p className="max-w-3xl text-muted">
-              Every tournament on Kite Platform must follow local law, venue rules, approved materials and age
+              Every tournament on GetPatang must follow local law, venue rules, approved materials and age
               requirements. Metal, glass-coated and other dangerous strings are never sold. Report anything unsafe and our
               moderators will review it.
             </p>

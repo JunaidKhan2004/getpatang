@@ -29,8 +29,8 @@ export class ConsoleOtpChannel implements OtpChannel {
 }
 
 const PURPOSE_TEXT: Record<OtpPurpose, string> = {
-  VERIFY_ACCOUNT: 'verify your Kite Platform account',
-  RESET_PASSWORD: 'reset your Kite Platform password',
+  VERIFY_ACCOUNT: 'verify your GetPatang account',
+  RESET_PASSWORD: 'reset your GetPatang password',
 };
 
 /** Sends codes by email through MailService (needs MAIL_TRANSPORT=smtp; checked at startup). */

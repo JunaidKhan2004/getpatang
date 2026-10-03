@@ -20,7 +20,7 @@ export class ProductRules {
         'PROHIBITED_ITEM',
         `Content promoting “${hit}” is not allowed. Metal, glass-coated and chemical strings are banned for safety.`,
         HttpStatus.UNPROCESSABLE_ENTITY,
-        [{ field, message: `“${hit}” is not allowed on Kite Platform` }],
+        [{ field, message: `“${hit}” is not allowed on GetPatang` }],
       );
     }
   }

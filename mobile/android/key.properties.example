@@ -1,5 +1,5 @@
 # Copy to key.properties (not committed) for signed release builds. See docs/DEPLOYMENT.md.
-storeFile=/absolute/path/to/kite-upload-key.jks
+storeFile=/absolute/path/to/getpatang-upload-key.jks
 storePassword=
 keyAlias=upload
 keyPassword=

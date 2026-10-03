@@ -67,7 +67,7 @@ export function DashboardShell({
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="kite-pattern sticky top-0 hidden h-dvh flex-col gap-6 overflow-y-auto bg-maroon-900 p-4 lg:flex">
-        <Link href="/" className="px-2 pt-2" aria-label="Kite Platform home">
+        <Link href="/" className="px-2 pt-2" aria-label="GetPatang home">
           <Logo inverted />
         </Link>
         <p className="px-3 text-xs font-semibold tracking-[0.1em] text-maroon-100/70 uppercase">{area}</p>

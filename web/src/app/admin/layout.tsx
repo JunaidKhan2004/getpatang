@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/feedback";
 import { requireUser } from "@/lib/session";
 import { isStaff } from "@/lib/types";
 
-export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · Kite Platform" } };
+export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · GetPatang" } };
 
 /** UI gate only. Every admin API call is authorised again by the backend. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

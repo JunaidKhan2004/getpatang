@@ -1,4 +1,4 @@
-# Deploying Kite Platform
+# Deploying GetPatang
 
 This guide takes a fresh server to a live platform, then covers updates, backups and the Android release.
 Everything except the mobile app runs in Docker on one server.
@@ -16,15 +16,15 @@ Android app ──► API_DOMAIN
 
 - A Linux server (Ubuntu 24.04 LTS recommended) with **2 vCPU, 4 GB RAM, 40 GB disk** to start.
 - **Docker Engine** with the Compose plugin: <https://docs.docker.com/engine/install/ubuntu/>.
-- Two DNS **A records** pointing at the server: the website (e.g. `kiteplatform.pk`) and the API (e.g. `api.kiteplatform.pk`).
+- Two DNS **A records** pointing at the server: the website (e.g. `getpatang.pk`) and the API (e.g. `api.getpatang.pk`).
 - Ports **80 and 443** open. Nothing else needs to be public.
 - An **SMTP account** for email (sign-in codes and notifications). Production will not start without one.
 
 ## 2. First deploy
 
 ```bash
-sudo mkdir -p /opt/kite-platform && sudo chown $USER /opt/kite-platform
-git clone <your repository> /opt/kite-platform && cd /opt/kite-platform
+sudo mkdir -p /opt/getpatang && sudo chown $USER /opt/getpatang
+git clone <your repository> /opt/getpatang && cd /opt/getpatang
 
 cp .env.production.example .env.production
 nano .env.production            # domains, database password, secrets, SMTP, first admin
@@ -47,7 +47,7 @@ Demo data is never loaded in production.
 ## 3. Updating
 
 ```bash
-cd /opt/kite-platform
+cd /opt/getpatang
 ./deploy/backup.sh                                   # always back up first
 git pull
 docker compose --env-file .env.production up -d --build
@@ -68,7 +68,7 @@ and copy the folder to another machine or cloud storage:
 
 ```bash
 crontab -e
-30 2 * * * cd /opt/kite-platform && ./deploy/backup.sh >> /var/log/kite-backup.log 2>&1
+30 2 * * * cd /opt/getpatang && ./deploy/backup.sh >> /var/log/getpatang-backup.log 2>&1
 ```
 
 Restore (stops the site while it runs):
@@ -76,7 +76,7 @@ Restore (stops the site while it runs):
 ```bash
 docker compose --env-file .env.production stop api web
 docker compose --env-file .env.production exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists' < backups/db-YYYYMMDD-HHMMSS.dump
-docker run --rm -v kite-platform_uploads:/data -v "$PWD/backups":/backup alpine sh -c 'rm -rf /data/* && tar -xzf /backup/uploads-YYYYMMDD-HHMMSS.tar.gz -C /data'
+docker run --rm -v getpatang_uploads:/data -v "$PWD/backups":/backup alpine sh -c 'rm -rf /data/* && tar -xzf /backup/uploads-YYYYMMDD-HHMMSS.tar.gz -C /data'
 docker compose --env-file .env.production start api web
 ```
 
@@ -96,7 +96,7 @@ The app talks to the API over HTTPS only in release builds.
 **Once:** create the upload key and keep it safe (losing it means you cannot update the app on Google Play):
 
 ```bash
-keytool -genkey -v -keystore ~/kite-upload-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+keytool -genkey -v -keystore ~/getpatang-upload-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 cp mobile/android/key.properties.example mobile/android/key.properties   # fill in the path and passwords
 ```
 
@@ -110,7 +110,7 @@ flutter build appbundle --release \
 # upload build/app/outputs/bundle/release/app-release.aab in Google Play Console
 ```
 
-Decide the final application ID (`com.kiteplatform.kite_platform` in `android/app/build.gradle.kts`) **before** the first
+Decide the final application ID (`pk.getpatang.app` in `android/app/build.gradle.kts`) **before** the first
 upload; it cannot change afterwards. Play Console also needs a privacy policy URL (`https://WEB_DOMAIN/privacy`), the
 content rating questionnaire and store screenshots.
 

@@ -79,7 +79,7 @@ export default async function ShopPage({
               {shop.phone && <li className="flex gap-2"><Phone className="size-4 shrink-0 text-primary" aria-hidden="true" /><a href={`tel:${shop.phone}`} className="hover:underline">{shop.phone}</a></li>}
               {shop.email && <li className="flex gap-2"><Mail className="size-4 shrink-0 text-primary" aria-hidden="true" /><a href={`mailto:${shop.email}`} className="break-all hover:underline">{shop.email}</a></li>}
             </ul>
-            <p className="text-xs text-muted">On Kite Platform since {formatDate(shop.createdAt)}</p>
+            <p className="text-xs text-muted">On GetPatang since {formatDate(shop.createdAt)}</p>
             <ReportButton targetType="shop" targetId={shop.id} label="Report shop" />
           </aside>
 

@@ -81,8 +81,8 @@ describe('settings validation', () => {
   it('requires real bank details before bank transfer is turned on', () => {
     expect(ok('payments.bank_transfer', { enabled: true, bankName: '', accountTitle: '', iban: '' })).toHaveProperty('error');
     expect(ok('payments.bank_transfer', { enabled: false, bankName: 'X', accountTitle: 'Y', iban: 'PK00' })).toHaveProperty('error');
-    expect(ok('payments.bank_transfer', { enabled: true, bankName: 'Meezan', accountTitle: 'Kite Platform', iban: 'pk36 scbl 0000 0011 2345 6702' })).toEqual({
-      value: { enabled: true, bankName: 'Meezan', accountTitle: 'Kite Platform', iban: 'PK36SCBL0000001123456702' },
+    expect(ok('payments.bank_transfer', { enabled: true, bankName: 'Meezan', accountTitle: 'GetPatang', iban: 'pk36 scbl 0000 0011 2345 6702' })).toEqual({
+      value: { enabled: true, bankName: 'Meezan', accountTitle: 'GetPatang', iban: 'PK36SCBL0000001123456702' },
     });
   });
 

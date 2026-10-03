@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         // Fixed forever once the app is on Google Play.
-        applicationId = "com.kiteplatform.kite_platform"
+        applicationId = "pk.getpatang.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

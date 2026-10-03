@@ -22,7 +22,7 @@ class SplashScreen extends StatelessWidget {
               children: [
                 const KiteMark(size: 72, body: AppColors.white, wing: AppColors.maroon100),
                 const SizedBox(height: 20),
-                Text('Kite Platform', style: t.textTheme.headlineMedium?.copyWith(color: AppColors.white)),
+                Text('GetPatang', style: t.textTheme.headlineMedium?.copyWith(color: AppColors.white)),
                 const SizedBox(height: 6),
                 Text(
                   'Shops · Tournaments · Community',

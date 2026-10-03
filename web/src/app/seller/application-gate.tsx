@@ -118,7 +118,7 @@ function ApplicationForm({
   return (
     <form action={submit} className="grid gap-6">
       <div className="grid gap-2">
-        <h1 className="text-3xl font-bold">{a ? "Update your application" : "Sell on Kite Platform"}</h1>
+        <h1 className="text-3xl font-bold">{a ? "Update your application" : "Sell on GetPatang"}</h1>
         <p className="text-muted">Tell us about your shop. We review every application by hand to keep buyers safe.</p>
       </div>
       {a?.reviewNote && <Alert tone="error"><strong>Please fix:</strong> {a.reviewNote}</Alert>}

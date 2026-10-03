@@ -9,7 +9,7 @@ import { getAccessToken, requireUser } from "@/lib/session";
 
 import { ApplicationGate } from "./application-gate";
 
-export const metadata: Metadata = { title: { default: "Seller", template: "%s · Seller · Kite Platform" } };
+export const metadata: Metadata = { title: { default: "Seller", template: "%s · Seller · GetPatang" } };
 
 /** UI gate only. Every seller API call is authorised again by the backend. */
 export default async function SellerLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +21,7 @@ export default async function SellerLayout({ children }: { children: React.React
       <div className="min-h-dvh bg-bg">
         <header className="border-b border-border bg-surface">
           <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
-            <Link href="/" aria-label="Kite Platform home"><Logo /></Link>
+            <Link href="/" aria-label="GetPatang home"><Logo /></Link>
             <Link href="/account" className="text-sm font-medium text-primary hover:underline">My account</Link>
           </div>
         </header>

@@ -32,7 +32,7 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-        <Link href="/" aria-label="Kite Platform home" className="shrink-0">
+        <Link href="/" aria-label="GetPatang home" className="shrink-0">
           <Logo />
         </Link>
 

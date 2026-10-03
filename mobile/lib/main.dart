@@ -17,7 +17,7 @@ class KiteApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
-    title: 'Kite Platform',
+    title: 'GetPatang',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     darkTheme: AppTheme.dark,

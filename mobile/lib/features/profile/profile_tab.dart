@@ -151,7 +151,7 @@ class ProfileTab extends ConsumerWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.info_outline),
-                  title: const Text('About Kite Platform'),
+                  title: const Text('About GetPatang'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/legal/about'),
                 ),

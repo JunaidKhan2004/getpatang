@@ -102,7 +102,7 @@ export class NotificationsService {
               to: u.email,
               subject: input.title,
               text: `Hi ${u.fullName},\n\n${input.body}`,
-              action: input.link ? { label: 'Open Kite Platform', url: this.webOrigin + input.link } : undefined,
+              action: input.link ? { label: 'Open GetPatang', url: this.webOrigin + input.link } : undefined,
             }),
           );
         }

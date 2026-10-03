@@ -53,7 +53,7 @@ export class EnvironmentVariables {
   SMTP_PASS?: string;
 
   @IsString()
-  MAIL_FROM = 'Kite Platform <no-reply@kiteplatform.local>';
+  MAIL_FROM = 'GetPatang <no-reply@getpatang.local>';
 
   /** Used for links in emails. */
   @IsString()

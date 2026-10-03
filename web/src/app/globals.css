@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Kite Platform design tokens — source of truth: docs/design-tokens.md */
+/* GetPatang design tokens — source of truth: docs/design-tokens.md */
 :root {
   --bg: #f6f6f6;
   --surface: #ffffff;

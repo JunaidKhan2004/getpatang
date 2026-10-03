@@ -1,4 +1,4 @@
-# Kite Platform
+# GetPatang
 
 Pakistan-focused kite marketplace, tournament and community platform.
 

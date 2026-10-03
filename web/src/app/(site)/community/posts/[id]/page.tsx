@@ -21,7 +21,7 @@ const getPost = cache(async (id: string) => {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const p = await getPost((await params).id);
-  return { title: `${p.author.name} on Kite Platform`, description: p.body.slice(0, 160) };
+  return { title: `${p.author.name} on GetPatang`, description: p.body.slice(0, 160) };
 }
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {

@@ -31,7 +31,7 @@ api --header 'Content-Type: application/json' \
 api 'http://127.0.0.1:4000/api/v1/products?q=KITE' >/dev/null && echo "✓ case-insensitive search query"
 
 for i in $(seq 1 20); do
-  if $COMPOSE exec -T web wget -qO- http://127.0.0.1:3000/ 2>/dev/null | grep -q 'Kite Platform'; then echo "✓ website renders"; break; fi
+  if $COMPOSE exec -T web wget -qO- http://127.0.0.1:3000/ 2>/dev/null | grep -q 'GetPatang'; then echo "✓ website renders"; break; fi
   [ "$i" = 20 ] && { $COMPOSE logs web; echo "Website did not respond"; exit 1; }
   sleep 3
 done

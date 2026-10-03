@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <aside className="kite-pattern relative hidden flex-col justify-between overflow-hidden bg-maroon-900 p-10 text-white lg:flex">
-        <Link href="/" aria-label="Kite Platform home">
+        <Link href="/" aria-label="GetPatang home">
           <Logo inverted />
         </Link>
         <div className="grid max-w-md gap-4">
@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       <main className="flex flex-col px-4 py-8 sm:px-8">
         <div className="lg:hidden">
-          <Link href="/" aria-label="Kite Platform home">
+          <Link href="/" aria-label="GetPatang home">
             <Logo />
           </Link>
         </div>

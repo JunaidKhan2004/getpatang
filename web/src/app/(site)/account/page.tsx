@@ -62,7 +62,7 @@ export default async function AccountPage() {
           { href: "/account/designs", title: "My kite designs", body: "Designs you saved in the kite designer." },
           { href: "/account/custom-orders", title: "Custom orders", body: "Quotes and conversations with shops." },
           { href: "/account/notifications", title: "Notification settings", body: "Choose in-app and email updates." },
-          ...(isSeller(user) ? [] : [{ href: "/seller", title: "Sell on Kite Platform", body: "Open your own shop. Apply in a few minutes." }]),
+          ...(isSeller(user) ? [] : [{ href: "/seller", title: "Sell on GetPatang", body: "Open your own shop. Apply in a few minutes." }]),
         ].map((l) => (
           <Link key={l.href} href={l.href} className="grid gap-1 rounded-md border border-border bg-surface p-5 hover:border-primary">
             <span className="font-display font-semibold">{l.title}</span>

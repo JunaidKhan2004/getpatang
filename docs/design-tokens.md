@@ -1,4 +1,4 @@
-# Kite Platform — Design Tokens
+# GetPatang — Design Tokens
 
 Single source of truth for colors, type and shape. The web app (`web/src/app/globals.css`)
 and the mobile app (`mobile/lib/core/theme/`) both implement these values. Change them here first.

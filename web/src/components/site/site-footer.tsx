@@ -17,7 +17,7 @@ const columns = [
     title: "Platform",
     links: [
       { href: "/about", label: "About" },
-      { href: "/seller", label: "Sell on Kite Platform" },
+      { href: "/seller", label: "Sell on GetPatang" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact" },
     ],
@@ -54,7 +54,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto max-w-7xl px-4 py-5 text-xs sm:px-6">
-          © {new Date().getFullYear()} Kite Platform. Fly safely and follow local laws. Metal, glass-coated and other
+          © {new Date().getFullYear()} GetPatang. Fly safely and follow local laws. Metal, glass-coated and other
           prohibited strings are not allowed on this platform.
         </p>
       </div>

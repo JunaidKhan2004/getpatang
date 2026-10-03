@@ -25,7 +25,7 @@ export function renderMail(m: MailMessage) {
   return `<!doctype html><html><body style="margin:0;background:#F6F6F6;font-family:Inter,Arial,sans-serif;color:#2A1616">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #D4D7DD;border-radius:8px" cellspacing="0" cellpadding="0">
-<tr><td style="background:#420000;color:#ffffff;padding:16px 24px;font-weight:700;font-size:18px;border-radius:8px 8px 0 0">Kite Platform</td></tr>
+<tr><td style="background:#420000;color:#ffffff;padding:16px 24px;font-weight:700;font-size:18px;border-radius:8px 8px 0 0">GetPatang</td></tr>
 <tr><td style="padding:24px"><h1 style="font-size:20px;margin:0 0 14px">${escape(m.subject)}</h1>${paragraphs}${button}</td></tr>
 <tr><td style="padding:14px 24px;border-top:1px solid #EAE9E9;font-size:12px;color:#5E626B">You can change which emails you get in your account's notification settings.</td></tr>
 </table></td></tr></table></body></html>`;

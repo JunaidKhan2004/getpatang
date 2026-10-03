@@ -13,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Kite Platform", template: "%s · Kite Platform" },
+  title: { default: "GetPatang", template: "%s · GetPatang" },
   description: "Pakistan's home for kite shops, organised tournaments, events and the kite-flying community.",
 };
 
