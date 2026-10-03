@@ -4,18 +4,31 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/kite_mark.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../shell/main_shell.dart';
 import '../data/marketplace_repository.dart';
 import '../widgets/market_widgets.dart';
+import 'home_hero.dart';
 import '../../../core/widgets/loaders.dart';
 
-class HomeTab extends ConsumerWidget {
+class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends ConsumerState<HomeTab> {
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final t = Theme.of(context);
     final auth = ref.watch(authControllerProvider);
     final user = auth is Authenticated ? auth.user : null;
@@ -31,88 +44,62 @@ class HomeTab extends ConsumerWidget {
           await ref.read(homeFeedProvider.future);
         },
         child: CustomScrollView(
+          controller: _scroll,
           slivers: [
             SliverToBoxAdapter(
-              child: Container(
-                color: AppColors.maroon900,
-                child: Stack(
+              child: HomeHero(
+                scroll: _scroll,
+                top: Row(
                   children: [
-                    const Positioned.fill(child: KitePattern(cell: 44)),
-                    SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 4, 18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (user?.profile?.city != null)
                             Row(
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if (user?.profile?.city != null)
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.location_on_outlined,
-                                              size: 14,
-                                              color: AppColors.maroon100,
-                                            ),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                              user!.profile!.city!,
-                                              style: t.textTheme.bodySmall?.copyWith(color: AppColors.maroon100),
-                                            ),
-                                          ],
-                                        ),
-                                      Text(
-                                        user == null
-                                            ? 'Welcome to GetPatang'
-                                            : 'Assalam o Alaikum, ${user.profile?.displayName ?? user.fullName}',
-                                        style: t.textTheme.titleLarge?.copyWith(color: AppColors.white),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const IconTheme(
-                                  data: IconThemeData(color: AppColors.white),
-                                  child: GlobalActions(),
+                                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.maroon100),
+                                const SizedBox(width: 2),
+                                Text(
+                                  user!.profile!.city!,
+                                  style: t.textTheme.bodySmall?.copyWith(color: AppColors.maroon100),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 14),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: Material(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(AppRadius.md),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(AppRadius.md),
-                                  onTap: () => context.push('/search'),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.search, color: AppColors.muted),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          'Search kites, shops…',
-                                          style: t.textTheme.bodyMedium?.copyWith(color: AppColors.muted),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          Text(
+                            user == null
+                                ? 'Welcome to GetPatang'
+                                : 'Assalam o Alaikum, ${user.profile?.displayName ?? user.fullName}',
+                            style: t.textTheme.titleLarge?.copyWith(color: AppColors.white),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
+                    const IconTheme(
+                      data: IconThemeData(color: AppColors.white),
+                      child: GlobalActions(),
+                    ),
                   ],
+                ),
+                search: Material(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    onTap: () => context.push('/search'),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.search, color: AppColors.muted),
+                          const SizedBox(width: 10),
+                          Text('Search kites, shops…', style: t.textTheme.bodyMedium?.copyWith(color: AppColors.muted)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
