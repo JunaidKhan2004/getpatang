@@ -24,6 +24,11 @@ export class UsersService {
     return toPublicUser(user);
   }
 
+  async setLocale(userId: string, locale: 'en' | 'ur') {
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { locale }, include: publicUserInclude });
+    return toPublicUser(user);
+  }
+
   async list(query: PaginationQueryDto) {
     const where: Prisma.UserWhereInput = query.q
       ? { OR: [{ fullName: textContains(query.q) }, { email: textContains(query.q) }, { phone: { contains: query.q } }] }

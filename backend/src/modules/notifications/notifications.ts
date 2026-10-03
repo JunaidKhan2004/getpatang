@@ -10,6 +10,7 @@ import type { Permission } from '../../common/auth/permissions.js';
 import { Errors } from '../../common/errors/app.exception.js';
 import { Paginated, PaginationQueryDto } from '../../common/pagination.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { type Lang, t, translate } from '../../common/i18n/i18n.js';
 import { MailModule, MailService } from './mail.js';
 
 // ─── Categories and defaults ────────────────────────────────────────────────
@@ -79,14 +80,15 @@ export class NotificationsService {
       const users = await this.prisma.user.findMany({
         // Account notices (e.g. a suspension) must reach people who can no longer sign in.
         where: { id: { in: ids }, status: input.category === 'account' ? { not: 'DELETED' } : 'ACTIVE' },
-        select: { id: true, email: true, fullName: true, notificationSettings: { select: { prefs: true } }, devices: { select: { token: true } } },
+        select: { id: true, email: true, fullName: true, locale: true, notificationSettings: { select: { prefs: true } }, devices: { select: { token: true } } },
       });
       const channel = (u: (typeof users)[number]): Channels => {
         if (input.category === 'account') return { inApp: true, email: true, push: true };
         const saved = ((u.notificationSettings?.prefs ?? {}) as Prefs)[input.category] ?? {};
         return { ...defaults(input.category), ...saved };
       };
-      const plan = users.map((u) => ({ u, c: channel(u) }));
+      // In-app notifications are stored in English and translated when read; emails go out in the person's language.
+      const plan = users.map((u) => ({ u: { ...u, lang: (u.locale === 'ur' ? 'ur' : 'en') as Lang }, c: channel(u) }));
 
       const inApp = plan.filter((p) => p.c.inApp);
       if (inApp.length) {
@@ -100,9 +102,10 @@ export class NotificationsService {
           sends.push(
             this.mail.send({
               to: u.email,
-              subject: input.title,
-              text: `Hi ${u.fullName},\n\n${input.body}`,
-              action: input.link ? { label: 'Open GetPatang', url: this.webOrigin + input.link } : undefined,
+              lang: u.lang,
+              subject: translate(input.title, u.lang),
+              text: t(u.lang, 'Hi {name},\n\n{body}', { name: u.fullName, body: translate(input.body, u.lang) }),
+              action: input.link ? { label: translate('Open GetPatang', u.lang), url: this.webOrigin + input.link } : undefined,
             }),
           );
         }

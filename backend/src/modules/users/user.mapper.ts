@@ -17,6 +17,7 @@ export function toPublicUser(u: UserWithRelations) {
     phone: u.phone,
     isVerified: u.isVerified,
     status: u.status,
+    locale: u.locale,
     roles: u.roles.map((r) => r.role.key),
     profile: u.profile
       ? {

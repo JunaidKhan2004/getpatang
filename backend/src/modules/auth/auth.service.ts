@@ -51,7 +51,7 @@ export class AuthService {
     const user = existing
       ? await this.prisma.user.update({
           where: { id: existing.id },
-          data: { fullName: dto.fullName, phone, passwordHash },
+          data: { fullName: dto.fullName, phone, passwordHash, locale: meta.lang ?? 'en' },
         })
       : await this.prisma.user.create({
           data: {
@@ -59,6 +59,7 @@ export class AuthService {
             email: dto.email,
             phone,
             passwordHash,
+            locale: meta.lang ?? 'en',
             roles: { create: { role: { connect: { key: Role.CUSTOMER } } } },
           },
         });

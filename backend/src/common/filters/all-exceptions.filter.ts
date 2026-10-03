@@ -3,6 +3,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 
 import { AppException } from '../errors/app.exception.js';
+import { langOf, translate } from '../i18n/i18n.js';
 
 /**
  * Every error leaves the API as `{ error: { code, message, details? } }`.
@@ -38,6 +39,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`${req.method} ${req.originalUrl}`, exception instanceof Error ? exception.stack : String(exception));
     }
 
+    const lang = langOf(req);
+    if (lang !== 'en') {
+      body.message = translate(body.message, lang);
+      if (Array.isArray(body.details)) {
+        body.details = body.details.map((d: unknown) =>
+          d && typeof d === 'object' && 'message' in d && typeof d.message === 'string' ? { ...d, message: translate(d.message, lang) } : d,
+        );
+      }
+    }
     res.status(status).json({ error: body });
   }
 }

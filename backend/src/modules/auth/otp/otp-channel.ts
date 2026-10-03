@@ -1,12 +1,14 @@
 import { Logger } from '@nestjs/common';
 import { OtpPurpose } from '@prisma/client';
 
+import { type Lang, t, translate } from '../../../common/i18n/i18n.js';
 import type { MailService } from '../../notifications/mail.js';
 
 export interface OtpRecipient {
   email: string;
   phone?: string | null;
   name: string;
+  lang?: Lang;
 }
 
 /** Delivers one-time codes. */
@@ -38,14 +40,16 @@ export class EmailOtpChannel implements OtpChannel {
   constructor(private readonly mail: MailService) {}
 
   async send(to: OtpRecipient, code: string, purpose: OtpPurpose): Promise<void> {
+    const lang = to.lang ?? 'en';
     await this.mail.send({
       to: to.email,
-      subject: `Your code: ${code}`,
-      text: `Hi ${to.name},
-
-Use ${code} to ${PURPOSE_TEXT[purpose]}. The code expires in 10 minutes.
-
-If you did not ask for this, you can ignore this email.`,
+      lang,
+      subject: t(lang, 'Your code: {code}', { code }),
+      text: t(lang, 'Hi {name},\n\nUse {code} to {purpose}. The code expires in 10 minutes.\n\nIf you did not ask for this, you can ignore this email.', {
+        name: to.name,
+        code,
+        purpose: translate(PURPOSE_TEXT[purpose], lang),
+      }),
     });
   }
 }

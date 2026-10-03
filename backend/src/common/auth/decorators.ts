@@ -2,6 +2,7 @@ import { applyDecorators, createParamDecorator, ExecutionContext, SetMetadata } 
 import type { Request } from 'express';
 
 import type { Permission } from './permissions.js';
+import { type Lang, langOf } from '../i18n/i18n.js';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const PERMISSIONS_KEY = 'requiredPermissions';
@@ -40,9 +41,11 @@ export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionC
 export interface RequestMeta {
   ipAddress?: string;
   userAgent?: string;
+  /** Language of the request (Accept-Language), for messages and new accounts. */
+  lang?: Lang;
 }
 
 export const ReqMeta = createParamDecorator((_data: unknown, ctx: ExecutionContext): RequestMeta => {
   const req = ctx.switchToHttp().getRequest<Request>();
-  return { ipAddress: req.ip, userAgent: req.get('user-agent')?.slice(0, 255) };
+  return { ipAddress: req.ip, userAgent: req.get('user-agent')?.slice(0, 255), lang: langOf(req) };
 });

@@ -32,7 +32,7 @@ export class OtpService {
    * Creates and delivers a new code, replacing any open code for the same purpose.
    * With `silent`, a request inside the cooldown is ignored instead of rejected.
    */
-  async issue(user: Pick<User, 'id' | 'email' | 'phone' | 'fullName'>, purpose: OtpPurpose, opts: { silent?: boolean } = {}) {
+  async issue(user: Pick<User, 'id' | 'email' | 'phone' | 'fullName' | 'locale'>, purpose: OtpPurpose, opts: { silent?: boolean } = {}) {
     const last = await this.prisma.otpCode.findFirst({
       where: { userId: user.id, purpose },
       orderBy: { createdAt: 'desc' },
@@ -54,7 +54,7 @@ export class OtpService {
         data: { userId: user.id, purpose, codeHash: this.hash(code), expiresAt: new Date(Date.now() + CODE_TTL_MS) },
       }),
     ]);
-    await this.channel.send({ email: user.email, phone: user.phone, name: user.fullName }, code, purpose);
+    await this.channel.send({ email: user.email, phone: user.phone, name: user.fullName, lang: user.locale === 'ur' ? 'ur' : 'en' }, code, purpose);
   }
 
   /** Checks and consumes the latest open code. Throws a user-safe error when it does not match. */

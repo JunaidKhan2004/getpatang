@@ -2,6 +2,8 @@ import { Global, Injectable, Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer, { type Transporter } from 'nodemailer';
 
+import { type Lang, translate } from '../../common/i18n/i18n.js';
+
 export interface MailMessage {
   to: string;
   subject: string;
@@ -9,6 +11,8 @@ export interface MailMessage {
   text: string;
   /** Optional call-to-action link (absolute URL). */
   action?: { label: string; url: string };
+  /** Layout direction and footer language. */
+  lang?: Lang;
 }
 
 const escape = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -22,12 +26,15 @@ export function renderMail(m: MailMessage) {
   const button = m.action
     ? `<p style="margin:20px 0"><a href="${escape(m.action.url)}" style="background:#420000;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">${escape(m.action.label)}</a></p>`
     : '';
-  return `<!doctype html><html><body style="margin:0;background:#F6F6F6;font-family:Inter,Arial,sans-serif;color:#2A1616">
+  const ur = m.lang === 'ur';
+  const font = ur ? "'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',Tahoma,serif" : 'Inter,Arial,sans-serif';
+  const footer = translate("You can change which emails you get in your account's notification settings.", m.lang ?? 'en');
+  return `<!doctype html><html lang="${ur ? 'ur' : 'en'}" dir="${ur ? 'rtl' : 'ltr'}"><body style="margin:0;background:#F6F6F6;font-family:${font};color:#2A1616;line-height:${ur ? 2 : 1.55}">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #D4D7DD;border-radius:8px" cellspacing="0" cellpadding="0">
 <tr><td style="background:#420000;color:#ffffff;padding:16px 24px;font-weight:700;font-size:18px;border-radius:8px 8px 0 0">GetPatang</td></tr>
 <tr><td style="padding:24px"><h1 style="font-size:20px;margin:0 0 14px">${escape(m.subject)}</h1>${paragraphs}${button}</td></tr>
-<tr><td style="padding:14px 24px;border-top:1px solid #EAE9E9;font-size:12px;color:#5E626B">You can change which emails you get in your account's notification settings.</td></tr>
+<tr><td style="padding:14px 24px;border-top:1px solid #EAE9E9;font-size:12px;color:#5E626B">${escape(footer)}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
