@@ -1,0 +1,87 @@
+# Production stack: PostgreSQL, API, website and an HTTPS proxy (Caddy, automatic certificates).
+# See docs/DEPLOYMENT.md. Configure everything in .env.production (copy .env.production.example).
+#
+#   docker compose --env-file .env.production up -d --build
+#   docker compose --env-file .env.production run --rm api seed     # first deploy only
+
+name: kite-platform
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kite_platform}
+      POSTGRES_USER: ${POSTGRES_USER:-kite}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kite} -d ${POSTGRES_DB:-kite_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    image: kite-platform-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kite}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kite_platform}?schema=public
+      CORS_ORIGINS: https://${WEB_DOMAIN:?Set WEB_DOMAIN}
+      PUBLIC_API_ORIGIN: https://${API_DOMAIN:?Set API_DOMAIN}
+      WEB_ORIGIN: https://${WEB_DOMAIN}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-30}
+      OTP_SECRET: ${OTP_SECRET:?Set OTP_SECRET}
+      OTP_CHANNEL: email
+      MAIL_TRANSPORT: smtp
+      SMTP_HOST: ${SMTP_HOST:?Set SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:?Set MAIL_FROM}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+    volumes:
+      - uploads:/data/uploads
+
+  web:
+    build: ./web
+    image: kite-platform-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # Server-side calls stay on the private network.
+      API_URL: http://api:4000/api/v1
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web, api]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      WEB_DOMAIN: ${WEB_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL for HTTPS certificates}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  db-data:
+  uploads:
+  caddy-data:
+  caddy-config:

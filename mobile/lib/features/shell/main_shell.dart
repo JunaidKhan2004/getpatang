@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../marketplace/application/cart_count.dart';
+import '../notifications/notifications.dart';
+
+/// Bottom navigation: Home, Marketplace, Tournaments, Community, Profile.
+/// Cart and notifications live in each tab's app bar (see [GlobalActions]).
+class MainShell extends StatelessWidget {
+  const MainShell({super.key, required this.shell});
+
+  final StatefulNavigationShell shell;
+
+  static const _items = [
+    (Icons.home_outlined, Icons.home, 'Home'),
+    (Icons.storefront_outlined, Icons.storefront, 'Market'),
+    (Icons.emoji_events_outlined, Icons.emoji_events, 'Tournaments'),
+    (Icons.groups_outlined, Icons.groups, 'Community'),
+    (Icons.person_outline, Icons.person, 'Profile'),
+  ];
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: shell,
+    bottomNavigationBar: NavigationBar(
+      selectedIndex: shell.currentIndex,
+      onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
+      destinations: [
+        for (final (icon, selected, label) in _items)
+          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(selected), label: label),
+      ],
+    ),
+  );
+}
+
+/// Cart and notification buttons, kept on every top-level screen.
+class GlobalActions extends ConsumerWidget {
+  const GlobalActions({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(cartCountProvider).value ?? 0;
+    final unread = ref.watch(unreadCountProvider).value ?? 0;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          tooltip: unread > 0 ? 'Notifications, $unread unread' : 'Notifications',
+          icon: Badge(
+            isLabelVisible: unread > 0,
+            label: Text(unread > 99 ? '99+' : '$unread'),
+            child: const Icon(Icons.notifications_none),
+          ),
+          onPressed: () async {
+            await context.push('/notifications');
+            ref.invalidate(unreadCountProvider);
+          },
+        ),
+        IconButton(
+          tooltip: count > 0 ? 'Cart, $count items' : 'Cart',
+          icon: Badge(
+            isLabelVisible: count > 0,
+            label: Text(count > 99 ? '99+' : '$count'),
+            child: const Icon(Icons.shopping_bag_outlined),
+          ),
+          onPressed: () => context.push('/cart'),
+        ),
+        const SizedBox(width: 4),
+      ],
+    );
+  }
+}

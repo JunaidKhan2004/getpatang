@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/* Kite Platform design tokens — source of truth: docs/design-tokens.md */
+:root {
+  --bg: #f6f6f6;
+  --surface: #ffffff;
+  --surface-2: #eae9e9;
+  --border: #d4d7dd;
+  --ink: #2a1616;
+  --muted: #5e626b;
+  --primary: #420000;
+  --primary-hover: #6b1a1a;
+  --primary-ink: #ffffff;
+  --primary-soft: #f2e4e4;
+  --highlight: #9b3b3b;
+  --success: #1e7a4f;
+  --warning: #a15c00;
+  --danger: #c62828;
+  --info: #2f5bd3;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #140606;
+    --surface: #221010;
+    --surface-2: #311818;
+    --border: #4a2423;
+    --ink: #f6f6f6;
+    --muted: #bbaeae;
+    --primary: #e8a7a0;
+    --primary-hover: #f2c2bc;
+    --primary-ink: #2a0000;
+    --primary-soft: #3a1515;
+    --highlight: #e8a7a0;
+    --success: #4cc38a;
+    --warning: #f0a640;
+    --danger: #f0716a;
+    --info: #8ea8ff;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-soft: var(--primary-soft);
+  --color-highlight: var(--highlight);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  /* Fixed brand colours for surfaces that stay maroon in both themes (hero, sidebar). */
+  --color-maroon-950: #2a0000;
+  --color-maroon-900: #420000;
+  --color-maroon-700: #6b1a1a;
+  --color-maroon-500: #9b3b3b;
+  --color-maroon-100: #f2e4e4;
+
+  --font-sans: var(--font-inter), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+/* Faint kite-diamond pattern for maroon surfaces */
+.kite-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07'%3E%3Cpath d='M32 4 52 32 32 60 12 32Z'/%3E%3Cpath d='M32 4v56M12 32h40'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

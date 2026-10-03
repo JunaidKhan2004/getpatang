@@ -1,0 +1,30 @@
+# HTTPS front door. Caddy gets and renews certificates automatically.
+{
+	email {$ACME_EMAIL}
+}
+
+(common) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}
+
+{$WEB_DOMAIN} {
+	import common
+	reverse_proxy web:3000
+}
+
+{$API_DOMAIN} {
+	import common
+	# Community videos can be up to 50 MB.
+	request_body {
+		max_size 60MB
+	}
+	reverse_proxy api:4000
+}
