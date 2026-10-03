@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "GetPatang app (local API)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "mobile",
+      "program": "lib/main.dart",
+      // Phone/emulator reach the API through `adb reverse`, set up by this task.
+      "preLaunchTask": "Connect Android devices to local API"
+    }
+  ]
+}

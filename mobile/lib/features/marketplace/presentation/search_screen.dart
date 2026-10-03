@@ -126,7 +126,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     sliver: SliverGrid.builder(
-                      gridDelegate: productGridDelegate,
+                      gridDelegate: productGridDelegate(context),
                       itemCount: r.products.length,
                       itemBuilder: (_, i) => ProductTile(product: r.products[i]),
                     ),

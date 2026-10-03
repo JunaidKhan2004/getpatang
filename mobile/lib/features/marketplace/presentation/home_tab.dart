@@ -175,7 +175,7 @@ class HomeTab extends ConsumerWidget {
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     sliver: SliverGrid.builder(
-                      gridDelegate: productGridDelegate,
+                      gridDelegate: productGridDelegate(context),
                       itemCount: d.products.length,
                       itemBuilder: (_, i) => ProductTile(product: d.products[i]),
                     ),

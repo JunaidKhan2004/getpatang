@@ -23,6 +23,8 @@ backend/uploads/
 Thumbs.db
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 backend/test-uploads/
 *.tsbuildinfo

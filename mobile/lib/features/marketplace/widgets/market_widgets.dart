@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,33 +86,58 @@ class StarRating extends StatelessWidget {
 }
 
 class PriceText extends StatelessWidget {
-  const PriceText({super.key, required this.price, this.compareAtPrice, this.from = false, this.large = false});
+  const PriceText({
+    super.key,
+    required this.price,
+    this.compareAtPrice,
+    this.from = false,
+    this.large = false,
+    this.oneLine = false,
+  });
   final int price;
   final int? compareAtPrice;
   final bool from;
   final bool large;
 
+  /// Keeps price and old price on one line (product cards have a fixed height).
+  final bool oneLine;
+
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final discounted = compareAtPrice != null && compareAtPrice! > price;
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.end,
-      spacing: 6,
-      children: [
-        Text(
-          '${from ? 'From ' : ''}${formatPKR(price)}',
-          style: (large ? t.textTheme.headlineMedium : t.textTheme.titleMedium)?.copyWith(
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-        ),
-        if (discounted)
-          Text(
-            formatPKR(compareAtPrice!),
-            style: t.textTheme.bodySmall?.copyWith(decoration: TextDecoration.lineThrough),
-          ),
-      ],
+    final current = Text(
+      '${from ? 'From ' : ''}${formatPKR(price)}',
+      maxLines: oneLine ? 1 : null,
+      overflow: oneLine ? TextOverflow.ellipsis : null,
+      style: (large ? t.textTheme.headlineMedium : t.textTheme.titleMedium)?.copyWith(
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
     );
+    final old = discounted
+        ? Text(
+            formatPKR(compareAtPrice!),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: t.textTheme.bodySmall?.copyWith(decoration: TextDecoration.lineThrough),
+          )
+        : null;
+    if (oneLine) {
+      // The current price always shows in full; the old price uses whatever room is left.
+      return LayoutBuilder(
+        builder: (context, box) => Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: box.maxWidth),
+              child: current,
+            ),
+            if (old != null) ...[const SizedBox(width: 6), Expanded(child: old)],
+          ],
+        ),
+      );
+    }
+    return Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 6, children: [current, ?old]);
   }
 }
 
@@ -152,29 +180,38 @@ class ProductTile extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.shop.name,
-                    style: t.textTheme.bodySmall?.copyWith(fontSize: 11),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    product.title,
-                    style: t.textTheme.titleMedium?.copyWith(fontSize: 14, height: 1.25),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  StarRating(value: product.ratingAvg, count: product.ratingCount, size: 11),
-                  const SizedBox(height: 4),
-                  PriceText(price: product.price, compareAtPrice: product.compareAtPrice, from: product.hasVariants),
-                ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.shop.name,
+                      style: t.textTheme.bodySmall?.copyWith(fontSize: 11),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Flexible(
+                      child: Text(
+                        product.title,
+                        style: t.textTheme.titleMedium?.copyWith(fontSize: 14, height: 1.25),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    StarRating(value: product.ratingAvg, count: product.ratingCount, size: 11),
+                    const SizedBox(height: 4),
+                    PriceText(
+                      price: product.price,
+                      compareAtPrice: product.compareAtPrice,
+                      from: product.hasVariants,
+                      oneLine: true,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -184,12 +221,40 @@ class ProductTile extends StatelessWidget {
   }
 }
 
-const productGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-  maxCrossAxisExtent: 240,
-  mainAxisSpacing: 12,
-  crossAxisSpacing: 12,
-  childAspectRatio: 0.6,
-);
+/// Product grid sized for its content: a square photo plus room for the text below it,
+/// which grows with the phone's font size so cards never overflow.
+SliverGridDelegate productGridDelegate(BuildContext context) =>
+    _ProductGridDelegate(MediaQuery.textScalerOf(context).scale(1));
+
+class _ProductGridDelegate extends SliverGridDelegate {
+  const _ProductGridDelegate(this.textScale);
+  final double textScale;
+
+  static const _maxTileWidth = 240.0;
+  static const _spacing = 12.0;
+
+  /// Shop name, two-line title, stars and one-line price, with padding (at 100% font size).
+  static const _textBlock = 124.0;
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    final cross = constraints.crossAxisExtent;
+    final count = math.max(1, ((cross + _spacing) / (_maxTileWidth + _spacing)).ceil());
+    final width = (cross - _spacing * (count - 1)) / count;
+    final height = width + _textBlock * math.max(1.0, textScale);
+    return SliverGridRegularTileLayout(
+      crossAxisCount: count,
+      mainAxisStride: height + _spacing,
+      crossAxisStride: width + _spacing,
+      childMainAxisExtent: height,
+      childCrossAxisExtent: width,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_ProductGridDelegate oldDelegate) => oldDelegate.textScale != textScale;
+}
 
 class ShopTile extends StatelessWidget {
   const ShopTile({super.key, required this.shop});
@@ -352,7 +417,7 @@ class PagedViewState<T> extends State<PagedView<T>> {
         SliverPadding(
           padding: widget.padding,
           sliver: SliverGrid.builder(
-            gridDelegate: productGridDelegate,
+            gridDelegate: productGridDelegate(context),
             itemCount: _items.length,
             itemBuilder: (c, i) => widget.itemBuilder(c, _items[i]),
           ),

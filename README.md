@@ -29,11 +29,16 @@ npm install
 cp .env.example .env.local
 npm run dev
 
-# 3. Mobile (Android emulator reaches the host API at 10.0.2.2)
+# 3. Mobile (USB phone or emulator). In VS Code just press F5 ("GetPatang app (local API)").
 cd mobile
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:4000/api/v1
+powershell -File tool/connect-devices.ps1   # phone's 127.0.0.1:4000 -> this computer (adb reverse)
+flutter run
 ```
+
+The app talks to `http://127.0.0.1:4000/api/v1` in development. `adb reverse` makes that address reach the API on this
+computer over USB, for real phones and emulators alike. Run `connect-devices.ps1` again after reconnecting the phone;
+without it every screen keeps loading and then shows "Could not reach the server".
 
 In development, verification and password-reset codes are **printed in the API terminal**
 (`[DEV ONLY — not sent] VERIFY_ACCOUNT code for …`). The API refuses to start with this

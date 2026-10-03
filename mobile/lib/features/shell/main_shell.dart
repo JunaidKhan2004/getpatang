@@ -12,12 +12,13 @@ class MainShell extends StatelessWidget {
 
   final StatefulNavigationShell shell;
 
+  // Labels must fit five tabs on a 360dp phone; the tooltip (and screen readers) get the full name.
   static const _items = [
-    (Icons.home_outlined, Icons.home, 'Home'),
-    (Icons.storefront_outlined, Icons.storefront, 'Market'),
-    (Icons.emoji_events_outlined, Icons.emoji_events, 'Tournaments'),
-    (Icons.groups_outlined, Icons.groups, 'Community'),
-    (Icons.person_outline, Icons.person, 'Profile'),
+    (Icons.home_outlined, Icons.home, 'Home', 'Home'),
+    (Icons.storefront_outlined, Icons.storefront, 'Market', 'Marketplace'),
+    (Icons.emoji_events_outlined, Icons.emoji_events, 'Tourneys', 'Tournaments'),
+    (Icons.groups_outlined, Icons.groups, 'Community', 'Community'),
+    (Icons.person_outline, Icons.person, 'Profile', 'Profile'),
   ];
 
   @override
@@ -27,8 +28,8 @@ class MainShell extends StatelessWidget {
       selectedIndex: shell.currentIndex,
       onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
       destinations: [
-        for (final (icon, selected, label) in _items)
-          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(selected), label: label),
+        for (final (icon, selected, label, tooltip) in _items)
+          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(selected), label: label, tooltip: tooltip),
       ],
     ),
   );
