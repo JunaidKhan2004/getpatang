@@ -11,6 +11,7 @@ import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import '../data/auth_models.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Verifies a 6-digit code. For [OtpPurpose.resetPassword] it hands the code to the reset screen
 /// (the backend checks it together with the new password).
@@ -64,7 +65,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
     setState(() => _loading = true);
     try {
       await ref.read(authControllerProvider.notifier).verifyAccount(widget.email, _code.text);
-      if (mounted) showToast(context, 'Email verified. Welcome!', kind: ToastKind.success);
+      if (mounted) showToast(context, 'Email verified. Welcome!'.tr, kind: ToastKind.success);
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
     } finally {
@@ -76,7 +77,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
     try {
       await ref.read(authControllerProvider.notifier).resendOtp(widget.email, widget.purpose);
       if (!mounted) return;
-      showToast(context, 'A new code has been sent.', kind: ToastKind.success);
+      showToast(context, 'A new code has been sent.'.tr, kind: ToastKind.success);
       _startCooldown();
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -87,8 +88,8 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return AuthScaffold(
-      title: 'Enter verification code',
-      subtitle: 'We sent a 6-digit code to ${widget.email}. It expires in 10 minutes.',
+      title: 'Enter verification code'.tr,
+      subtitle: 'We sent a 6-digit code to {email}. It expires in 10 minutes.'.trf({'email': widget.email}),
       child: Form(
         key: _form,
         child: Column(
@@ -110,11 +111,11 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               decoration: const InputDecoration(counterText: '', hintText: '••••••'),
             ),
             const SizedBox(height: 24),
-            LoadingButton(label: 'Verify', loading: _loading, onPressed: _submit),
+            LoadingButton(label: 'Verify'.tr, loading: _loading, onPressed: _submit),
             const SizedBox(height: 12),
             TextButton(
               onPressed: _cooldown > 0 ? null : _resend,
-              child: Text(_cooldown > 0 ? 'Resend code in ${_cooldown}s' : 'Resend code'),
+              child: Text(_cooldown > 0 ? 'Resend code in {cooldown}s'.trf({'cooldown': _cooldown}) : 'Resend code'.tr),
             ),
           ],
         ),

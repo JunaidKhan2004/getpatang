@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/kite_mark.dart';
+import '../../../../core/i18n/i18n.dart';
 
 /// Shared layout for all auth screens: brand mark, title, subtitle, scrollable form.
 class AuthScaffold extends StatelessWidget {
@@ -25,12 +26,12 @@ class AuthScaffold extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          padding: const EdgeInsetsDirectional.fromSTEB(24, 8, 24, 32),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Align(alignment: Alignment.centerLeft, child: KiteMark(size: 34)),
+              const Align(alignment: AlignmentDirectional.centerStart, child: KiteMark(size: 34)),
               const SizedBox(height: 20),
               Text(title, style: t.textTheme.headlineMedium),
               const SizedBox(height: 6),
@@ -50,7 +51,7 @@ class PasswordField extends StatefulWidget {
   const PasswordField({
     super.key,
     required this.controller,
-    this.label = 'Password',
+    this.label,
     this.validator,
     this.textInputAction = TextInputAction.done,
     this.onSubmitted,
@@ -58,7 +59,7 @@ class PasswordField extends StatefulWidget {
   });
 
   final TextEditingController controller;
-  final String label;
+  final String? label;
   final String? Function(String?)? validator;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onSubmitted;
@@ -80,10 +81,10 @@ class _PasswordFieldState extends State<PasswordField> {
     onFieldSubmitted: widget.onSubmitted,
     autofillHints: widget.autofillHints,
     decoration: InputDecoration(
-      labelText: widget.label,
+      labelText: widget.label ?? 'Password'.tr,
       prefixIcon: const Icon(Icons.lock_outline),
       suffixIcon: IconButton(
-        tooltip: _obscure ? 'Show password' : 'Hide password',
+        tooltip: _obscure ? 'Show password'.tr : 'Hide password'.tr,
         icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
         onPressed: () => setState(() => _obscure = !_obscure),
       ),

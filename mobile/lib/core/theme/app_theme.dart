@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../i18n/i18n.dart';
 import 'app_colors.dart';
 
 abstract final class AppRadius {
@@ -66,7 +67,7 @@ abstract final class AppTheme {
     final body = GoogleFonts.interTextTheme(base.textTheme);
     final display = GoogleFonts.poppinsTextTheme(base.textTheme);
 
-    final textTheme = body
+    final latin = body
         .copyWith(
           headlineLarge: display.headlineLarge?.copyWith(fontSize: 32, fontWeight: FontWeight.w700, height: 1.15),
           headlineMedium: display.headlineMedium?.copyWith(fontSize: 24, fontWeight: FontWeight.w600, height: 1.2),
@@ -80,6 +81,7 @@ abstract final class AppTheme {
           labelSmall: body.labelSmall?.copyWith(fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.9),
         )
         .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
+    final textTheme = AppLang.isUrdu ? _urdu(latin) : latin;
 
     final roundedMd = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md));
     OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
@@ -150,6 +152,31 @@ abstract final class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(behavior: SnackBarBehavior.floating, shape: roundedMd),
+    );
+  }
+
+  /// Noto Nastaliq Urdu for Urdu text. Nastaliq is tall, so lines get more room; Latin
+  /// letters and digits (prices, codes) fall back to Inter.
+  static TextTheme _urdu(TextTheme t) {
+    final inter = GoogleFonts.inter().fontFamily!;
+    TextStyle? u(TextStyle? s, double height) =>
+        s?.copyWith(fontFamily: 'NotoNastaliqUrdu', fontFamilyFallback: [inter], height: height, letterSpacing: 0);
+    return t.copyWith(
+      displayLarge: u(t.displayLarge, 1.6),
+      displayMedium: u(t.displayMedium, 1.6),
+      displaySmall: u(t.displaySmall, 1.6),
+      headlineLarge: u(t.headlineLarge, 1.6),
+      headlineMedium: u(t.headlineMedium, 1.6),
+      headlineSmall: u(t.headlineSmall, 1.7),
+      titleLarge: u(t.titleLarge, 1.7),
+      titleMedium: u(t.titleMedium, 1.7),
+      titleSmall: u(t.titleSmall, 1.7),
+      bodyLarge: u(t.bodyLarge, 1.9),
+      bodyMedium: u(t.bodyMedium, 1.9),
+      bodySmall: u(t.bodySmall, 1.8),
+      labelLarge: u(t.labelLarge, 1.6),
+      labelMedium: u(t.labelMedium, 1.6),
+      labelSmall: u(t.labelSmall, 1.6),
     );
   }
 }

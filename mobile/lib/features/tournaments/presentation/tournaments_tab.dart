@@ -9,11 +9,11 @@ import '../../marketplace/widgets/market_widgets.dart';
 import '../../shell/main_shell.dart';
 import '../data/tournament_models.dart';
 import '../data/tournaments_repository.dart';
+import '../../../core/i18n/i18n.dart';
 
 String formatWhen(DateTime d) {
-  const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   final h = d.hour % 12 == 0 ? 12 : d.hour % 12;
-  return '${d.day} ${m[d.month - 1]} ${d.year}, $h:${d.minute.toString().padLeft(2, '0')} ${d.hour < 12 ? 'AM' : 'PM'}';
+  return '${d.day} ${monthName(d.month)} ${d.year}, $h:${d.minute.toString().padLeft(2, '0')} ${(d.hour < 12 ? 'AM' : 'PM').tr}';
 }
 
 class StatusPill extends StatelessWidget {
@@ -30,12 +30,12 @@ class StatusPill extends StatelessWidget {
 }
 
 Widget tournamentStatusPill(TournamentCardData t) {
-  if (t.status == 'IN_PROGRESS') return const StatusPill('● Live', AppColors.danger);
-  if (t.registrationOpen) return const StatusPill('Registration open', AppColors.success);
+  if (t.status == 'IN_PROGRESS') return StatusPill('● Live'.tr, AppColors.danger);
+  if (t.registrationOpen) return StatusPill('Registration open'.tr, AppColors.success);
   return switch (t.status) {
-    'COMPLETED' => const StatusPill('Completed', AppColors.muted),
-    'CANCELLED' => const StatusPill('Cancelled', AppColors.danger),
-    _ => const StatusPill('Upcoming', AppColors.info),
+    'COMPLETED' => StatusPill('Completed'.tr, AppColors.muted),
+    'CANCELLED' => StatusPill('Cancelled'.tr, AppColors.danger),
+    _ => StatusPill('Upcoming'.tr, AppColors.info),
   };
 }
 
@@ -63,7 +63,11 @@ class TournamentTile extends StatelessWidget {
               _line(
                 context,
                 Icons.groups_outlined,
-                '${t.registeredCount}/${t.maxParticipants} players · ${t.entryFee == 0 ? 'Free entry' : formatPKR(t.entryFee)}',
+                '{registeredCount}/{maxParticipants} players · {entryFee}'.trf({
+                  'registeredCount': t.registeredCount,
+                  'maxParticipants': t.maxParticipants,
+                  'entryFee': t.entryFee == 0 ? 'Free entry'.tr : formatPKR(t.entryFee),
+                }),
               ),
             ],
           ),
@@ -101,10 +105,10 @@ class _TournamentsTabState extends ConsumerState<TournamentsTab> {
     final repo = ref.watch(tournamentsRepositoryProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tournaments'),
+        title: Text('Tournaments'.tr),
         actions: [
           IconButton(
-            tooltip: 'Rankings',
+            tooltip: 'Rankings'.tr,
             icon: const Icon(Icons.leaderboard_outlined),
             onPressed: () => context.push('/rankings'),
           ),
@@ -121,9 +125,9 @@ class _TournamentsTabState extends ConsumerState<TournamentsTab> {
               children: [
                 for (final e in _views.entries)
                   Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsetsDirectional.only(end: 8),
                     child: ChoiceChip(
-                      label: Text(e.value),
+                      label: Text(e.value.tr),
                       selected: _view == e.key,
                       onSelected: (_) => setState(() => _view = e.key),
                     ),
@@ -137,16 +141,16 @@ class _TournamentsTabState extends ConsumerState<TournamentsTab> {
               fetch: (page) => repo.list(view: _view, page: page),
               itemBuilder: (_, t) => TournamentTile(t: t),
               header: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 0),
                 child: Text(
-                  'Every event here has a local permit and published safety rules.',
+                  'Every event here has a local permit and published safety rules.'.tr,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
-              empty: const EmptyState(
+              empty: EmptyState(
                 icon: Icons.emoji_events_outlined,
-                title: 'No tournaments here yet',
-                message: 'Check back soon or try another filter.',
+                title: 'No tournaments here yet'.tr,
+                message: 'Check back soon or try another filter.'.tr,
               ),
             ),
           ),

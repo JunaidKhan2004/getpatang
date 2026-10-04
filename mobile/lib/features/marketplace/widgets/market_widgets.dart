@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback.dart';
 import '../../../core/widgets/kite_mark.dart';
 import '../data/models.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Product photo, or the kite placeholder when the seller has not uploaded one.
 class ProductThumb extends StatelessWidget {
@@ -66,7 +67,9 @@ class StarRating extends StatelessWidget {
     final t = Theme.of(context);
     final full = value.round();
     return Semantics(
-      label: count == 0 ? 'No reviews yet' : 'Rated ${value.toStringAsFixed(1)} out of 5',
+      label: count == 0
+          ? 'No reviews yet'.tr
+          : 'Rated {toStringAsFixed} out of 5'.trf({'toStringAsFixed': value.toStringAsFixed(1)}),
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -76,7 +79,7 @@ class StarRating extends StatelessWidget {
           if (count != null) ...[
             const SizedBox(width: 4),
             Text(
-              count! > 0 ? '${value.toStringAsFixed(1)} ($count)' : 'No reviews',
+              count! > 0 ? '${value.toStringAsFixed(1)} ($count)' : 'No reviews'.tr,
               style: t.textTheme.bodySmall?.copyWith(fontSize: size - 1),
             ),
           ],
@@ -173,7 +176,7 @@ class ProductTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Out of stock',
+                          'Out of stock'.tr,
                           style: t.textTheme.labelSmall?.copyWith(color: t.colorScheme.surface, letterSpacing: 0),
                         ),
                       ),
@@ -183,7 +186,7 @@ class ProductTile extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 8, 10, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -276,11 +279,14 @@ class ShopTile extends StatelessWidget {
             ),
             if (shop.isVerified) ...[
               const SizedBox(width: 4),
-              Icon(Icons.verified, size: 16, color: AppColors.info, semanticLabel: 'Verified shop'),
+              Icon(Icons.verified, size: 16, color: AppColors.info, semanticLabel: 'Verified shop'.tr),
             ],
           ],
         ),
-        subtitle: Text('${shop.city} · ${shop.followerCount} followers', style: t.textTheme.bodySmall),
+        subtitle: Text(
+          '{city} · {followerCount} followers'.trf({'city': shop.city, 'followerCount': shop.followerCount}),
+          style: t.textTheme.bodySmall,
+        ),
         trailing: const Icon(Icons.chevron_right),
       ),
     );
@@ -319,7 +325,7 @@ class AsyncBody<T> extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => value.when(
     data: builder,
     loading: () => const Center(child: KiteLoader()),
-    error: (e, _) => ErrorRetry(message: e is ApiException ? e.message : 'Something went wrong.', onRetry: onRetry),
+    error: (e, _) => ErrorRetry(message: e is ApiException ? e.message : 'Something went wrong.'.tr, onRetry: onRetry),
   );
 }
 
@@ -331,9 +337,9 @@ class ErrorRetry extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EmptyState(
     icon: Icons.cloud_off_outlined,
-    title: 'Could not load this',
+    title: 'Could not load this'.tr,
     message: message,
-    action: OutlinedButton(onPressed: onRetry, child: const Text('Try again')),
+    action: OutlinedButton(onPressed: onRetry, child: Text('Try again'.tr)),
   );
 }
 
@@ -448,7 +454,7 @@ class PagedViewState<T> extends State<PagedView<T>> {
       if (_error != null && _items.isNotEmpty)
         SliverToBoxAdapter(
           child: Center(
-            child: TextButton(onPressed: _loadMore, child: const Text('Could not load more. Try again')),
+            child: TextButton(onPressed: _loadMore, child: Text('Could not load more. Try again'.tr)),
           ),
         ),
     ];

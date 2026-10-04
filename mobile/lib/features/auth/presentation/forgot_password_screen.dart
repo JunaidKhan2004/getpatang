@@ -8,6 +8,7 @@ import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import '../data/auth_models.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -44,8 +45,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) => AuthScaffold(
-    title: 'Reset your password',
-    subtitle: 'Enter the email on your account. If it exists, we will send a reset code.',
+    title: 'Reset your password'.tr,
+    subtitle: 'Enter the email on your account. If it exists, we will send a reset code.'.tr,
     child: Form(
       key: _form,
       child: Column(
@@ -57,10 +58,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             autofillHints: const [AutofillHints.email],
             validator: Validators.email,
             onFieldSubmitted: (_) => _submit(),
-            decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
+            decoration: InputDecoration(labelText: 'Email'.tr, prefixIcon: const Icon(Icons.mail_outline)),
           ),
           const SizedBox(height: 24),
-          LoadingButton(label: 'Send reset code', loading: _loading, onPressed: _submit),
+          LoadingButton(label: 'Send reset code'.tr, loading: _loading, onPressed: _submit),
         ],
       ),
     ),

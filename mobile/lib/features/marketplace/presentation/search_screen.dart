@@ -9,6 +9,7 @@ import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -79,10 +80,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           textInputAction: TextInputAction.search,
           onChanged: _onChanged,
           onSubmitted: (v) => _run(v.trim()),
-          decoration: const InputDecoration(
-            hintText: 'Search kites, shops…',
+          decoration: InputDecoration(
+            hintText: 'Search kites, shops…'.tr,
             isDense: true,
-            prefixIcon: Icon(Icons.search),
+            prefixIcon: const Icon(Icons.search),
           ),
         ),
         actions: const [SizedBox(width: 12)],
@@ -99,23 +100,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           : _error != null
           ? ErrorRetry(message: _error!, onRetry: _retry)
           : r == null
-          ? const EmptyState(
+          ? EmptyState(
               icon: Icons.search,
-              title: 'Search the platform',
-              message: 'Type at least 2 characters to find products and shops.',
+              title: 'Search the platform'.tr,
+              message: 'Type at least 2 characters to find products and shops.'.tr,
             )
           : r.products.isEmpty && r.shops.isEmpty
           ? EmptyState(
               icon: Icons.search_off,
-              title: 'Nothing found',
-              message: 'No results for “$_query”. Try a more general word.',
+              title: 'Nothing found'.tr,
+              message: 'No results for “{query}”. Try a more general word.'.trf({'query': _query}),
             )
           : CustomScrollView(
               slivers: [
                 if (r.shops.isNotEmpty) ...[
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    sliver: SliverToBoxAdapter(child: Text('Shops', style: t.textTheme.titleLarge)),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+                    sliver: SliverToBoxAdapter(child: Text('Shops'.tr, style: t.textTheme.titleLarge)),
                   ),
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -128,11 +129,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ],
                 if (r.products.isNotEmpty) ...[
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-                    sliver: SliverToBoxAdapter(child: Text('Products', style: t.textTheme.titleLarge)),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 20, 16, 8),
+                    sliver: SliverToBoxAdapter(child: Text('Products'.tr, style: t.textTheme.titleLarge)),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 24),
                     sliver: SliverGrid.builder(
                       gridDelegate: productGridDelegate(context),
                       itemCount: r.products.length,

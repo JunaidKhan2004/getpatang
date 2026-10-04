@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../marketplace/application/cart_count.dart';
 import '../notifications/notifications.dart';
+import '../../core/i18n/i18n.dart';
 
 /// Bottom navigation: Home, Marketplace, Tournaments, Community, Profile.
 /// Cart and notifications live in each tab's app bar (see [GlobalActions]).
@@ -29,7 +30,7 @@ class MainShell extends StatelessWidget {
       onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
       destinations: [
         for (final (icon, selected, label, tooltip) in _items)
-          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(selected), label: label, tooltip: tooltip),
+          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(selected), label: label.tr, tooltip: tooltip.tr),
       ],
     ),
   );
@@ -47,7 +48,7 @@ class GlobalActions extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          tooltip: unread > 0 ? 'Notifications, $unread unread' : 'Notifications',
+          tooltip: unread > 0 ? 'Notifications, {unread} unread'.trf({'unread': unread}) : 'Notifications'.tr,
           icon: Badge(
             isLabelVisible: unread > 0,
             label: Text(unread > 99 ? '99+' : '$unread'),
@@ -59,7 +60,7 @@ class GlobalActions extends ConsumerWidget {
           },
         ),
         IconButton(
-          tooltip: count > 0 ? 'Cart, $count items' : 'Cart',
+          tooltip: count > 0 ? 'Cart, {count} items'.trf({'count': count}) : 'Cart'.tr,
           icon: Badge(
             isLabelVisible: count > 0,
             label: Text(count > 99 ? '99+' : '$count'),

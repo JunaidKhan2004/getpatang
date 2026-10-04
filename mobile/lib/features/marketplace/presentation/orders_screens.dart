@@ -9,11 +9,11 @@ import '../../../core/widgets/feedback.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
+import '../../../core/i18n/i18n.dart';
 
 String _date(DateTime d) {
-  const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   final l = d.toLocal();
-  return '${l.day} ${m[l.month - 1]} ${l.year}';
+  return '${l.day} ${monthName(l.month)} ${l.year}';
 }
 
 Color _statusColor(String s) => switch (s) {
@@ -35,7 +35,7 @@ class StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(99)),
       child: Text(
-        orderStatusLabels[status] ?? status,
+        orderStatusLabels[status]?.tr ?? status,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(color: c, letterSpacing: 0),
       ),
     );
@@ -61,17 +61,26 @@ class OrderPlacedScreen extends StatelessWidget {
               const Spacer(),
               const Icon(Icons.check_circle, size: 72, color: AppColors.success),
               const SizedBox(height: 16),
-              Text('Your order is placed', textAlign: TextAlign.center, style: t.textTheme.headlineMedium),
+              Text('Your order is placed'.tr, textAlign: TextAlign.center, style: t.textTheme.headlineMedium),
               const SizedBox(height: 8),
               if (r != null) ...[
                 Text(
                   r.orderNumbers.length > 1
-                      ? 'Your items come from ${r.orderNumbers.length} shops, so you have ${r.orderNumbers.length} orders: ${r.orderNumbers.join(', ')}.'
-                      : 'Order ${r.orderNumbers.first}. The shop will confirm it soon.',
+                      ? 'Your items come from {orderNumbersLength} shops, so you have {orderNumbersLength2} orders: {join}.'
+                            .trf({
+                              'orderNumbersLength': r.orderNumbers.length,
+                              'orderNumbersLength2': r.orderNumbers.length,
+                              'join': r.orderNumbers.join(', '),
+                            })
+                      : 'Order {first}. The shop will confirm it soon.'.trf({'first': r.orderNumbers.first}),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text('Total ${formatPKR(r.total)}', textAlign: TextAlign.center, style: t.textTheme.titleLarge),
+                Text(
+                  'Total {total}'.trf({'total': formatPKR(r.total)}),
+                  textAlign: TextAlign.center,
+                  style: t.textTheme.titleLarge,
+                ),
                 if (r.instructions != null) ...[
                   const SizedBox(height: 16),
                   Card(
@@ -80,9 +89,9 @@ class OrderPlacedScreen extends StatelessWidget {
                 ],
               ],
               const Spacer(),
-              FilledButton(onPressed: () => context.go('/orders'), child: const Text('View my orders')),
+              FilledButton(onPressed: () => context.go('/orders'), child: Text('View my orders'.tr)),
               const SizedBox(height: 8),
-              OutlinedButton(onPressed: () => context.go('/marketplace'), child: const Text('Continue shopping')),
+              OutlinedButton(onPressed: () => context.go('/marketplace'), child: Text('Continue shopping'.tr)),
             ],
           ),
         ),
@@ -98,14 +107,14 @@ class OrdersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('My orders')),
+      appBar: AppBar(title: Text('My orders'.tr)),
       body: PagedView<OrderSummaryData>(
         fetch: (page) => ref.read(marketplaceRepositoryProvider).orders(page: page),
         empty: EmptyState(
           icon: Icons.receipt_long_outlined,
-          title: 'No orders yet',
-          message: 'When you place an order it will appear here.',
-          action: FilledButton(onPressed: () => context.go('/marketplace'), child: const Text('Start shopping')),
+          title: 'No orders yet'.tr,
+          message: 'When you place an order it will appear here.'.tr,
+          action: FilledButton(onPressed: () => context.go('/marketplace'), child: Text('Start shopping'.tr)),
         ),
         itemBuilder: (_, o) => Card(
           child: InkWell(
@@ -146,15 +155,15 @@ class OrderScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Cancel this order?'),
+        title: Text('Cancel this order?'.tr),
         content: TextField(
           controller: reason,
           maxLength: 300,
-          decoration: const InputDecoration(labelText: 'Reason (optional)'),
+          decoration: InputDecoration(labelText: 'Reason (optional)'.tr),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Keep order')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Cancel order')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Keep order'.tr)),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Cancel order'.tr)),
         ],
       ),
     );
@@ -164,7 +173,7 @@ class OrderScreen extends ConsumerWidget {
     try {
       await ref.read(marketplaceRepositoryProvider).cancelOrder(orderNumber, text.isEmpty ? null : text);
       ref.invalidate(orderProvider(orderNumber));
-      if (context.mounted) showToast(context, 'Your order was cancelled.', kind: ToastKind.success);
+      if (context.mounted) showToast(context, 'Your order was cancelled.'.tr, kind: ToastKind.success);
     } on ApiException catch (e) {
       if (context.mounted) showToast(context, e.message, kind: ToastKind.error);
     }
@@ -177,7 +186,7 @@ class OrderScreen extends ConsumerWidget {
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (c, set) => AlertDialog(
-          title: const Text('Write a review'),
+          title: Text('Write a review'.tr),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -186,7 +195,7 @@ class OrderScreen extends ConsumerWidget {
                 children: [
                   for (var i = 1; i <= 5; i++)
                     IconButton(
-                      tooltip: '$i star${i > 1 ? 's' : ''}',
+                      tooltip: '{i} star{s}'.trf({'i': i, 's': i > 1 ? 's' : ''}),
                       onPressed: () => set(() => rating = i),
                       icon: Icon(
                         Icons.star_rounded,
@@ -200,13 +209,13 @@ class OrderScreen extends ConsumerWidget {
                 controller: comment,
                 maxLength: 1000,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Your review (optional)'),
+                decoration: InputDecoration(labelText: 'Your review (optional)'.tr),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-            TextButton(onPressed: rating == 0 ? null : () => Navigator.pop(c, true), child: const Text('Publish')),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Cancel'.tr)),
+            TextButton(onPressed: rating == 0 ? null : () => Navigator.pop(c, true), child: Text('Publish'.tr)),
           ],
         ),
       ),
@@ -217,7 +226,7 @@ class OrderScreen extends ConsumerWidget {
     try {
       await ref.read(marketplaceRepositoryProvider).review(slug, rating, text.isEmpty ? null : text);
       ref.invalidate(orderProvider(orderNumber));
-      if (context.mounted) showToast(context, 'Thanks! Your review is published.', kind: ToastKind.success);
+      if (context.mounted) showToast(context, 'Thanks! Your review is published.'.tr, kind: ToastKind.success);
     } on ApiException catch (e) {
       if (context.mounted) showToast(context, e.message, kind: ToastKind.error);
     }
@@ -241,7 +250,15 @@ class OrderScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text('Placed ${_date(o.createdAt)} · ${o.shopName}', style: t.textTheme.bodySmall)),
+                    Expanded(
+                      child: Text(
+                        'Placed {createdAt} · {shopName}'.trf({
+                          'createdAt': _date(o.createdAt),
+                          'shopName': o.shopName,
+                        }),
+                        style: t.textTheme.bodySmall,
+                      ),
+                    ),
                     StatusChip(o.status),
                   ],
                 ),
@@ -256,7 +273,11 @@ class OrderScreen extends ConsumerWidget {
                     color: AppColors.danger.withValues(alpha: 0.08),
                     child: Padding(
                       padding: const EdgeInsets.all(14),
-                      child: Text('We could not verify your payment: ${o.paymentReviewNote}'),
+                      child: Text(
+                        'We could not verify your payment: {paymentReviewNote}'.trf({
+                          'paymentReviewNote': o.paymentReviewNote,
+                        }),
+                      ),
                     ),
                   ),
                 if (o.canSubmitProof) _PaymentProofCard(order: o),
@@ -266,21 +287,23 @@ class OrderScreen extends ConsumerWidget {
                       leading: const Icon(Icons.currency_exchange),
                       title: Text(
                         r.status == 'COMPLETED'
-                            ? 'Refund of ${formatPKR(r.amount)} sent'
-                            : 'Refund of ${formatPKR(r.amount)} in progress',
+                            ? 'Refund of {amount} sent'.trf({'amount': formatPKR(r.amount)})
+                            : 'Refund of {amount} in progress'.trf({'amount': formatPKR(r.amount)}),
                       ),
-                      subtitle: r.reference == null ? null : Text('Reference ${r.reference}'),
+                      subtitle: r.reference == null
+                          ? null
+                          : Text('Reference {reference}'.trf({'reference': r.reference})),
                     ),
                   ),
                 const SizedBox(height: 16),
-                Text('Order progress', style: t.textTheme.titleLarge),
+                Text('Order progress'.tr, style: t.textTheme.titleLarge),
                 const SizedBox(height: 8),
                 if (stopped)
                   for (final e in o.timeline)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.circle, size: 12, color: _statusColor(e.status)),
-                      title: Text(orderStatusLabels[e.status] ?? e.status),
+                      title: Text(orderStatusLabels[e.status]?.tr ?? e.status),
                       subtitle: Text([e.note, _date(e.at)].whereType<String>().join('\n')),
                     )
                 else
@@ -293,12 +316,12 @@ class OrderScreen extends ConsumerWidget {
                         color: i <= reached ? t.colorScheme.primary : t.colorScheme.outline,
                       ),
                       title: Text(
-                        orderStatusLabels[s]!,
+                        orderStatusLabels[s]!.tr,
                         style: TextStyle(fontWeight: i == reached ? FontWeight.w700 : FontWeight.w400),
                       ),
                     ),
                 const SizedBox(height: 16),
-                Text('Items', style: t.textTheme.titleLarge),
+                Text('Items'.tr, style: t.textTheme.titleLarge),
                 for (final i in o.items)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -306,12 +329,17 @@ class OrderScreen extends ConsumerWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${i.variantName != null ? '${i.variantName} · ' : ''}Qty ${i.quantity}'),
+                        Text(
+                          '{variantName}Qty {quantity}'.trf({
+                            'variantName': i.variantName != null ? '${i.variantName} · ' : '',
+                            'quantity': i.quantity,
+                          }),
+                        ),
                         if (i.canReview && i.productSlug != null)
                           TextButton(
                             style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
                             onPressed: () => _review(context, ref, i.productSlug!),
-                            child: const Text('Write a review'),
+                            child: Text('Write a review'.tr),
                           ),
                       ],
                     ),
@@ -319,22 +347,24 @@ class OrderScreen extends ConsumerWidget {
                     onTap: i.productSlug == null ? null : () => context.push('/product/${i.productSlug}'),
                   ),
                 const Divider(),
-                _line(t, 'Items', formatPKR(o.subtotal)),
-                _line(t, 'Shipping', o.shippingFee == 0 ? 'Free' : formatPKR(o.shippingFee)),
-                if (o.discount > 0) _line(t, 'Discount', '−${formatPKR(o.discount)}'),
-                _line(t, 'Total', formatPKR(o.total), bold: true),
+                _line(t, 'Items'.tr, formatPKR(o.subtotal)),
+                _line(t, 'Shipping'.tr, o.shippingFee == 0 ? 'Free'.tr : formatPKR(o.shippingFee)),
+                if (o.discount > 0) _line(t, 'Discount'.tr, '−${formatPKR(o.discount)}'),
+                _line(t, 'Total'.tr, formatPKR(o.total), bold: true),
                 const SizedBox(height: 16),
-                Text('Delivery', style: t.textTheme.titleLarge),
+                Text('Delivery'.tr, style: t.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(o.address),
                 if (o.paymentLabel != null) ...[
                   const SizedBox(height: 16),
-                  Text('Payment', style: t.textTheme.titleLarge),
-                  Text('${o.paymentLabel} · ${paymentStatusLabels[o.paymentStatus] ?? o.paymentStatus?.toLowerCase()}'),
+                  Text('Payment'.tr, style: t.textTheme.titleLarge),
+                  Text(
+                    '${o.paymentLabel} · ${paymentStatusLabels[o.paymentStatus]?.tr ?? o.paymentStatus?.toLowerCase()}',
+                  ),
                 ],
                 const SizedBox(height: 16),
-                Text('Need help with this order?', style: t.textTheme.titleLarge),
-                Text('Contact ${o.shopName} directly:', style: t.textTheme.bodySmall),
+                Text('Need help with this order?'.tr, style: t.textTheme.titleLarge),
+                Text('Contact {shopName} directly:'.trf({'shopName': o.shopName}), style: t.textTheme.bodySmall),
                 if (o.shopPhone != null) SelectableText(o.shopPhone!),
                 if (o.shopEmail != null) SelectableText(o.shopEmail!),
                 if (o.canCancel) ...[
@@ -342,7 +372,7 @@ class OrderScreen extends ConsumerWidget {
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger),
                     onPressed: () => _cancel(context, ref),
-                    child: const Text('Cancel order'),
+                    child: Text('Cancel order'.tr),
                   ),
                 ],
               ],
@@ -370,15 +400,15 @@ class WishlistScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Wishlist')),
+    appBar: AppBar(title: Text('Wishlist'.tr)),
     body: PagedView<ProductCardData>(
       grid: true,
       fetch: (page) => ref.read(marketplaceRepositoryProvider).wishlist(page: page),
       itemBuilder: (_, p) => ProductTile(product: p),
-      empty: const EmptyState(
+      empty: EmptyState(
         icon: Icons.favorite_border,
-        title: 'Nothing saved yet',
-        message: 'Tap the heart on any product to keep it here.',
+        title: 'Nothing saved yet'.tr,
+        message: 'Tap the heart on any product to keep it here.'.tr,
       ),
     ),
   );
@@ -408,7 +438,7 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
   Future<void> _send() async {
     final ref_ = _reference.text.trim();
     if (ref_.length < 4) {
-      showToast(context, 'Enter the transaction reference from your bank.', kind: ToastKind.error);
+      showToast(context, 'Enter the transaction reference from your bank.'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _busy = true);
@@ -437,20 +467,22 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              o.paymentStatus == 'VERIFYING' ? 'We are checking your transfer' : 'Paid by bank transfer? Tell us',
+              o.paymentStatus == 'VERIFYING' ? 'We are checking your transfer'.tr : 'Paid by bank transfer? Tell us'.tr,
               style: t.textTheme.titleMedium,
             ),
             if (o.paymentStatus == 'VERIFYING')
               Text(
-                'Reference ${o.paymentReference}. The shop starts preparing once it is verified.',
+                'Reference {paymentReference}. The shop starts preparing once it is verified.'.trf({
+                  'paymentReference': o.paymentReference,
+                }),
                 style: t.textTheme.bodySmall,
               ),
             if (!_editing)
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
                   onPressed: () => setState(() => _editing = true),
-                  child: const Text('Update transfer details'),
+                  child: Text('Update transfer details'.tr),
                 ),
               )
             else ...[
@@ -458,15 +490,15 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
               TextField(
                 controller: _reference,
                 maxLength: 64,
-                decoration: const InputDecoration(
-                  labelText: 'Transaction reference',
-                  helperText: 'From your bank app or receipt.',
+                decoration: InputDecoration(
+                  labelText: 'Transaction reference'.tr,
+                  helperText: 'From your bank app or receipt.'.tr,
                 ),
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.receipt_long_outlined),
                 label: Text(
-                  _receipt == null ? 'Add receipt photo (optional)' : _receipt!.name,
+                  _receipt == null ? 'Add receipt photo (optional)'.tr : _receipt!.name,
                   overflow: TextOverflow.ellipsis,
                 ),
                 onPressed: () async {
@@ -479,7 +511,7 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
                 },
               ),
               const SizedBox(height: 8),
-              LoadingButton(label: 'I have paid', loading: _busy, onPressed: _send),
+              LoadingButton(label: 'I have paid'.tr, loading: _busy, onPressed: _send),
             ],
           ],
         ),

@@ -9,6 +9,7 @@ import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
 import 'product_screen.dart' show ensureSignedIn;
+import '../../../core/i18n/i18n.dart';
 
 class ShopScreen extends ConsumerWidget {
   const ShopScreen({super.key, required this.slug});
@@ -30,10 +31,10 @@ class ShopScreen extends ConsumerWidget {
               page: page,
             ),
         itemBuilder: (_, p) => ProductTile(product: p),
-        empty: const EmptyState(
+        empty: EmptyState(
           icon: Icons.storefront_outlined,
-          title: 'No products yet',
-          message: 'This shop has not listed any products yet.',
+          title: 'No products yet'.tr,
+          message: 'This shop has not listed any products yet.'.tr,
         ),
       ),
     ),
@@ -78,7 +79,7 @@ class _ShopHeaderState extends ConsumerState<_ShopHeader> {
       children: [
         Container(height: 110, color: AppColors.maroon900, child: const KitePattern(cell: 40)),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,17 +96,16 @@ class _ShopHeaderState extends ConsumerState<_ShopHeader> {
                             Flexible(child: Text(s.name, style: t.textTheme.headlineSmall)),
                             if (s.isVerified) ...[
                               const SizedBox(width: 6),
-                              const Icon(
-                                Icons.verified,
-                                size: 20,
-                                color: AppColors.info,
-                                semanticLabel: 'Verified shop',
-                              ),
+                              Icon(Icons.verified, size: 20, color: AppColors.info, semanticLabel: 'Verified shop'.tr),
                             ],
                           ],
                         ),
                         Text(
-                          '${s.city} · $_followers followers · ${s.productCount ?? 0} products',
+                          '{city} · {followers} followers · {productCount} products'.trf({
+                            'city': s.city,
+                            'followers': _followers,
+                            'productCount': s.productCount ?? 0,
+                          }),
                           style: t.textTheme.bodySmall,
                         ),
                         StarRating(value: s.ratingAvg, count: s.ratingCount),
@@ -116,19 +116,21 @@ class _ShopHeaderState extends ConsumerState<_ShopHeader> {
               ),
               const SizedBox(height: 14),
               _following
-                  ? OutlinedButton(onPressed: _busy ? null : _toggle, child: const Text('Following'))
-                  : LoadingButton(label: 'Follow shop', loading: _busy, onPressed: _toggle),
+                  ? OutlinedButton(onPressed: _busy ? null : _toggle, child: Text('Following'.tr))
+                  : LoadingButton(label: 'Follow shop'.tr, loading: _busy, onPressed: _toggle),
               if (s.description != null) ...[
                 const SizedBox(height: 14),
                 Text(s.description!, style: t.textTheme.bodyMedium),
               ],
               if (s.phone != null || s.email != null) ...[
                 const SizedBox(height: 8),
-                if (s.phone != null) SelectableText('Phone: ${s.phone}', style: t.textTheme.bodySmall),
-                if (s.email != null) SelectableText('Email: ${s.email}', style: t.textTheme.bodySmall),
+                if (s.phone != null)
+                  SelectableText('Phone: {phone}'.trf({'phone': s.phone}), style: t.textTheme.bodySmall),
+                if (s.email != null)
+                  SelectableText('Email: {email}'.trf({'email': s.email}), style: t.textTheme.bodySmall),
               ],
               const SizedBox(height: 18),
-              Text('Products', style: t.textTheme.titleLarge),
+              Text('Products'.tr, style: t.textTheme.titleLarge),
             ],
           ),
         ),
@@ -142,14 +144,14 @@ class ShopsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Shops')),
+    appBar: AppBar(title: Text('Shops'.tr)),
     body: PagedView<ShopCardData>(
       fetch: (page) => ref.read(marketplaceRepositoryProvider).shops(page: page),
       itemBuilder: (_, s) => ShopTile(shop: s),
-      empty: const EmptyState(
+      empty: EmptyState(
         icon: Icons.storefront_outlined,
-        title: 'No shops yet',
-        message: 'Shops will appear here as they join.',
+        title: 'No shops yet'.tr,
+        message: 'Shops will appear here as they join.'.tr,
       ),
     ),
   );

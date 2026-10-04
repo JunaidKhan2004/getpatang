@@ -12,6 +12,7 @@ import '../../marketplace/widgets/market_widgets.dart' show ProductThumb;
 import '../../marketplace/data/models.dart' show ImageRef;
 import '../data/community_repository.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Asks for a reason and sends a report about a post, comment or user.
 Future<void> showReportSheet(BuildContext context, WidgetRef ref, String targetType, String targetId) async {
@@ -24,19 +25,19 @@ Future<void> showReportSheet(BuildContext context, WidgetRef ref, String targetT
     showDragHandle: true,
     builder: (c) => StatefulBuilder(
       builder: (c, set) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.viewInsetsOf(c).bottom + 20),
+        padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, MediaQuery.viewInsetsOf(c).bottom + 20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Why are you reporting this?', style: Theme.of(c).textTheme.titleLarge),
+              Text('Why are you reporting this?'.tr, style: Theme.of(c).textTheme.titleLarge),
               RadioGroup<String>(
                 groupValue: reason,
                 onChanged: (v) => set(() => reason = v),
                 child: Column(
                   children: [
                     for (final e in reportReasons.entries)
-                      RadioListTile<String>(contentPadding: EdgeInsets.zero, value: e.key, title: Text(e.value)),
+                      RadioListTile<String>(contentPadding: EdgeInsets.zero, value: e.key, title: Text(e.value.tr)),
                   ],
                 ),
               ),
@@ -44,11 +45,11 @@ Future<void> showReportSheet(BuildContext context, WidgetRef ref, String targetT
                 controller: details,
                 maxLength: 1000,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Anything else? (optional)'),
+                decoration: InputDecoration(labelText: 'Anything else? (optional)'.tr),
               ),
               FilledButton(
                 onPressed: reason == null ? null : () => Navigator.pop(c, true),
-                child: const Text('Send report'),
+                child: Text('Send report'.tr),
               ),
             ],
           ),
@@ -62,7 +63,7 @@ Future<void> showReportSheet(BuildContext context, WidgetRef ref, String targetT
   try {
     await ref.read(communityRepositoryProvider).report(targetType, targetId, reason!, text.isEmpty ? null : text);
     if (context.mounted) {
-      showToast(context, 'Thanks for reporting. Our moderators will review it.', kind: ToastKind.success);
+      showToast(context, 'Thanks for reporting. Our moderators will review it.'.tr, kind: ToastKind.success);
     }
   } on ApiException catch (e) {
     if (context.mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -104,7 +105,7 @@ class _VideoBoxState extends State<_VideoBox> {
         height: 180,
         color: Colors.black,
         alignment: Alignment.center,
-        child: const Text('Video could not load', style: TextStyle(color: Colors.white)),
+        child: Text('Video could not load'.tr, style: const TextStyle(color: Colors.white)),
       );
     }
     if (!_ready) {
@@ -123,7 +124,7 @@ class _VideoBoxState extends State<_VideoBox> {
           VideoPlayer(_c),
           Semantics(
             button: true,
-            label: _c.value.isPlaying ? 'Pause video' : 'Play video',
+            label: _c.value.isPlaying ? 'Pause video'.tr : 'Play video'.tr,
             child: GestureDetector(
               onTap: () => setState(() => _c.value.isPlaying ? _c.pause() : _c.play()),
               child: AnimatedOpacity(
@@ -176,7 +177,13 @@ class _PostTileState extends ConsumerState<PostTile> {
       final r = await ref.read(communityRepositoryProvider).share(_p.id);
       if (mounted) setState(() => _p = _p.copyWith(shareCount: r.shareCount));
       await SharePlus.instance.share(
-        ShareParams(text: 'Post by ${_p.author.name} on GetPatang: ${Env.webBaseUrl}${r.path}'),
+        ShareParams(
+          text: 'Post by {authorName} on GetPatang: {webBaseUrl}{path}'.trf({
+            'authorName': _p.author.name,
+            'webBaseUrl': Env.webBaseUrl,
+            'path': r.path,
+          }),
+        ),
       );
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -188,11 +195,11 @@ class _PostTileState extends ConsumerState<PostTile> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Edit post'),
+        title: Text('Edit post'.tr),
         content: TextField(controller: ctrl, maxLines: 5, maxLength: 2000),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Cancel'.tr)),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Save'.tr)),
         ],
       ),
     );
@@ -211,11 +218,11 @@ class _PostTileState extends ConsumerState<PostTile> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete this post?'),
-        content: const Text('It will be removed for everyone.'),
+        title: Text('Delete this post?'.tr),
+        content: Text('It will be removed for everyone.'.tr),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Cancel'.tr)),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Delete'.tr)),
         ],
       ),
     );
@@ -225,7 +232,7 @@ class _PostTileState extends ConsumerState<PostTile> {
       if (!mounted) return;
       setState(() => _deleted = true);
       widget.onDeleted?.call();
-      showToast(context, 'Post deleted.');
+      showToast(context, 'Post deleted.'.tr);
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
     }
@@ -241,7 +248,7 @@ class _PostTileState extends ConsumerState<PostTile> {
       child: InkWell(
         onTap: widget.openOnTap ? () => context.push('/post/${p.id}') : null,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 10, 4, 4),
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 4, 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -265,25 +272,25 @@ class _PostTileState extends ConsumerState<PostTile> {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    tooltip: 'Post options',
+                    tooltip: 'Post options'.tr,
                     onSelected: (v) => switch (v) {
                       'edit' => _edit(),
                       'delete' => _delete(),
                       _ => showReportSheet(context, ref, 'post', p.id),
                     },
                     itemBuilder: (_) => p.isMine
-                        ? const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit post')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete post')),
+                        ? [
+                            PopupMenuItem(value: 'edit', child: Text('Edit post'.tr)),
+                            PopupMenuItem(value: 'delete', child: Text('Delete post'.tr)),
                           ]
-                        : const [PopupMenuItem(value: 'report', child: Text('Report post'))],
+                        : [PopupMenuItem(value: 'report', child: Text('Report post'.tr))],
                   ),
                 ],
               ),
-              Padding(padding: const EdgeInsets.fromLTRB(0, 8, 10, 8), child: Text(p.body)),
+              Padding(padding: const EdgeInsetsDirectional.fromSTEB(0, 8, 10, 8), child: Text(p.body)),
               if (p.media.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(right: 10, bottom: 6),
+                  padding: const EdgeInsetsDirectional.only(end: 10, bottom: 6),
                   child: p.media.first.kind == 'video'
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
@@ -296,7 +303,9 @@ class _PostTileState extends ConsumerState<PostTile> {
                           mainAxisSpacing: 4,
                           crossAxisSpacing: 4,
                           childAspectRatio: p.media.length == 1 ? 4 / 3 : 1,
-                          children: [for (final m in p.media) ProductThumb(image: ImageRef(m.url, 'Photo'), radius: 8)],
+                          children: [
+                            for (final m in p.media) ProductThumb(image: ImageRef(m.url, 'Photo'.tr), radius: 8),
+                          ],
                         ),
                 ),
               Row(
@@ -314,7 +323,7 @@ class _PostTileState extends ConsumerState<PostTile> {
                   TextButton.icon(
                     onPressed: _share,
                     icon: const Icon(Icons.share_outlined, size: 20),
-                    label: Text(p.shareCount > 0 ? '${p.shareCount}' : 'Share'),
+                    label: Text(p.shareCount > 0 ? '${p.shareCount}' : 'Share'.tr),
                   ),
                 ],
               ),

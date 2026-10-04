@@ -12,11 +12,12 @@ import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Sends a guest to sign in and returns false; true when signed in.
 bool ensureSignedIn(BuildContext context, WidgetRef ref) {
   if (ref.read(authControllerProvider) is Authenticated) return true;
-  showToast(context, 'Please sign in to continue.');
+  showToast(context, 'Please sign in to continue.'.tr);
   context.push(Uri(path: '/login', queryParameters: {'from': GoRouterState.of(context).uri.toString()}).toString());
   return false;
 }
@@ -67,7 +68,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
       if (goToCart) {
         context.push('/cart');
       } else {
-        showToast(context, 'Added to your cart.', kind: ToastKind.success);
+        showToast(context, 'Added to your cart.'.tr, kind: ToastKind.success);
       }
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -82,7 +83,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
     setState(() => _wishlisted = next);
     try {
       await ref.read(marketplaceRepositoryProvider).setWishlist(p.id, next);
-      if (mounted) showToast(context, next ? 'Saved to your wishlist.' : 'Removed from your wishlist.');
+      if (mounted) showToast(context, next ? 'Saved to your wishlist.'.tr : 'Removed from your wishlist.'.tr);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _wishlisted = !next);
@@ -109,7 +110,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     : PageView(children: [for (final img in p.images) ProductThumb(image: img, radius: 0)]),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -118,7 +119,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                       children: [
                         Expanded(child: Text(p.title, style: t.textTheme.headlineSmall)),
                         IconButton(
-                          tooltip: _wishlisted ? 'Remove from wishlist' : 'Save to wishlist',
+                          tooltip: _wishlisted ? 'Remove from wishlist'.tr : 'Save to wishlist'.tr,
                           onPressed: _toggleWishlist,
                           icon: Icon(
                             _wishlisted ? Icons.favorite : Icons.favorite_border,
@@ -137,10 +138,10 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     const SizedBox(height: 4),
                     Text(
                       available <= 0
-                          ? 'Out of stock'
+                          ? 'Out of stock'.tr
                           : available <= 5
-                          ? 'Only $available left'
-                          : 'In stock',
+                          ? 'Only {available} left'.trf({'available': available})
+                          : 'In stock'.tr,
                       style: t.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: available <= 0
@@ -152,7 +153,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     ),
                     if (p.variants.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Text('Choose an option', style: t.textTheme.titleMedium),
+                      Text('Choose an option'.tr, style: t.textTheme.titleMedium),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -160,7 +161,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                         children: [
                           for (final v in p.variants)
                             ChoiceChip(
-                              label: Text(v.stock > 0 ? v.name : '${v.name} · sold out'),
+                              label: Text(v.stock > 0 ? v.name : '{vName} · sold out'.trf({'vName': v.name})),
                               selected: v.id == _variantId,
                               onSelected: v.stock > 0
                                   ? (_) => setState(() {
@@ -175,7 +176,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Text('Quantity', style: t.textTheme.titleMedium),
+                        Text('Quantity'.tr, style: t.textTheme.titleMedium),
                         const Spacer(),
                         QuantityStepper(
                           value: _quantity,
@@ -190,18 +191,18 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                       child: ListTile(
                         onTap: () => context.push('/shop/${p.shop.slug}'),
                         leading: ShopAvatar(name: p.shop.name, size: 40),
-                        title: Text('Sold by ${p.shop.name}'),
+                        title: Text('Sold by {shopName}'.trf({'shopName': p.shop.name})),
                         subtitle: Text(p.shop.city),
                         trailing: const Icon(Icons.chevron_right),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Description', style: t.textTheme.titleLarge),
+                    Text('Description'.tr, style: t.textTheme.titleLarge),
                     const SizedBox(height: 6),
                     Text(p.description, style: t.textTheme.bodyLarge),
                     if (p.specifications.isNotEmpty) ...[
                       const SizedBox(height: 20),
-                      Text('Specifications', style: t.textTheme.titleLarge),
+                      Text('Specifications'.tr, style: t.textTheme.titleLarge),
                       const SizedBox(height: 6),
                       for (final (label, value) in p.specifications)
                         Padding(
@@ -226,21 +227,21 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            p.shippingInfo ?? 'Delivery across Pakistan. Shipping fee shown at checkout.',
+                            p.shippingInfo ?? 'Delivery across Pakistan. Shipping fee shown at checkout.'.tr,
                             style: t.textTheme.bodySmall,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Text('Reviews', style: t.textTheme.titleLarge),
+                    Text('Reviews'.tr, style: t.textTheme.titleLarge),
                     const SizedBox(height: 6),
                     reviews.when(
                       loading: () => const ListRowSkeleton(kite: false),
-                      error: (_, _) => Text('Reviews could not load.', style: t.textTheme.bodySmall),
+                      error: (_, _) => Text('Reviews could not load.'.tr, style: t.textTheme.bodySmall),
                       data: (r) => r.items.isEmpty
                           ? Text(
-                              'No reviews yet. Customers can review after their order is delivered.',
+                              'No reviews yet. Customers can review after their order is delivered.'.tr,
                               style: t.textTheme.bodySmall,
                             )
                           : Column(
@@ -263,7 +264,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                     ),
                     if (p.related.isNotEmpty) ...[
                       const SizedBox(height: 20),
-                      Text('You may also like', style: t.textTheme.titleLarge),
+                      Text('You may also like'.tr, style: t.textTheme.titleLarge),
                       const SizedBox(height: 10),
                       SizedBox(
                         height: 300,
@@ -284,7 +285,7 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
         SafeArea(
           top: false,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 10),
             decoration: BoxDecoration(
               color: t.colorScheme.surface,
               border: Border(top: BorderSide(color: t.colorScheme.outline)),
@@ -294,12 +295,16 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: available > 0 && !_adding ? () => _add(goToCart: true) : null,
-                    child: const Text('Buy now'),
+                    child: Text('Buy now'.tr),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: LoadingButton(label: 'Add to cart', loading: _adding, onPressed: available > 0 ? _add : null),
+                  child: LoadingButton(
+                    label: 'Add to cart'.tr,
+                    loading: _adding,
+                    onPressed: available > 0 ? _add : null,
+                  ),
                 ),
               ],
             ),
@@ -333,7 +338,7 @@ class QuantityStepper extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          tooltip: 'Decrease quantity',
+          tooltip: 'Decrease quantity'.tr,
           visualDensity: VisualDensity.compact,
           onPressed: enabled && value > 1 ? () => onChanged(value - 1) : null,
           icon: const Icon(Icons.remove),
@@ -343,7 +348,7 @@ class QuantityStepper extends StatelessWidget {
           child: Text('$value', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
         ),
         IconButton(
-          tooltip: 'Increase quantity',
+          tooltip: 'Increase quantity'.tr,
           visualDensity: VisualDensity.compact,
           onPressed: enabled && value < max ? () => onChanged(value + 1) : null,
           icon: const Icon(Icons.add),

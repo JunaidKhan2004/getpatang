@@ -11,6 +11,7 @@ import '../marketplace/data/models.dart' show PageResult, formatPKR;
 import '../marketplace/presentation/product_screen.dart' show ensureSignedIn;
 import '../marketplace/widgets/market_widgets.dart';
 import '../tournaments/presentation/tournaments_tab.dart' show StatusPill, formatWhen;
+import '../../core/i18n/i18n.dart';
 
 // ─── Models (mirror backend/src/modules/events/events.ts) ────────────────────
 
@@ -178,13 +179,15 @@ final myEventsProvider = FutureProvider.autoDispose((ref) => ref.watch(eventsRep
 // ─── Widgets ────────────────────────────────────────────────────────────────
 
 Widget eventStatusPill(EventData e) {
-  if (e.status == 'CANCELLED') return const StatusPill('Cancelled', AppColors.danger);
-  if (e.status == 'COMPLETED') return const StatusPill('Completed', AppColors.muted);
-  if (e.registrationOpen) return const StatusPill('Registration open', AppColors.success);
-  return StatusPill(e.registrationRequired ? 'Registration closed' : 'Open to all', AppColors.info);
+  if (e.status == 'CANCELLED') return StatusPill('Cancelled'.tr, AppColors.danger);
+  if (e.status == 'COMPLETED') return StatusPill('Completed'.tr, AppColors.muted);
+  if (e.registrationOpen) return StatusPill('Registration open'.tr, AppColors.success);
+  return StatusPill(e.registrationRequired ? 'Registration closed'.tr : 'Open to all'.tr, AppColors.info);
 }
 
-String _going(EventData e) => e.capacity == null ? '${e.attending} going' : '${e.attending}/${e.capacity} going';
+String _going(EventData e) => e.capacity == null
+    ? '{attending} going'.trf({'attending': e.attending})
+    : '{attending}/{capacity} going'.trf({'attending': e.attending, 'capacity': e.capacity});
 
 class EventTile extends StatelessWidget {
   const EventTile({super.key, required this.e, this.footer});
@@ -215,7 +218,7 @@ class EventTile extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: [StatusPill(eventTypeLabels[e.type] ?? e.type, AppColors.maroon900), eventStatusPill(e)],
+                children: [StatusPill(eventTypeLabels[e.type]?.tr ?? e.type, AppColors.maroon900), eventStatusPill(e)],
               ),
               const SizedBox(height: 8),
               Text(e.name, style: theme.textTheme.titleMedium),
@@ -249,7 +252,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   Widget build(BuildContext context) {
     final repo = ref.watch(eventsRepositoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Events')),
+      appBar: AppBar(title: Text('Events'.tr)),
       body: Column(
         children: [
           SizedBox(
@@ -259,18 +262,18 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               children: [
                 ChoiceChip(
-                  label: const Text('Upcoming'),
+                  label: Text('Upcoming'.tr),
                   selected: !_past,
                   onSelected: (_) => setState(() => _past = false),
                 ),
                 const SizedBox(width: 8),
-                ChoiceChip(label: const Text('Past'), selected: _past, onSelected: (_) => setState(() => _past = true)),
+                ChoiceChip(label: Text('Past'.tr), selected: _past, onSelected: (_) => setState(() => _past = true)),
                 const SizedBox(width: 16),
                 for (final t in eventTypeLabels.entries)
                   Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsetsDirectional.only(end: 8),
                     child: FilterChip(
-                      label: Text(t.value),
+                      label: Text(t.value.tr),
                       selected: _type == t.key,
                       onSelected: (s) => setState(() => _type = s ? t.key : null),
                     ),
@@ -283,10 +286,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
               key: ValueKey('$_past-$_type'),
               fetch: (page) => repo.list(past: _past, type: _type, page: page),
               itemBuilder: (_, e) => EventTile(e: e),
-              empty: const EmptyState(
+              empty: EmptyState(
                 icon: Icons.celebration_outlined,
-                title: 'No events here yet',
-                message: 'Festivals, exhibitions and workshops will appear here.',
+                title: 'No events here yet'.tr,
+                message: 'Festivals, exhibitions and workshops will appear here.'.tr,
               ),
             ),
           ),
@@ -302,7 +305,7 @@ class EventScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Event')),
+    appBar: AppBar(title: Text('Event'.tr)),
     body: AsyncBody(
       value: ref.watch(eventProvider(slug)),
       onRetry: () => ref.invalidate(eventProvider(slug)),
@@ -357,7 +360,10 @@ class _EventBody extends StatelessWidget {
                   Text(e.name, style: theme.textTheme.headlineSmall?.copyWith(color: AppColors.white)),
                   const SizedBox(height: 6),
                   Text(
-                    '${eventTypeLabels[e.type] ?? e.type} · by ${e.organizerName}',
+                    '{type} · by {organizerName}'.trf({
+                      'type': eventTypeLabels[e.type]?.tr ?? e.type,
+                      'organizerName': e.organizerName,
+                    }),
                     style: theme.textTheme.bodySmall?.copyWith(color: AppColors.maroon100),
                   ),
                 ],
@@ -373,7 +379,10 @@ class _EventBody extends StatelessWidget {
               if (e.cancelReason != null) ...[
                 Card(
                   color: AppColors.danger.withValues(alpha: 0.08),
-                  child: Padding(padding: const EdgeInsets.all(12), child: Text('Cancelled: ${e.cancelReason}')),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text('Cancelled: {cancelReason}'.trf({'cancelReason': e.cancelReason})),
+                  ),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -381,25 +390,33 @@ class _EventBody extends StatelessWidget {
               const SizedBox(height: 12),
               fact(
                 Icons.event_outlined,
-                'When',
+                'When'.tr,
                 formatWhen(e.startsAt) + (e.endsAt != null ? ' – ${formatWhen(e.endsAt!)}' : ''),
               ),
-              fact(Icons.place_outlined, 'Where', [e.venue, e.venueAddress, e.city].whereType<String>().join(', ')),
-              fact(Icons.groups_outlined, 'Going', _going(e) + (e.waitlisted > 0 ? ' · ${e.waitlisted} waiting' : '')),
-              fact(Icons.payments_outlined, 'Fee', e.fee == 0 ? 'Free' : '${formatPKR(e.fee)}, paid to the organizer'),
-              if (e.organizerContact != null) fact(Icons.call_outlined, 'Organizer contact', e.organizerContact!),
+              fact(Icons.place_outlined, 'Where'.tr, [e.venue, e.venueAddress, e.city].whereType<String>().join(', ')),
+              fact(
+                Icons.groups_outlined,
+                'Going'.tr,
+                _going(e) + (e.waitlisted > 0 ? ' · {waitlisted} waiting'.trf({'waitlisted': e.waitlisted}) : ''),
+              ),
+              fact(
+                Icons.payments_outlined,
+                'Fee'.tr,
+                e.fee == 0 ? 'Free'.tr : '{fee}, paid to the organizer'.trf({'fee': formatPKR(e.fee)}),
+              ),
+              if (e.organizerContact != null) fact(Icons.call_outlined, 'Organizer contact'.tr, e.organizerContact!),
               if (e.tournamentSlug != null)
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.emoji_events_outlined),
-                    title: Text(e.tournamentName ?? 'Tournament'),
-                    subtitle: const Text('Tournament at this event'),
+                    title: Text(e.tournamentName ?? 'Tournament'.tr),
+                    subtitle: Text('Tournament at this event'.tr),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/tournament/${e.tournamentSlug}'),
                   ),
                 ),
               const SizedBox(height: 12),
-              Text('About', style: theme.textTheme.titleLarge),
+              Text('About'.tr, style: theme.textTheme.titleLarge),
               const SizedBox(height: 4),
               Text(e.description ?? ''),
               const SizedBox(height: 16),
@@ -413,7 +430,7 @@ class _EventBody extends StatelessWidget {
                         children: [
                           Icon(Icons.health_and_safety_outlined, color: theme.colorScheme.primary),
                           const SizedBox(width: 8),
-                          Text('Safety', style: theme.textTheme.titleMedium),
+                          Text('Safety'.tr, style: theme.textTheme.titleMedium),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -424,7 +441,7 @@ class _EventBody extends StatelessWidget {
               ),
               if (e.rules != null) ...[
                 const SizedBox(height: 16),
-                Text('Rules', style: theme.textTheme.titleLarge),
+                Text('Rules'.tr, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(e.rules!),
               ],
@@ -477,22 +494,26 @@ class _EventRegistrationState extends ConsumerState<_EventRegistration> {
     );
 
     if (!e.registrationRequired) {
-      return box([Text('Open to everyone', style: theme.textTheme.titleMedium), const Text('No registration needed.')]);
+      return box([Text('Open to everyone'.tr, style: theme.textTheme.titleMedium), Text('No registration needed.'.tr)]);
     }
     if (e.myStatus != null) {
       final confirmed = e.myStatus == 'CONFIRMED';
       return box([
-        Text('You are registered', style: theme.textTheme.titleMedium),
+        Text('You are registered'.tr, style: theme.textTheme.titleMedium),
         const SizedBox(height: 6),
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: StatusPill(
-            confirmed ? 'Confirmed' : 'On the waiting list',
+            confirmed ? 'Confirmed'.tr : 'On the waiting list'.tr,
             confirmed ? AppColors.success : AppColors.warning,
           ),
         ),
         const SizedBox(height: 6),
-        Text(e.myGuests > 0 ? 'You plus ${e.myGuests} guest${e.myGuests > 1 ? 's' : ''}.' : 'Just you.'),
+        Text(
+          e.myGuests > 0
+              ? 'You plus {myGuests} guest{s}.'.trf({'myGuests': e.myGuests, 's': e.myGuests > 1 ? 's' : ''})
+              : 'Just you.'.tr,
+        ),
         if (e.status == 'PUBLISHED' && e.startsAt.isAfter(DateTime.now())) ...[
           const SizedBox(height: 10),
           OutlinedButton(
@@ -500,40 +521,42 @@ class _EventRegistrationState extends ConsumerState<_EventRegistration> {
                 ? null
                 : () => _run(() async {
                     await repo.cancel(e.slug);
-                    return 'Your registration was cancelled.';
+                    return 'Your registration was cancelled.'.tr;
                   }),
-            child: const Text('Cancel registration'),
+            child: Text('Cancel registration'.tr),
           ),
         ],
       ]);
     }
     if (!e.registrationOpen) {
-      return box([Text('Registration', style: theme.textTheme.titleMedium), const Text('Registration is closed.')]);
+      return box([Text('Registration'.tr, style: theme.textTheme.titleMedium), Text('Registration is closed.'.tr)]);
     }
 
     final left = e.capacity == null ? null : (e.capacity! - e.attending).clamp(0, e.capacity!);
     return box([
-      Text('Register', style: theme.textTheme.titleMedium),
+      Text('Register'.tr, style: theme.textTheme.titleMedium),
       const SizedBox(height: 4),
       Text(
         left == null
-            ? 'No limit on places.'
-            : (left == 0 ? 'The event is full. You can join the waiting list.' : '$left places left.'),
+            ? 'No limit on places.'.tr
+            : (left == 0
+                  ? 'The event is full. You can join the waiting list.'.tr
+                  : '{left} places left.'.trf({'left': left})),
       ),
       if (e.maxGuests > 0) ...[
         const SizedBox(height: 10),
         DropdownButtonFormField<int>(
           initialValue: _guests,
-          decoration: const InputDecoration(labelText: 'Guests coming with you'),
+          decoration: InputDecoration(labelText: 'Guests coming with you'.tr),
           items: [
-            for (var i = 0; i <= e.maxGuests; i++) DropdownMenuItem(value: i, child: Text(i == 0 ? 'None' : '$i')),
+            for (var i = 0; i <= e.maxGuests; i++) DropdownMenuItem(value: i, child: Text(i == 0 ? 'None'.tr : '$i')),
           ],
           onChanged: (v) => setState(() => _guests = v ?? 0),
         ),
       ],
       const SizedBox(height: 10),
       LoadingButton(
-        label: left == 0 ? 'Join the waiting list' : 'Register',
+        label: left == 0 ? 'Join the waiting list'.tr : 'Register'.tr,
         loading: _busy,
         onPressed: () {
           if (!ensureSignedIn(context, ref)) return;
@@ -549,16 +572,16 @@ class MyEventsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('My events')),
+    appBar: AppBar(title: Text('My events'.tr)),
     body: AsyncBody(
       value: ref.watch(myEventsProvider),
       onRetry: () => ref.invalidate(myEventsProvider),
       builder: (rows) => rows.isEmpty
           ? EmptyState(
               icon: Icons.celebration_outlined,
-              title: 'No registrations yet',
-              message: 'Find a festival or workshop near you.',
-              action: FilledButton(onPressed: () => context.push('/events'), child: const Text('Browse events')),
+              title: 'No registrations yet'.tr,
+              message: 'Find a festival or workshop near you.'.tr,
+              action: FilledButton(onPressed: () => context.push('/events'), child: Text('Browse events'.tr)),
             )
           : RefreshIndicator(
               onRefresh: () => ref.refresh(myEventsProvider.future),
@@ -572,8 +595,8 @@ class MyEventsScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(top: 8),
                         child: StatusPill(
                           r.status == 'CONFIRMED'
-                              ? 'Confirmed${r.guests > 0 ? ' · +${r.guests}' : ''}'
-                              : 'Waiting list${r.guests > 0 ? ' · +${r.guests}' : ''}',
+                              ? 'Confirmed{guests}'.trf({'guests': r.guests > 0 ? ' · +${r.guests}' : ''})
+                              : 'Waiting list{guests}'.trf({'guests': r.guests > 0 ? ' · +${r.guests}' : ''}),
                           r.status == 'CONFIRMED' ? AppColors.success : AppColors.warning,
                         ),
                       ),

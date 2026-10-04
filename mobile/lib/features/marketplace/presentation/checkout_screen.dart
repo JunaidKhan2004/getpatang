@@ -13,6 +13,7 @@ import '../application/cart_count.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Random UUID v4 so a retried "Place order" never creates duplicate orders.
 String _uuid() {
@@ -104,7 +105,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _place() async {
     if (_addressId == null) {
-      showToast(context, 'Please add a delivery address.', kind: ToastKind.error);
+      showToast(context, 'Please add a delivery address.'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _placing = true);
@@ -134,17 +135,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final data = ref.watch(_checkoutDataProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(title: Text('Checkout'.tr)),
       body: data.when(
-        loading: () => const Center(child: KiteLoader(label: 'Preparing checkout…')),
+        loading: () => Center(child: KiteLoader(label: 'Preparing checkout…'.tr)),
         error: (e, _) => EmptyState(
           icon: Icons.cloud_off_outlined,
-          title: 'Checkout could not load',
-          message: e is ApiException ? e.message : 'Please try again.',
-          action: OutlinedButton(
-            onPressed: () => ref.invalidate(_checkoutDataProvider),
-            child: const Text('Try again'),
-          ),
+          title: 'Checkout could not load'.tr,
+          message: e is ApiException ? e.message : 'Please try again.'.tr,
+          action: OutlinedButton(onPressed: () => ref.invalidate(_checkoutDataProvider), child: Text('Try again'.tr)),
         ),
         data: (d) {
           if (_addresses == null) {
@@ -156,10 +154,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) => _price());
           }
           if (d.payment.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.payments_outlined,
-              title: 'Ordering is paused',
-              message: 'Payment methods are being set up. Please try again later.',
+              title: 'Ordering is paused'.tr,
+              message: 'Payment methods are being set up. Please try again later.'.tr,
             );
           }
           return ListView(
@@ -167,15 +165,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(child: Text('1. Delivery address', style: t.textTheme.titleLarge)),
-                  TextButton.icon(onPressed: _addAddress, icon: const Icon(Icons.add), label: const Text('New')),
+                  Expanded(child: Text('1. Delivery address'.tr, style: t.textTheme.titleLarge)),
+                  TextButton.icon(onPressed: _addAddress, icon: const Icon(Icons.add), label: Text('New'.tr)),
                 ],
               ),
               if (_addresses!.isEmpty)
                 OutlinedButton.icon(
                   onPressed: _addAddress,
                   icon: const Icon(Icons.add_location_alt_outlined),
-                  label: const Text('Add a delivery address'),
+                  label: Text('Add a delivery address'.tr),
                 ),
               RadioGroup<String>(
                 groupValue: _addressId,
@@ -196,7 +194,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('2. Delivery method', style: t.textTheme.titleLarge),
+              Text('2. Delivery method'.tr, style: t.textTheme.titleLarge),
               RadioGroup<String>(
                 groupValue: _delivery,
                 onChanged: (v) {
@@ -212,7 +210,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           value: m.key,
                           title: Text(m.label),
                           subtitle: Text(
-                            '${m.description}\n${formatPKR(m.fee!)} per shop${m.freeAbove != null ? ' · free above ${formatPKR(m.freeAbove!)}' : ''}',
+                            '{description}\n{fee} per shop{freeAbove}'.trf({
+                              'description': m.description,
+                              'fee': formatPKR(m.fee!),
+                              'freeAbove': m.freeAbove != null ? ' · free above ${formatPKR(m.freeAbove!)}' : '',
+                            }),
                           ),
                           isThreeLine: true,
                         ),
@@ -221,7 +223,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('3. Payment', style: t.textTheme.titleLarge),
+              Text('3. Payment'.tr, style: t.textTheme.titleLarge),
               RadioGroup<String>(
                 groupValue: _payment,
                 onChanged: (v) => setState(() => _payment = v),
@@ -240,7 +242,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 controller: _notes,
                 maxLength: 300,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Note for the shop (optional)'),
+                decoration: InputDecoration(labelText: 'Note for the shop (optional)'.tr),
               ),
               const SizedBox(height: 8),
               Row(
@@ -250,7 +252,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     child: TextField(
                       controller: _coupon,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: InputDecoration(labelText: 'Coupon code', errorText: _couponError),
+                      decoration: InputDecoration(labelText: 'Coupon code'.tr, errorText: _couponError),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -267,14 +269,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               });
                               _price();
                             },
-                      child: const Text('Apply'),
+                      child: Text('Apply'.tr),
                     ),
                   ),
                 ],
               ),
               if (_quote?.couponCode != null)
                 Text(
-                  'Coupon ${_quote!.couponCode} applied.',
+                  'Coupon {couponCode} applied.'.trf({'couponCode': _quote!.couponCode}),
                   style: t.textTheme.bodySmall?.copyWith(color: AppColors.success),
                 ),
               const SizedBox(height: 16),
@@ -289,31 +291,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         )
                       : Column(
                           children: [
-                            _row(context, 'Items', formatPKR(_quote!.subtotal)),
+                            _row(context, 'Items'.tr, formatPKR(_quote!.subtotal)),
                             _row(
                               context,
-                              _quote!.shopCount > 1 ? 'Shipping (${_quote!.shopCount} shops)' : 'Shipping',
-                              _quote!.shippingFee == 0 ? 'Free' : formatPKR(_quote!.shippingFee),
+                              _quote!.shopCount > 1
+                                  ? 'Shipping ({shopCount} shops)'.trf({'shopCount': _quote!.shopCount})
+                                  : 'Shipping'.tr,
+                              _quote!.shippingFee == 0 ? 'Free'.tr : formatPKR(_quote!.shippingFee),
                             ),
                             if (_quote!.discount > 0)
-                              _row(context, 'Discount', '−${formatPKR(_quote!.discount)}', color: AppColors.success),
+                              _row(context, 'Discount'.tr, '−${formatPKR(_quote!.discount)}', color: AppColors.success),
                             const Divider(height: 20),
-                            _row(context, 'Total', formatPKR(_quote!.total), bold: true),
+                            _row(context, 'Total'.tr, formatPKR(_quote!.total), bold: true),
                           ],
                         ),
                 ),
               ),
               const SizedBox(height: 8),
-              Text('You can cancel until the shop starts preparing your order.', style: t.textTheme.bodySmall),
+              Text('You can cancel until the shop starts preparing your order.'.tr, style: t.textTheme.bodySmall),
             ],
           );
         },
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 12),
           child: LoadingButton(
-            label: _quote == null ? 'Place order' : 'Place order · ${formatPKR(_quote!.total)}',
+            label: _quote == null ? 'Place order'.tr : 'Place order · {total}'.trf({'total': formatPKR(_quote!.total)}),
             loading: _placing,
             onPressed: _quote == null || _pricing || _addressId == null ? null : _place,
           ),
@@ -386,54 +390,54 @@ class _AddressFormSheetState extends ConsumerState<AddressFormSheet> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
+    padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
     child: Form(
       key: _form,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('New delivery address', style: Theme.of(context).textTheme.titleLarge),
+            Text('New delivery address'.tr, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             TextFormField(
               controller: _name,
               textCapitalization: TextCapitalization.words,
-              validator: (v) => Validators.name(v, 'Full name'),
-              decoration: const InputDecoration(labelText: 'Full name'),
+              validator: (v) => Validators.name(v, 'Full name'.tr),
+              decoration: InputDecoration(labelText: 'Full name'.tr),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _phone,
               keyboardType: TextInputType.phone,
-              validator: (v) => Validators.required(v, 'Mobile number') ?? Validators.optionalPhone(v),
-              decoration: const InputDecoration(labelText: 'Mobile number', hintText: '03XX XXXXXXX'),
+              validator: (v) => Validators.required(v, 'Mobile number'.tr) ?? Validators.optionalPhone(v),
+              decoration: InputDecoration(labelText: 'Mobile number'.tr, hintText: '03XX XXXXXXX'.tr),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _line1,
-              validator: (v) => (v == null || v.trim().length < 5) ? 'Enter the street address' : null,
-              decoration: const InputDecoration(labelText: 'Street address'),
+              validator: (v) => (v == null || v.trim().length < 5) ? 'Enter the street address'.tr : null,
+              decoration: InputDecoration(labelText: 'Street address'.tr),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _line2,
-              decoration: const InputDecoration(labelText: 'Area / landmark (optional)'),
+              decoration: InputDecoration(labelText: 'Area / landmark (optional)'.tr),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _city,
-              items: [for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c))],
+              items: [for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c.tr))],
               onChanged: (v) => setState(() => _city = v),
-              validator: (v) => v == null ? 'Choose a city' : null,
-              decoration: const InputDecoration(labelText: 'City'),
+              validator: (v) => v == null ? 'Choose a city'.tr : null,
+              decoration: InputDecoration(labelText: 'City'.tr),
             ),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               value: _default,
               onChanged: (v) => setState(() => _default = v ?? false),
-              title: const Text('Make this my default address'),
+              title: Text('Make this my default address'.tr),
             ),
-            LoadingButton(label: 'Save address', loading: _saving, onPressed: _save),
+            LoadingButton(label: 'Save address'.tr, loading: _saving, onPressed: _save),
           ],
         ),
       ),

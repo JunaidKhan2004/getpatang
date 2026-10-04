@@ -1,6 +1,8 @@
 /// Tournament models. Mirror backend/src/modules/tournaments responses.
 library;
 
+import '../../../core/i18n/i18n.dart';
+
 DateTime _date(Object? v) => DateTime.parse(v as String).toLocal();
 
 class TournamentCardData {
@@ -267,11 +269,11 @@ class PlayerProfileData {
 
 String placementLabel(int? p) => switch (p) {
   null => '—',
-  1 => 'Champion',
-  2 => 'Runner-up',
-  3 => 'Semi-finalist',
-  5 => 'Quarter-finalist',
-  _ => 'Top ${(p - 1) * 2}',
+  1 => 'Champion'.tr,
+  2 => 'Runner-up'.tr,
+  3 => 'Semi-finalist'.tr,
+  5 => 'Quarter-finalist'.tr,
+  _ => 'Top {p}'.trf({'p': (p - 1) * 2}),
 };
 
 const participantStatusLabels = {

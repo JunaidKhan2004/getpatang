@@ -17,6 +17,7 @@ import '../tournaments/presentation/tournaments_tab.dart' show StatusPill, forma
 import 'designer_repository.dart';
 import 'kite_design.dart';
 import '../../core/widgets/loaders.dart';
+import '../../core/i18n/i18n.dart';
 
 Color _statusColor(CustomOrderData r) => r.quoteExpired
     ? AppColors.muted
@@ -94,7 +95,7 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
   Future<void> _save({required bool thenRequest}) async {
     if (!ensureSignedIn(context, ref)) return;
     if (_name.text.trim().length < 2) {
-      showToast(context, 'Give your design a name (2–60 characters).', kind: ToastKind.error);
+      showToast(context, 'Give your design a name (2–60 characters).'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _saving = true);
@@ -103,7 +104,7 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
       _id = saved.id;
       ref.invalidate(myDesignsProvider);
       if (!mounted) return;
-      showToast(context, 'Design saved.', kind: ToastKind.success);
+      showToast(context, 'Design saved.'.tr, kind: ToastKind.success);
       if (thenRequest) context.push('/custom-orders/new?design=${saved.id}');
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.fieldErrors.values.firstOrNull ?? e.message, kind: ToastKind.error);
@@ -129,7 +130,7 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
     runSpacing: 8,
     children: [
       for (final o in options.entries)
-        ChoiceChip(label: Text(o.value), selected: value == o.key, onSelected: (_) => onChanged(o.key)),
+        ChoiceChip(label: Text(o.value.tr), selected: value == o.key, onSelected: (_) => onChanged(o.key)),
     ],
   );
 
@@ -177,11 +178,11 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
     final signedIn = ref.watch(authControllerProvider) is Authenticated;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_id == null ? 'Kite designer' : 'Edit design'),
-        actions: [if (signedIn) TextButton(onPressed: () => context.push('/designs'), child: const Text('My designs'))],
+        title: Text(_id == null ? 'Kite designer'.tr : 'Edit design'.tr),
+        actions: [if (signedIn) TextButton(onPressed: () => context.push('/designs'), child: Text('My designs'.tr))],
       ),
       body: _loading
-          ? const Center(child: KiteLoader(label: 'Opening your design…'))
+          ? Center(child: KiteLoader(label: 'Opening your design…'.tr))
           : Column(
               children: [
                 Container(
@@ -198,42 +199,50 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
                 ),
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 24),
                     children: [
-                      _section('Shape', [
+                      _section('Shape'.tr, [
                         _choices(kiteShapes, _d.shape, (v) => setState(() => _d = _d.copyWith(shape: v))),
                       ]),
-                      _section('Size', [
+                      _section('Size'.tr, [
                         _choices(kiteSizes, _d.size, (v) => setState(() => _d = _d.copyWith(size: v))),
                       ]),
-                      _section('Colours and pattern', [
-                        _colors('Kite colour', _d.background, (c) => setState(() => _d = _d.copyWith(background: c))),
+                      _section('Colours and pattern'.tr, [
+                        _colors(
+                          'Kite colour'.tr,
+                          _d.background,
+                          (c) => setState(() => _d = _d.copyWith(background: c)),
+                        ),
                         const SizedBox(height: 12),
                         _choices(kitePatterns, _d.pattern, (v) => setState(() => _d = _d.copyWith(pattern: v))),
                         if (_d.pattern != 'none')
                           _colors(
-                            'Pattern colour',
+                            'Pattern colour'.tr,
                             _d.patternColor,
                             (c) => setState(() => _d = _d.copyWith(patternColor: c)),
                           ),
                       ]),
-                      _section('Text and logo', [
+                      _section('Text and logo'.tr, [
                         TextField(
                           controller: _text,
                           maxLength: 24,
-                          decoration: const InputDecoration(labelText: 'Text on the kite (optional)'),
+                          decoration: InputDecoration(labelText: 'Text on the kite (optional)'.tr),
                           onChanged: (v) => setState(() => _d = _d.copyWith(text: v)),
                         ),
                         if (_d.text.trim().isNotEmpty) ...[
                           _choices(kiteFonts, _d.font, (v) => setState(() => _d = _d.copyWith(font: v))),
-                          _colors('Text colour', _d.textColor, (c) => setState(() => _d = _d.copyWith(textColor: c))),
+                          _colors(
+                            'Text colour'.tr,
+                            _d.textColor,
+                            (c) => setState(() => _d = _d.copyWith(textColor: c)),
+                          ),
                         ],
                         const SizedBox(height: 12),
                         if (_d.imageUrl != null)
                           OutlinedButton.icon(
                             onPressed: () => setState(() => _d = _d.withoutImage()),
                             icon: const Icon(Icons.close),
-                            label: const Text('Remove logo'),
+                            label: Text('Remove logo'.tr),
                           )
                         else
                           OutlinedButton.icon(
@@ -241,41 +250,45 @@ class _DesignerScreenState extends ConsumerState<DesignerScreen> {
                             icon: _uploading
                                 ? const KiteSpinner(size: 18)
                                 : const Icon(Icons.add_photo_alternate_outlined),
-                            label: Text(_uploading ? 'Uploading…' : 'Add a logo'),
+                            label: Text(_uploading ? 'Uploading…'.tr : 'Add a logo'.tr),
                           ),
                       ]),
-                      _section('Tail', [
+                      _section('Tail'.tr, [
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Add a tail'),
+                          title: Text('Add a tail'.tr),
                           value: _d.tail,
                           onChanged: (v) => setState(() => _d = _d.copyWith(tail: v)),
                         ),
                         if (_d.tail)
-                          _colors('Tail colour', _d.tailColor, (c) => setState(() => _d = _d.copyWith(tailColor: c))),
+                          _colors(
+                            'Tail colour'.tr,
+                            _d.tailColor,
+                            (c) => setState(() => _d = _d.copyWith(tailColor: c)),
+                          ),
                       ]),
-                      _section('Save', [
+                      _section('Save'.tr, [
                         TextField(
                           controller: _name,
                           maxLength: 60,
-                          decoration: const InputDecoration(
-                            labelText: 'Design name',
-                            hintText: 'e.g. Team Falcon patang',
+                          decoration: InputDecoration(
+                            labelText: 'Design name'.tr,
+                            hintText: 'e.g. Team Falcon patang'.tr,
                           ),
                         ),
                         LoadingButton(
-                          label: 'Save and request a quote',
+                          label: 'Save and request a quote'.tr,
                           loading: _saving,
                           onPressed: () => _save(thenRequest: true),
                         ),
                         const SizedBox(height: 8),
                         OutlinedButton(
                           onPressed: _saving ? null : () => _save(thenRequest: false),
-                          child: const Text('Save design'),
+                          child: Text('Save design'.tr),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Preview only. The shop confirms materials, exact colours and size in its quote.',
+                          'Preview only. The shop confirms materials, exact colours and size in its quote.'.tr,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ]),
@@ -297,11 +310,11 @@ class MyDesignsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text('Delete “${d.name}”?'),
-        content: const Text('Requests already sent keep their copy.'),
+        title: Text('Delete “{dName}”?'.trf({'dName': d.name})),
+        content: Text('Requests already sent keep their copy.'.tr),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Keep')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Keep'.tr)),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Delete'.tr)),
         ],
       ),
     );
@@ -317,13 +330,13 @@ class MyDesignsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
     appBar: AppBar(
-      title: const Text('My designs'),
-      actions: [TextButton(onPressed: () => context.push('/custom-orders'), child: const Text('Requests'))],
+      title: Text('My designs'.tr),
+      actions: [TextButton(onPressed: () => context.push('/custom-orders'), child: Text('Requests'.tr))],
     ),
     floatingActionButton: FloatingActionButton.extended(
       onPressed: () => context.push('/designer'),
       icon: const Icon(Icons.add),
-      label: const Text('New design'),
+      label: Text('New design'.tr),
     ),
     body: AsyncBody(
       value: ref.watch(myDesignsProvider),
@@ -331,14 +344,14 @@ class MyDesignsScreen extends ConsumerWidget {
       builder: (designs) => designs.isEmpty
           ? EmptyState(
               icon: Icons.palette_outlined,
-              title: 'No designs yet',
-              message: 'Create a kite in the designer and save it here.',
-              action: FilledButton(onPressed: () => context.push('/designer'), child: const Text('Open the designer')),
+              title: 'No designs yet'.tr,
+              message: 'Create a kite in the designer and save it here.'.tr,
+              action: FilledButton(onPressed: () => context.push('/designer'), child: Text('Open the designer'.tr)),
             )
           : RefreshIndicator(
               onRefresh: () => ref.refresh(myDesignsProvider.future),
               child: GridView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 96),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 220,
                   mainAxisSpacing: 12,
@@ -366,17 +379,17 @@ class MyDesignsScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
-                            Text(kiteShapes[d.design.shape] ?? '', style: Theme.of(context).textTheme.bodySmall),
+                            Text(kiteShapes[d.design.shape]?.tr ?? '', style: Theme.of(context).textTheme.bodySmall),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextButton(
                                     onPressed: () => context.push('/custom-orders/new?design=${d.id}'),
-                                    child: const Text('Get quote'),
+                                    child: Text('Get quote'.tr),
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: 'Delete',
+                                  tooltip: 'Delete'.tr,
                                   icon: const Icon(Icons.delete_outline),
                                   onPressed: () => _delete(context, ref, d),
                                 ),
@@ -430,7 +443,7 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
 
   Future<void> _send() async {
     if (!_form.currentState!.validate() || _designId == null || _shopId == null) {
-      if (_shopId == null) showToast(context, 'Choose a shop.', kind: ToastKind.error);
+      if (_shopId == null) showToast(context, 'Choose a shop.'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _busy = true);
@@ -444,7 +457,7 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
         if (_deadline != null) 'deadline': _deadline!.toUtc().toIso8601String(),
       });
       if (!mounted) return;
-      showToast(context, 'Request sent. The shop will reply with a quote or a question.', kind: ToastKind.success);
+      showToast(context, 'Request sent. The shop will reply with a quote or a question.'.tr, kind: ToastKind.success);
       context.pushReplacement('/custom-orders/${r.id}');
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.fieldErrors.values.firstOrNull ?? e.message, kind: ToastKind.error);
@@ -455,7 +468,7 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Request a quote')),
+    appBar: AppBar(title: Text('Request a quote'.tr)),
     body: AsyncBody(
       value: ref.watch(_requestSetupProvider),
       onRetry: () => ref.invalidate(_requestSetupProvider),
@@ -463,16 +476,16 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
         if (setup.designs.isEmpty) {
           return EmptyState(
             icon: Icons.palette_outlined,
-            title: 'Save a design first',
-            message: 'Create your kite in the designer, then come back here.',
-            action: FilledButton(onPressed: () => context.push('/designer'), child: const Text('Open the designer')),
+            title: 'Save a design first'.tr,
+            message: 'Create your kite in the designer, then come back here.'.tr,
+            action: FilledButton(onPressed: () => context.push('/designer'), child: Text('Open the designer'.tr)),
           );
         }
         if (setup.shops.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.storefront_outlined,
-            title: 'No shops are taking custom orders',
-            message: 'Please check again soon.',
+            title: 'No shops are taking custom orders'.tr,
+            message: 'Please check again soon.'.tr,
           );
         }
         _designId ??= setup.designs.any((d) => d.id == widget.designId) ? widget.designId : setup.designs.first.id;
@@ -486,12 +499,12 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _designId,
-                decoration: const InputDecoration(labelText: 'Design'),
+                decoration: InputDecoration(labelText: 'Design'.tr),
                 items: [for (final d in setup.designs) DropdownMenuItem(value: d.id, child: Text(d.name))],
                 onChanged: (v) => setState(() => _designId = v),
               ),
               const SizedBox(height: 16),
-              Text('Choose a shop', style: Theme.of(context).textTheme.titleMedium),
+              Text('Choose a shop'.tr, style: Theme.of(context).textTheme.titleMedium),
               RadioGroup<String>(
                 groupValue: _shopId,
                 onChanged: (v) => setState(() => _shopId = v),
@@ -519,25 +532,27 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
               TextFormField(
                 controller: _qty,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Quantity'),
+                decoration: InputDecoration(labelText: 'Quantity'.tr),
                 validator: (v) {
                   final n = int.tryParse(v ?? '');
-                  return n == null || n < 1 || n > 1000 ? 'Enter 1 to 1000' : null;
+                  return n == null || n < 1 || n > 1000 ? 'Enter 1 to 1000'.tr : null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _budget,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Budget for all, Rs (optional)'),
+                decoration: InputDecoration(labelText: 'Budget for all, Rs (optional)'.tr),
                 validator: (v) =>
-                    v == null || v.trim().isEmpty || int.tryParse(v.trim()) != null ? null : 'Numbers only',
+                    v == null || v.trim().isEmpty || int.tryParse(v.trim()) != null ? null : 'Numbers only'.tr,
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_outlined),
                 label: Text(
-                  _deadline == null ? 'Needed by (optional)' : 'Needed by ${formatWhen(_deadline!).split(',').first}',
+                  _deadline == null
+                      ? 'Needed by (optional)'.tr
+                      : 'Needed by {first}'.trf({'first': formatWhen(_deadline!).split(',').first}),
                 ),
                 onPressed: () async {
                   final now = DateTime.now();
@@ -554,20 +569,21 @@ class _RequestQuoteScreenState extends ConsumerState<RequestQuoteScreen> {
                 controller: _details,
                 maxLines: 5,
                 maxLength: 2000,
-                decoration: const InputDecoration(
-                  labelText: 'Details for the shop',
-                  hintText: 'Material, exact size, occasion, anything the shop should know.',
+                decoration: InputDecoration(
+                  labelText: 'Details for the shop'.tr,
+                  hintText: 'Material, exact size, occasion, anything the shop should know.'.tr,
                   alignLabelWithHint: true,
                 ),
                 validator: (v) =>
-                    (v ?? '').trim().length < 10 ? 'Describe what you need (at least 10 characters)' : null,
+                    (v ?? '').trim().length < 10 ? 'Describe what you need (at least 10 characters)'.tr : null,
               ),
               Text(
-                'Shops make kites with paper and plain cotton string only. Requests for unsafe string or materials are refused.',
+                'Shops make kites with paper and plain cotton string only. Requests for unsafe string or materials are refused.'
+                    .tr,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              LoadingButton(label: 'Send request', loading: _busy, onPressed: _send),
+              LoadingButton(label: 'Send request'.tr, loading: _busy, onPressed: _send),
             ],
           ),
         );
@@ -585,7 +601,7 @@ class CustomOrdersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(designerRepositoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Custom orders')),
+      appBar: AppBar(title: Text('Custom orders'.tr)),
       body: PagedView<CustomOrderData>(
         fetch: (page) => repo.requests(page: page),
         itemBuilder: (_, r) => Card(
@@ -596,7 +612,7 @@ class CustomOrdersScreen extends ConsumerWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${r.shopName} · ${r.quantity} pcs'),
+                Text('{shopName} · {quantity} pcs'.trf({'shopName': r.shopName, 'quantity': r.quantity})),
                 const SizedBox(height: 4),
                 StatusPill(r.statusLabel, _statusColor(r)),
               ],
@@ -609,9 +625,9 @@ class CustomOrdersScreen extends ConsumerWidget {
         ),
         empty: EmptyState(
           icon: Icons.design_services_outlined,
-          title: 'No requests yet',
-          message: 'Design a kite, then ask a shop to make it.',
-          action: FilledButton(onPressed: () => context.push('/designer'), child: const Text('Open the designer')),
+          title: 'No requests yet'.tr,
+          message: 'Design a kite, then ask a shop to make it.'.tr,
+          action: FilledButton(onPressed: () => context.push('/designer'), child: Text('Open the designer'.tr)),
         ),
       ),
     );
@@ -656,8 +672,8 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
         builder: (c) => AlertDialog(
           title: Text(title),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('No')),
-            TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Yes')),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text('No'.tr)),
+            TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Yes'.tr)),
           ],
         ),
       ) ==
@@ -671,7 +687,11 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
       builder: (_) => _AcceptSheet(r: r),
     );
     if (orderNumber == null || !mounted) return;
-    showToast(context, 'Quote accepted. Order $orderNumber is placed.', kind: ToastKind.success);
+    showToast(
+      context,
+      'Quote accepted. Order {orderNumber} is placed.'.trf({'orderNumber': orderNumber}),
+      kind: ToastKind.success,
+    );
     ref.invalidate(customOrderProvider(widget.id));
   }
 
@@ -679,7 +699,7 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
   Widget build(BuildContext context) {
     final repo = ref.read(designerRepositoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Custom order')),
+      appBar: AppBar(title: Text('Custom order'.tr)),
       body: AsyncBody(
         value: ref.watch(customOrderProvider(widget.id)),
         onRetry: () => ref.invalidate(customOrderProvider(widget.id)),
@@ -700,7 +720,14 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(r.designName, style: theme.textTheme.titleLarge),
-                          Text('${r.shopName} · ${r.quantity} pcs · ${r.number}', style: theme.textTheme.bodySmall),
+                          Text(
+                            '{shopName} · {quantity} pcs · {number}'.trf({
+                              'shopName': r.shopName,
+                              'quantity': r.quantity,
+                              'number': r.number,
+                            }),
+                            style: theme.textTheme.bodySmall,
+                          ),
                           const SizedBox(height: 6),
                           StatusPill(r.statusLabel, _statusColor(r)),
                         ],
@@ -713,8 +740,8 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                   Card(
                     child: ListTile(
                       leading: const Icon(Icons.receipt_long_outlined),
-                      title: Text('Order ${r.orderNumber}'),
-                      subtitle: const Text('Track it like any other order'),
+                      title: Text('Order {orderNumber}'.trf({'orderNumber': r.orderNumber})),
+                      subtitle: Text('Track it like any other order'.tr),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/orders/${r.orderNumber}'),
                     ),
@@ -727,30 +754,41 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Quote', style: theme.textTheme.titleMedium),
+                          Text('Quote'.tr, style: theme.textTheme.titleMedium),
                           Text(formatPKR(r.quotePrice!), style: theme.textTheme.headlineSmall),
-                          Text('For ${r.quantity} pcs, plus delivery · ready in ${r.quoteDays} days'),
+                          Text(
+                            'For {quantity} pcs, plus delivery · ready in {quoteDays} days'.trf({
+                              'quantity': r.quantity,
+                              'quoteDays': r.quoteDays,
+                            }),
+                          ),
                           if (r.quoteNote != null)
                             Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.quoteNote!)),
                           const SizedBox(height: 6),
                           Text(
                             r.quoteExpired
-                                ? 'This quote has expired.'
-                                : 'Valid until ${formatWhen(r.quoteValidUntil!)}',
+                                ? 'This quote has expired.'.tr
+                                : 'Valid until {quoteValidUntil}'.trf({
+                                    'quoteValidUntil': formatWhen(r.quoteValidUntil!),
+                                  }),
                             style: theme.textTheme.bodySmall,
                           ),
                           if (r.canAccept) ...[
                             const SizedBox(height: 10),
-                            LoadingButton(label: 'Accept and place order', loading: _busy, onPressed: () => _accept(r)),
+                            LoadingButton(
+                              label: 'Accept and place order'.tr,
+                              loading: _busy,
+                              onPressed: () => _accept(r),
+                            ),
                             TextButton(
                               onPressed: _busy
                                   ? null
                                   : () async {
-                                      if (await _confirm('Decline this quote?')) {
-                                        await _run(() => repo.command(r.id, 'decline'), 'Quote declined.');
+                                      if (await _confirm('Decline this quote?'.tr)) {
+                                        await _run(() => repo.command(r.id, 'decline'), 'Quote declined.'.tr);
                                       }
                                     },
-                              child: const Text('Decline quote'),
+                              child: Text('Decline quote'.tr),
                             ),
                           ],
                         ],
@@ -758,19 +796,20 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                     ),
                   ),
                 if (r.status == 'CLARIFICATION_NEEDED')
-                  const Card(
+                  Card(
                     child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Text('The shop asked a question. Reply below so they can quote.'),
+                      padding: const EdgeInsets.all(12),
+                      child: Text('The shop asked a question. Reply below so they can quote.'.tr),
                     ),
                   ),
                 const SizedBox(height: 12),
-                Text('Details', style: theme.textTheme.titleMedium),
+                Text('Details'.tr, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text(r.requirements),
-                if (r.budget != null) Text('Budget: ${formatPKR(r.budget!)}', style: theme.textTheme.bodySmall),
+                if (r.budget != null)
+                  Text('Budget: {budget}'.trf({'budget': formatPKR(r.budget!)}), style: theme.textTheme.bodySmall),
                 const SizedBox(height: 16),
-                Text('Conversation', style: theme.textTheme.titleMedium),
+                Text('Conversation'.tr, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
                 for (final m in r.messages)
                   m.role == 'system'
@@ -779,7 +818,9 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                           child: Text(m.body, textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
                         )
                       : Align(
-                          alignment: m.role == 'customer' ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: m.role == 'customer'
+                              ? AlignmentDirectional.centerEnd
+                              : AlignmentDirectional.centerStart,
                           child: Container(
                             constraints: const BoxConstraints(maxWidth: 300),
                             margin: const EdgeInsets.symmetric(vertical: 4),
@@ -794,7 +835,7 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${m.role == 'seller' ? r.shopName : 'You'} · ${formatWhen(m.at)}',
+                                  '${m.role == 'seller' ? r.shopName : 'You'.tr} · ${formatWhen(m.at)}',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: m.role == 'customer'
                                         ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
@@ -817,9 +858,9 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                     minLines: 1,
                     maxLength: 2000,
                     decoration: InputDecoration(
-                      hintText: 'Message the shop',
+                      hintText: 'Message the shop'.tr,
                       suffixIcon: IconButton(
-                        tooltip: 'Send',
+                        tooltip: 'Send'.tr,
                         icon: const Icon(Icons.send),
                         onPressed: _busy
                             ? null
@@ -829,7 +870,7 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                                 _run(() async {
                                   await repo.message(r.id, text);
                                   _msg.clear();
-                                }, 'Message sent.');
+                                }, 'Message sent.'.tr);
                               },
                       ),
                     ),
@@ -838,11 +879,11 @@ class _CustomOrderScreenState extends ConsumerState<CustomOrderScreen> {
                     onPressed: _busy
                         ? null
                         : () async {
-                            if (await _confirm('Cancel this request?')) {
-                              await _run(() => repo.command(r.id, 'cancel'), 'Request cancelled.');
+                            if (await _confirm('Cancel this request?'.tr)) {
+                              await _run(() => repo.command(r.id, 'cancel'), 'Request cancelled.'.tr);
                             }
                           },
-                    child: const Text('Cancel request'),
+                    child: Text('Cancel request'.tr),
                   ),
                 ],
               ],
@@ -881,7 +922,7 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
+    padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
     child: AsyncBody(
       value: ref.watch(_acceptSetupProvider),
       onRetry: () => ref.invalidate(_acceptSetupProvider),
@@ -896,9 +937,9 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
         return ListView(
           shrinkWrap: true,
           children: [
-            Text('Accept and place the order', style: Theme.of(context).textTheme.titleLarge),
+            Text('Accept and place the order'.tr, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            Text('Deliver to', style: Theme.of(context).textTheme.titleSmall),
+            Text('Deliver to'.tr, style: Theme.of(context).textTheme.titleSmall),
             RadioGroup<String>(
               groupValue: _address,
               onChanged: (v) => setState(() => _address = v),
@@ -916,7 +957,7 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('Add an address'),
+              label: Text('Add an address'.tr),
               onPressed: () async {
                 final a = await showModalBottomSheet<AddressData>(
                   context: context,
@@ -932,7 +973,7 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
                 }
               },
             ),
-            Text('Delivery', style: Theme.of(context).textTheme.titleSmall),
+            Text('Delivery'.tr, style: Theme.of(context).textTheme.titleSmall),
             RadioGroup<String>(
               groupValue: _delivery,
               onChanged: (v) => setState(() => _delivery = v),
@@ -948,7 +989,7 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
                 ],
               ),
             ),
-            Text('Payment', style: Theme.of(context).textTheme.titleSmall),
+            Text('Payment'.tr, style: Theme.of(context).textTheme.titleSmall),
             RadioGroup<String>(
               groupValue: _payment,
               onChanged: (v) => setState(() => _payment = v),
@@ -965,11 +1006,16 @@ class _AcceptSheetState extends ConsumerState<_AcceptSheet> {
               ),
             ),
             const Divider(),
-            Text('Quote ${formatPKR(price)} + delivery ${fee == 0 ? 'free' : formatPKR(fee)}'),
-            Text('Total ${formatPKR(price + fee)}', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Quote {price} + delivery {fee}'.trf({
+                'price': formatPKR(price),
+                'fee': fee == 0 ? 'free' : formatPKR(fee),
+              }),
+            ),
+            Text('Total {fee}'.trf({'fee': formatPKR(price + fee)}), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
             LoadingButton(
-              label: 'Accept quote and place order',
+              label: 'Accept quote and place order'.tr,
               loading: _busy,
               onPressed: _address == null || _delivery == null || _payment == null
                   ? null

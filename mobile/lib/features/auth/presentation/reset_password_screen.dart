@@ -7,6 +7,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key, required this.email, required this.code});
@@ -37,7 +38,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     try {
       await ref.read(authControllerProvider.notifier).resetPassword(widget.email, widget.code, _password.text);
       if (!mounted) return;
-      showToast(context, 'Password updated. Sign in with your new password.', kind: ToastKind.success);
+      showToast(context, 'Password updated. Sign in with your new password.'.tr, kind: ToastKind.success);
       context.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -51,8 +52,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) => AuthScaffold(
-    title: 'Choose a new password',
-    subtitle: 'Use at least 8 characters with a letter and a number. You will be signed out on other devices.',
+    title: 'Choose a new password'.tr,
+    subtitle: 'Use at least 8 characters with a letter and a number. You will be signed out on other devices.'.tr,
     child: Form(
       key: _form,
       child: Column(
@@ -60,7 +61,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         children: [
           PasswordField(
             controller: _password,
-            label: 'New password',
+            label: 'New password'.tr,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.newPassword],
             validator: Validators.password,
@@ -68,13 +69,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           const SizedBox(height: 16),
           PasswordField(
             controller: _confirm,
-            label: 'Confirm new password',
+            label: 'Confirm new password'.tr,
             autofillHints: const [AutofillHints.newPassword],
             validator: Validators.confirm(() => _password.text),
             onSubmitted: (_) => _submit(),
           ),
           const SizedBox(height: 24),
-          LoadingButton(label: 'Update password', loading: _loading, onPressed: _submit),
+          LoadingButton(label: 'Update password'.tr, loading: _loading, onPressed: _submit),
         ],
       ),
     ),

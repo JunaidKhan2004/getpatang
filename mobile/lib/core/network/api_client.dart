@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/env.dart';
 import '../storage/token_storage.dart';
+import '../i18n/i18n.dart';
 
 /// Error shown to users. Never contains raw technical details.
 class ApiException implements Exception {
@@ -27,19 +28,20 @@ class ApiException implements Exception {
         }
       }
       return ApiException(
-        '${err['message'] ?? 'Something went wrong. Please try again.'}',
+        '${err['message'] ?? 'Something went wrong. Please try again.'.tr}',
         code: err['code'] as String?,
         statusCode: e.response?.statusCode,
         fieldErrors: fields,
       );
     }
     return switch (e.type) {
-      DioExceptionType.connectionTimeout || DioExceptionType.receiveTimeout || DioExceptionType.sendTimeout =>
-        const ApiException('The connection timed out. Check your internet and try again.'),
-      DioExceptionType.connectionError => const ApiException(
-        'Could not reach the server. Check your internet connection.',
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.sendTimeout => ApiException('The connection timed out. Check your internet and try again.'.tr),
+      DioExceptionType.connectionError => ApiException(
+        'Could not reach the server. Check your internet connection.'.tr,
       ),
-      _ => const ApiException('Something went wrong. Please try again.'),
+      _ => ApiException('Something went wrong. Please try again.'.tr),
     };
   }
 
@@ -64,6 +66,7 @@ class ApiClient {
     dio.interceptors.add(
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
+          options.headers['Accept-Language'] = AppLang.code;
           final tokens = await _tokens.read();
           if (tokens != null && options.extra['skipAuth'] != true) {
             options.headers['Authorization'] = 'Bearer ${tokens.accessToken}';

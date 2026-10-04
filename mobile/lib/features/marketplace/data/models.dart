@@ -1,10 +1,12 @@
 /// Marketplace models. Mirror backend/src/modules/catalog, shopping and orders responses.
 library;
 
+import '../../../core/i18n/i18n.dart';
+
 /// "Rs 1,250" — same grouping as the website (en-PK).
 String formatPKR(num n) {
   final digits = n.round().abs().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
-  return 'Rs ${n < 0 ? '-' : ''}$digits';
+  return 'Rs {amount}'.trf({'amount': '${n < 0 ? '-' : ''}$digits'});
 }
 
 class ImageRef {
@@ -446,7 +448,7 @@ class OrderSummaryData {
       j['total'] as int,
       DateTime.parse(j['createdAt'] as String),
       (j['shop'] as Map)['name'] as String,
-      extra > 0 ? '$items and $extra more' : items,
+      extra > 0 ? '{items} and {extra} more'.trf({'items': items, 'extra': extra}) : items,
     );
   }
 }
@@ -512,8 +514,16 @@ class OrderDetailData {
       shippingFee: j['shippingFee'] as int,
       discount: j['discount'] as int,
       total: j['total'] as int,
-      address:
-          '${a['fullName']}\n${[a['line1'], a['line2'], a['city'], a['postalCode']].where((s) => s != null && '$s'.isNotEmpty).join(', ')}\n${a['phone']}',
+      address: '{fullName}\n{join}\n{phone}'.trf({
+        'fullName': a['fullName'],
+        'join': [
+          a['line1'],
+          a['line2'],
+          a['city'],
+          a['postalCode'],
+        ].where((s) => s != null && '$s'.isNotEmpty).join(', '),
+        'phone': a['phone'],
+      }),
       shopName: (j['shop'] as Map)['name'] as String,
       shopPhone: (j['shop'] as Map)['phone'] as String?,
       shopEmail: (j['shop'] as Map)['email'] as String?,

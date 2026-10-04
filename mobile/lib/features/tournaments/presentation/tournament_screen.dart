@@ -12,6 +12,7 @@ import '../../marketplace/widgets/market_widgets.dart';
 import '../data/tournament_models.dart';
 import '../data/tournaments_repository.dart';
 import 'tournaments_tab.dart';
+import '../../../core/i18n/i18n.dart';
 
 class TournamentScreen extends ConsumerWidget {
   const TournamentScreen({super.key, required this.slug});
@@ -26,14 +27,14 @@ class TournamentScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(t.card.name, overflow: TextOverflow.ellipsis),
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(text: 'Overview'),
-              Tab(text: 'Players'),
-              Tab(text: 'Bracket'),
-              Tab(text: 'Rules'),
+              Tab(text: 'Overview'.tr),
+              Tab(text: 'Players'.tr),
+              Tab(text: 'Bracket'.tr),
+              Tab(text: 'Rules'.tr),
             ],
           ),
         ),
@@ -77,7 +78,7 @@ class _Overview extends ConsumerWidget {
                     Text(c.name, style: theme.textTheme.headlineSmall?.copyWith(color: AppColors.white)),
                     const SizedBox(height: 6),
                     Text(
-                      'Organised by ${c.organizerName}',
+                      'Organised by {organizerName}'.trf({'organizerName': c.organizerName}),
                       style: theme.textTheme.bodySmall?.copyWith(color: AppColors.maroon100),
                     ),
                     if (t.championName != null) ...[
@@ -87,7 +88,7 @@ class _Overview extends ConsumerWidget {
                           const Icon(Icons.emoji_events, color: AppColors.white, size: 20),
                           const SizedBox(width: 6),
                           Text(
-                            'Champion: ${t.championName}',
+                            'Champion: {championName}'.trf({'championName': t.championName}),
                             style: theme.textTheme.titleMedium?.copyWith(color: AppColors.white),
                           ),
                         ],
@@ -106,27 +107,41 @@ class _Overview extends ConsumerWidget {
                 if (t.cancelReason != null) ...[
                   Card(
                     color: AppColors.danger.withValues(alpha: 0.08),
-                    child: Padding(padding: const EdgeInsets.all(12), child: Text('Cancelled: ${t.cancelReason}')),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text('Cancelled: {cancelReason}'.trf({'cancelReason': t.cancelReason})),
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
                 _RegistrationCard(t: t),
                 const SizedBox(height: 16),
-                _fact(context, Icons.event_outlined, 'Starts', formatWhen(c.startsAt)),
-                _fact(context, Icons.how_to_reg_outlined, 'Registration closes', formatWhen(c.registrationClosesAt)),
-                _fact(context, Icons.place_outlined, 'Venue', '${c.venue}, ${c.city}'),
+                _fact(context, Icons.event_outlined, 'Starts'.tr, formatWhen(c.startsAt)),
+                _fact(context, Icons.how_to_reg_outlined, 'Registration closes'.tr, formatWhen(c.registrationClosesAt)),
+                _fact(context, Icons.place_outlined, 'Venue'.tr, '${c.venue}, ${c.city}'),
                 _fact(
                   context,
                   Icons.groups_outlined,
-                  'Players',
-                  '${c.registeredCount} of ${c.maxParticipants}${t.waitlistedCount > 0 ? ' · ${t.waitlistedCount} waiting' : ''}',
+                  'Players'.tr,
+                  '{registeredCount} of {maxParticipants}{waiting}'.trf({
+                    'registeredCount': c.registeredCount,
+                    'maxParticipants': c.maxParticipants,
+                    'waiting': t.waitlistedCount > 0
+                        ? ' · {waitlisted} waiting'.trf({'waitlisted': t.waitlistedCount})
+                        : '',
+                  }),
                 ),
-                _fact(context, Icons.payments_outlined, 'Entry fee', c.entryFee == 0 ? 'Free' : formatPKR(c.entryFee)),
-                if (t.prizeInfo != null) _fact(context, Icons.emoji_events_outlined, 'Prize', t.prizeInfo!),
+                _fact(
+                  context,
+                  Icons.payments_outlined,
+                  'Entry fee'.tr,
+                  c.entryFee == 0 ? 'Free'.tr : formatPKR(c.entryFee),
+                ),
+                if (t.prizeInfo != null) _fact(context, Icons.emoji_events_outlined, 'Prize'.tr, t.prizeInfo!),
                 if (t.organizerContact != null)
-                  _fact(context, Icons.call_outlined, 'Organizer contact', t.organizerContact!),
+                  _fact(context, Icons.call_outlined, 'Organizer contact'.tr, t.organizerContact!),
                 const SizedBox(height: 12),
-                Text('About', style: theme.textTheme.titleLarge),
+                Text('About'.tr, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(t.description),
               ],
@@ -185,19 +200,26 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
         showDragHandle: true,
         builder: (c) => StatefulBuilder(
           builder: (c, set) => Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Register for ${t.card.name}', style: Theme.of(c).textTheme.titleLarge),
+                Text('Register for {cardName}'.trf({'cardName': t.card.name}), style: Theme.of(c).textTheme.titleLarge),
                 const SizedBox(height: 10),
-                Text('Players must be at least ${t.card.minAge}. Approved materials: ${t.approvedMaterials}'),
+                Text(
+                  'Players must be at least {minAge}. Approved materials: {approvedMaterials}'.trf({
+                    'minAge': t.card.minAge,
+                    'approvedMaterials': t.approvedMaterials,
+                  }),
+                ),
                 if (askDob) ...[
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.cake_outlined),
-                    label: Text(dob == null ? 'Choose your date of birth' : '${dob!.day}/${dob!.month}/${dob!.year}'),
+                    label: Text(
+                      dob == null ? 'Choose your date of birth'.tr : '${dob!.day}/${dob!.month}/${dob!.year}',
+                    ),
                     onPressed: () async {
                       final picked = await showDatePicker(
                         context: c,
@@ -213,13 +235,13 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
                   contentPadding: EdgeInsets.zero,
                   value: accepted,
                   onChanged: (v) => set(() => accepted = v ?? false),
-                  title: const Text(
-                    'I have read the rules and safety requirements, and I will use only the approved materials.',
+                  title: Text(
+                    'I have read the rules and safety requirements, and I will use only the approved materials.'.tr,
                   ),
                 ),
                 FilledButton(
                   onPressed: accepted && (!askDob || dob != null) ? () => Navigator.pop(c, true) : null,
-                  child: const Text('Confirm registration'),
+                  child: Text('Confirm registration'.tr),
                 ),
               ],
             ),
@@ -252,7 +274,7 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
     try {
       await ref.read(tournamentsRepositoryProvider).withdraw(widget.t.card.slug);
       ref.invalidate(tournamentProvider(widget.t.card.slug));
-      if (mounted) showToast(context, 'You have withdrawn.');
+      if (mounted) showToast(context, 'You have withdrawn.'.tr);
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
     } finally {
@@ -272,10 +294,10 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Your registration', style: theme.textTheme.titleMedium),
+              Text('Your registration'.tr, style: theme.textTheme.titleMedium),
               const SizedBox(height: 6),
               StatusPill(
-                participantStatusLabels[status] ?? status,
+                participantStatusLabels[status]?.tr ?? status,
                 status == 'CONFIRMED'
                     ? AppColors.success
                     : (status == 'PENDING' || status == 'WAITLISTED')
@@ -285,7 +307,7 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
               if (t.myPlacement != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text('Final result: ${placementLabel(t.myPlacement)}'),
+                  child: Text('Final result: {myPlacement}'.trf({'myPlacement': placementLabel(t.myPlacement)})),
                 ),
               if (t.myStatusNote != null)
                 Padding(
@@ -294,7 +316,7 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
                 ),
               if (t.card.status == 'PUBLISHED' && const ['PENDING', 'CONFIRMED', 'WAITLISTED'].contains(status)) ...[
                 const SizedBox(height: 10),
-                OutlinedButton(onPressed: _busy ? null : _withdraw, child: const Text('Withdraw')),
+                OutlinedButton(onPressed: _busy ? null : _withdraw, child: Text('Withdraw'.tr)),
               ],
             ],
           ),
@@ -305,13 +327,17 @@ class _RegistrationCardState extends ConsumerState<_RegistrationCard> {
       return Card(
         child: ListTile(
           leading: const Icon(Icons.lock_clock_outlined),
-          title: const Text('Registration'),
-          subtitle: Text(t.card.status == 'PUBLISHED' ? 'Not open right now.' : 'Registration is closed.'),
+          title: Text('Registration'.tr),
+          subtitle: Text(t.card.status == 'PUBLISHED' ? 'Not open right now.'.tr : 'Registration is closed.'.tr),
         ),
       );
     }
     final full = t.card.registeredCount >= t.card.maxParticipants;
-    return LoadingButton(label: full ? 'Join the waiting list' : 'Register now', loading: _busy, onPressed: _register);
+    return LoadingButton(
+      label: full ? 'Join the waiting list'.tr : 'Register now'.tr,
+      loading: _busy,
+      onPressed: _register,
+    );
   }
 }
 
@@ -347,23 +373,27 @@ class _Rules extends StatelessWidget {
                   children: [
                     Icon(Icons.verified_user_outlined, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
-                    Text('Safety and eligibility', style: theme.textTheme.titleMedium),
+                    Text('Safety and eligibility'.tr, style: theme.textTheme.titleMedium),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(t.safetyRules),
                 const SizedBox(height: 8),
-                Text('Approved materials: ${t.approvedMaterials}'),
-                Text('Minimum age: ${t.card.minAge}'),
-                if (t.venueRestrictions != null) Text('Venue: ${t.venueRestrictions}'),
+                Text('Approved materials: {approvedMaterials}'.trf({'approvedMaterials': t.approvedMaterials})),
+                Text('Minimum age: {minAge}'.trf({'minAge': t.card.minAge})),
+                if (t.venueRestrictions != null)
+                  Text('Venue: {venueRestrictions}'.trf({'venueRestrictions': t.venueRestrictions})),
                 if (t.permitReference != null)
-                  Text('Local permission: ${t.permitReference}', style: theme.textTheme.bodySmall),
+                  Text(
+                    'Local permission: {permitReference}'.trf({'permitReference': t.permitReference}),
+                    style: theme.textTheme.bodySmall,
+                  ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
-        section('Competition rules', t.rules),
+        section('Competition rules'.tr, t.rules),
       ],
     );
   }
@@ -379,10 +409,10 @@ class _Players extends ConsumerWidget {
     onRetry: () => ref.invalidate(participantsProvider(slug)),
     builder: (list) {
       if (list.isEmpty) {
-        return const EmptyState(
+        return EmptyState(
           icon: Icons.groups_outlined,
-          title: 'No confirmed players yet',
-          message: 'Confirmed players appear here.',
+          title: 'No confirmed players yet'.tr,
+          message: 'Confirmed players appear here.'.tr,
         );
       }
       return ListView.separated(
@@ -395,7 +425,12 @@ class _Players extends ConsumerWidget {
             contentPadding: EdgeInsets.zero,
             leading: CircleAvatar(child: Text(p.name[0].toUpperCase())),
             title: Text(p.name),
-            subtitle: Text([p.city, if (p.seed != null) 'Seed ${p.seed}'].whereType<String>().join(' · ')),
+            subtitle: Text(
+              [
+                p.city,
+                if (p.seed != null) 'Seed {seed}'.trf({'seed': p.seed}),
+              ].whereType<String>().join(' · '),
+            ),
             trailing: p.placement != null ? Text(placementLabel(p.placement)) : null,
             onTap: () => context.push('/player/${p.userId}'),
           );
@@ -415,16 +450,16 @@ class _Bracket extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Dispute this match'),
+        title: Text('Dispute this match'.tr),
         content: TextField(
           controller: reason,
           maxLines: 3,
           maxLength: 1000,
-          decoration: const InputDecoration(labelText: 'What went wrong?'),
+          decoration: InputDecoration(labelText: 'What went wrong?'.tr),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Send')),
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text('Cancel'.tr)),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Send'.tr)),
         ],
       ),
     );
@@ -435,7 +470,7 @@ class _Bracket extends ConsumerWidget {
       await ref.read(tournamentsRepositoryProvider).dispute(m.id, text);
       ref.invalidate(bracketProvider(slug));
       if (context.mounted) {
-        showToast(context, 'Dispute sent. A tournament manager will review it.', kind: ToastKind.success);
+        showToast(context, 'Dispute sent. A tournament manager will review it.'.tr, kind: ToastKind.success);
       }
     } on ApiException catch (e) {
       if (context.mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -450,10 +485,10 @@ class _Bracket extends ConsumerWidget {
       onRetry: () => ref.invalidate(bracketProvider(slug)),
       builder: (rounds) {
         if (rounds.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.account_tree_outlined,
-            title: 'No bracket yet',
-            message: 'It appears once the organizer draws it.',
+            title: 'No bracket yet'.tr,
+            message: 'It appears once the organizer draws it.'.tr,
           );
         }
         return RefreshIndicator(
@@ -497,7 +532,7 @@ class _MatchCard extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              p?.name ?? 'To be decided',
+              p?.name ?? 'To be decided'.tr,
               style: TextStyle(
                 fontWeight: won ? FontWeight.w700 : FontWeight.w400,
                 fontStyle: p == null ? FontStyle.italic : null,
@@ -524,13 +559,13 @@ class _MatchCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('Match ${m.matchNumber}', style: theme.textTheme.bodySmall),
+                Text('Match {matchNumber}'.trf({'matchNumber': m.matchNumber}), style: theme.textTheme.bodySmall),
                 const Spacer(),
                 Text(
                   m.isBye
-                      ? 'Bye'
+                      ? 'Bye'.tr
                       : live
-                      ? '● Live'
+                      ? '● Live'.tr
                       : m.status[0] + m.status.substring(1).toLowerCase().replaceAll('_', '-'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: live ? AppColors.danger : null,
@@ -553,8 +588,8 @@ class _MatchCard extends StatelessWidget {
               ),
             if (mine && (m.status == 'LIVE' || m.status == 'COMPLETED') && !m.isBye)
               Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(onPressed: onDispute, child: const Text('Dispute')),
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton(onPressed: onDispute, child: Text('Dispute'.tr)),
               ),
           ],
         ),

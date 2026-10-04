@@ -8,6 +8,7 @@ import '../../core/widgets/feedback.dart';
 import '../auth/application/auth_controller.dart';
 import '../marketplace/data/models.dart' show PageResult;
 import '../marketplace/widgets/market_widgets.dart';
+import '../../core/i18n/i18n.dart';
 
 class NotificationData {
   const NotificationData(this.id, this.category, this.title, this.body, this.link, this.read, this.createdAt);
@@ -138,10 +139,10 @@ const _icons = {
 
 String _ago(DateTime d) {
   final s = DateTime.now().difference(d).inSeconds;
-  if (s < 60) return 'Just now';
-  if (s < 3600) return '${s ~/ 60} min ago';
-  if (s < 86400) return '${s ~/ 3600} h ago';
-  if (s < 172800) return 'Yesterday';
+  if (s < 60) return 'Just now'.tr;
+  if (s < 3600) return '{s} min ago'.trf({'s': s ~/ 60});
+  if (s < 86400) return '{s} h ago'.trf({'s': s ~/ 3600});
+  if (s < 172800) return 'Yesterday'.tr;
   return '${d.day}/${d.month}/${d.year}';
 }
 
@@ -172,10 +173,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final repo = ref.watch(notificationsRepositoryProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text('Notifications'.tr),
         actions: [
           IconButton(
-            tooltip: 'Mark all as read',
+            tooltip: 'Mark all as read'.tr,
             icon: const Icon(Icons.done_all),
             onPressed: () async {
               try {
@@ -188,7 +189,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             },
           ),
           IconButton(
-            tooltip: 'Settings',
+            tooltip: 'Settings'.tr,
             icon: const Icon(Icons.tune),
             onPressed: () => context.push('/notification-settings'),
           ),
@@ -197,17 +198,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
             child: Row(
               children: [
                 ChoiceChip(
-                  label: const Text('All'),
+                  label: Text('All'.tr),
                   selected: !_unread,
                   onSelected: (_) => setState(() => _unread = false),
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Unread'),
+                  label: Text('Unread'.tr),
                   selected: _unread,
                   onSelected: (_) => setState(() => _unread = true),
                 ),
@@ -236,8 +237,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               },
               empty: EmptyState(
                 icon: Icons.notifications_none,
-                title: _unread ? "You're all caught up" : 'No notifications yet',
-                message: 'Order, payment, tournament and community updates will appear here.',
+                title: _unread ? 'You\'re all caught up'.tr : 'No notifications yet'.tr,
+                message: 'Order, payment, tournament and community updates will appear here.'.tr,
               ),
             ),
           ),
@@ -261,7 +262,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Notification settings')),
+    appBar: AppBar(title: Text('Notification settings'.tr)),
     body: AsyncBody(
       value: ref.watch(_prefsProvider),
       onRetry: () => ref.invalidate(_prefsProvider),
@@ -270,14 +271,15 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Choose how we tell you about each kind of update. Security messages, like sign-in codes, are always sent.',
+              'Choose how we tell you about each kind of update. Security messages, like sign-in codes, are always sent.'
+                  .tr,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             for (final c in p.categories)
               Card(
                 margin: const EdgeInsets.only(top: 12),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+                  padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -285,20 +287,20 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                       Text(c.description, style: Theme.of(context).textTheme.bodySmall),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('In the app'),
+                        title: Text('In the app'.tr),
                         value: c.inApp,
                         onChanged: (v) => setLocal(() => c.inApp = v),
                       ),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Email'),
+                        title: Text('Email'.tr),
                         value: c.email,
                         onChanged: (v) => setLocal(() => c.email = v),
                       ),
                       if (p.push)
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Push'),
+                          title: Text('Push'.tr),
                           value: c.push,
                           onChanged: (v) => setLocal(() => c.push = v),
                         ),
@@ -310,19 +312,19 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
-                  'Phone push notifications will be added once they are set up for the app.',
+                  'Phone push notifications will be added once they are set up for the app.'.tr,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             const SizedBox(height: 16),
             LoadingButton(
-              label: 'Save settings',
+              label: 'Save settings'.tr,
               loading: _saving,
               onPressed: () async {
                 setState(() => _saving = true);
                 try {
                   await ref.read(notificationsRepositoryProvider).savePreferences(p.categories);
-                  if (context.mounted) showToast(context, 'Notification settings saved.', kind: ToastKind.success);
+                  if (context.mounted) showToast(context, 'Notification settings saved.'.tr, kind: ToastKind.success);
                 } on ApiException catch (e) {
                   if (context.mounted) showToast(context, e.message, kind: ToastKind.error);
                 } finally {

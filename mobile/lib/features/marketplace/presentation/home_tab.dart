@@ -10,6 +10,7 @@ import '../data/marketplace_repository.dart';
 import '../widgets/market_widgets.dart';
 import 'home_hero.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
@@ -68,8 +69,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                             ),
                           Text(
                             user == null
-                                ? 'Welcome to GetPatang'
-                                : 'Assalam o Alaikum, ${user.profile?.displayName ?? user.fullName}',
+                                ? 'Welcome to GetPatang'.tr
+                                : 'Assalam o Alaikum, {fullName}'.trf({
+                                    'fullName': user.profile?.displayName ?? user.fullName,
+                                  }),
                             style: t.textTheme.titleLarge?.copyWith(color: AppColors.white),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -95,7 +98,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         children: [
                           const Icon(Icons.search, color: AppColors.muted),
                           const SizedBox(width: 10),
-                          Text('Search kites, shops…', style: t.textTheme.bodyMedium?.copyWith(color: AppColors.muted)),
+                          Text(
+                            'Search kites, shops…'.tr,
+                            style: t.textTheme.bodyMedium?.copyWith(color: AppColors.muted),
+                          ),
                         ],
                       ),
                     ),
@@ -108,7 +114,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 data: (cats) => SizedBox(
                   height: 56,
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 4),
                     scrollDirection: Axis.horizontal,
                     itemCount: cats.length,
                     separatorBuilder: (_, _) => const SizedBox(width: 8),
@@ -123,14 +129,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
                 child: Row(
                   children: [
                     Expanded(
                       child: _QuickLink(
                         icon: Icons.celebration_outlined,
-                        title: 'Events',
-                        subtitle: 'Festivals & workshops',
+                        title: 'Events'.tr,
+                        subtitle: 'Festivals & workshops'.tr,
                         onTap: () => context.push('/events'),
                       ),
                     ),
@@ -138,8 +144,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     Expanded(
                       child: _QuickLink(
                         icon: Icons.palette_outlined,
-                        title: 'Design a kite',
-                        subtitle: 'Get a shop quote',
+                        title: 'Design a kite'.tr,
+                        subtitle: 'Get a shop quote'.tr,
                         onTap: () => context.push('/designer'),
                       ),
                     ),
@@ -150,7 +156,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             ...feed.when(
               loading: () => [
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 24, 16, 16),
                   sliver: ProductGridSkeleton(gridDelegate: productGridDelegate(context), count: 4),
                 ),
               ],
@@ -162,7 +168,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               ],
               data: (d) => [
                 if (d.products.isNotEmpty) ...[
-                  _SectionHeader(title: 'Popular right now', onSeeAll: () => context.go('/marketplace?sort=popular')),
+                  _SectionHeader(
+                    title: 'Popular right now'.tr,
+                    onSeeAll: () => context.go('/marketplace?sort=popular'),
+                  ),
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     sliver: SliverGrid.builder(
@@ -173,9 +182,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   ),
                 ],
                 if (d.shops.isNotEmpty) ...[
-                  _SectionHeader(title: 'Popular shops', onSeeAll: () => context.push('/shops')),
+                  _SectionHeader(title: 'Popular shops'.tr, onSeeAll: () => context.push('/shops')),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 24),
                     sliver: SliverList.separated(
                       itemCount: d.shops.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -184,10 +193,13 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   ),
                 ],
                 if (d.products.isEmpty && d.shops.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
-                      child: Padding(padding: EdgeInsets.all(32), child: Text('Shops will appear here as they join.')),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Text('Shops will appear here as they join.'.tr),
+                      ),
                     ),
                   ),
               ],
@@ -206,12 +218,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SliverPadding(
-    padding: const EdgeInsets.fromLTRB(16, 20, 8, 10),
+    padding: const EdgeInsetsDirectional.fromSTEB(16, 20, 8, 10),
     sliver: SliverToBoxAdapter(
       child: Row(
         children: [
           Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge)),
-          TextButton(onPressed: onSeeAll, child: const Text('See all')),
+          TextButton(onPressed: onSeeAll, child: Text('See all'.tr)),
         ],
       ),
     ),

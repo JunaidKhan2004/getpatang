@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import 'kite_mark.dart';
+import '../i18n/i18n.dart';
 
 /// Loading visuals: a flying-kite loader, a small kite spinner and shimmer skeletons.
 /// Animations stop when the phone asks for reduced motion.
@@ -67,7 +68,7 @@ class KiteLoader extends StatelessWidget {
     final tail = onDark ? AppColors.maroon100 : scheme.primary.withValues(alpha: 0.55);
 
     return Semantics(
-      label: label ?? 'Loading',
+      label: label ?? 'Loading'.tr,
       liveRegion: true,
       child: ExcludeSemantics(
         child: Column(
@@ -194,7 +195,7 @@ class KiteSpinner extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = color ?? IconTheme.of(context).color ?? Theme.of(context).colorScheme.primary;
     return Semantics(
-      label: 'Loading',
+      label: 'Loading'.tr,
       child: SizedBox(
         width: size,
         height: size * 1.2,
@@ -231,7 +232,7 @@ class Shimmer extends StatelessWidget {
     final base = dark ? AppColors.darkSurface2 : AppColors.neutral200;
     final highlight = dark ? AppColors.darkBorder : AppColors.neutral50;
     return Semantics(
-      label: 'Loading',
+      label: 'Loading'.tr,
       child: ExcludeSemantics(
         child: _Ticker(
           period: const Duration(milliseconds: 1400),

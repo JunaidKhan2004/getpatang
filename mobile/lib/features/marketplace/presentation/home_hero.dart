@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/kite_mark.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Home header: a dusk sky in the brand maroons with a large patang flying on the right, smaller
 /// kites drifting at different depths, a breathing glow and a staggered reveal of the text.
@@ -96,7 +97,11 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
                 child: AnimatedBuilder(
                   animation: Listenable.merge([_sky, widget.scroll]),
                   builder: (_, _) => CustomPaint(
-                    painter: _SkyPainter(t: _sky.value, scroll: _offset),
+                    painter: _SkyPainter(
+                      t: _sky.value,
+                      scroll: _offset,
+                      rtl: Directionality.of(context) == TextDirection.rtl,
+                    ),
                   ),
                 ),
               ),
@@ -105,13 +110,13 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
             SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 4, 18),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 4, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _rise(0, widget.top),
                     const SizedBox(height: 18),
-                    // Leave the right side to the kite.
+                    // Leave the far side to the kite.
                     FractionallySizedBox(
                       widthFactor: 0.66,
                       child: Column(
@@ -120,7 +125,7 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
                           _rise(
                             1,
                             Text(
-                              'Fly higher with the kite community.',
+                              'Fly higher with the kite community.'.tr,
                               style: t.textTheme.headlineSmall?.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w700,
@@ -132,7 +137,7 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
                           _rise(
                             2,
                             Text(
-                              'Trusted shops · Approved tournaments · Events',
+                              'Trusted shops · Approved tournaments · Events'.tr,
                               style: t.textTheme.bodySmall?.copyWith(color: AppColors.maroon100),
                             ),
                           ),
@@ -140,7 +145,7 @@ class _HomeHeroState extends State<HomeHero> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _rise(3, Padding(padding: const EdgeInsets.only(right: 12), child: widget.search)),
+                    _rise(3, Padding(padding: const EdgeInsetsDirectional.only(end: 12), child: widget.search)),
                   ],
                 ),
               ),
@@ -162,13 +167,21 @@ const _distant = [
 ];
 
 class _SkyPainter extends CustomPainter {
-  _SkyPainter({required this.t, required this.scroll});
+  _SkyPainter({required this.t, required this.scroll, required this.rtl});
   final double t;
   final double scroll;
+
+  /// Urdu: the whole sky is mirrored so the big kite sits on the left, away from the text.
+  final bool rtl;
 
   @override
   void paint(Canvas canvas, Size size) {
     final a = t * 2 * math.pi;
+    if (rtl) {
+      canvas
+        ..translate(size.width, 0)
+        ..scale(-1, 1);
+    }
 
     // Breathing glow behind the big kite.
     final glowCenter = Offset(size.width * 0.86, size.height * 0.42 + scroll * 0.3);
@@ -301,5 +314,5 @@ class _SkyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SkyPainter old) => old.t != t || old.scroll != scroll;
+  bool shouldRepaint(_SkyPainter old) => old.t != t || old.scroll != scroll || old.rtl != rtl;
 }

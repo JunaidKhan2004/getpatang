@@ -6,6 +6,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 /// Cities offered first; the list is a convenience, not a restriction.
 const pakistanCities = [
@@ -68,8 +69,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
   @override
   Widget build(BuildContext context) => AuthScaffold(
     showBack: false,
-    title: 'Set up your profile',
-    subtitle: 'This is how shops, players and the community will see you.',
+    title: 'Set up your profile'.tr,
+    subtitle: 'This is how shops, players and the community will see you.'.tr,
     child: Form(
       key: _form,
       child: Column(
@@ -79,26 +80,26 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
             controller: _displayName,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            validator: (v) => Validators.name(v, 'Display name'),
-            decoration: const InputDecoration(labelText: 'Display name', prefixIcon: Icon(Icons.badge_outlined)),
+            validator: (v) => Validators.name(v, 'Display name'.tr),
+            decoration: InputDecoration(labelText: 'Display name'.tr, prefixIcon: const Icon(Icons.badge_outlined)),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _city,
-            items: [for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c))],
+            items: [for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c.tr))],
             onChanged: (v) => setState(() => _city = v),
-            validator: (v) => v == null ? 'Choose your city' : null,
-            decoration: const InputDecoration(labelText: 'City', prefixIcon: Icon(Icons.location_on_outlined)),
+            validator: (v) => v == null ? 'Choose your city'.tr : null,
+            decoration: InputDecoration(labelText: 'City'.tr, prefixIcon: const Icon(Icons.location_on_outlined)),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _bio,
             maxLines: 3,
             maxLength: 160,
-            decoration: const InputDecoration(labelText: 'Short bio (optional)', alignLabelWithHint: true),
+            decoration: InputDecoration(labelText: 'Short bio (optional)'.tr, alignLabelWithHint: true),
           ),
           const SizedBox(height: 16),
-          LoadingButton(label: 'Continue', loading: _loading, onPressed: _submit),
+          LoadingButton(label: 'Continue'.tr, loading: _loading, onPressed: _submit),
         ],
       ),
     ),

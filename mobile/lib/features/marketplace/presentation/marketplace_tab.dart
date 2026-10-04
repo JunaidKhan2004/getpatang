@@ -8,6 +8,7 @@ import '../../shell/main_shell.dart';
 import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
+import '../../../core/i18n/i18n.dart';
 
 const _sorts = {
   'newest': 'Newest',
@@ -69,11 +70,11 @@ class _MarketplaceTabState extends ConsumerState<MarketplaceTab> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Marketplace'), actions: const [GlobalActions()]),
+      appBar: AppBar(title: Text('Marketplace'.tr), actions: const [GlobalActions()]),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -83,13 +84,13 @@ class _MarketplaceTabState extends ConsumerState<MarketplaceTab> {
                     onSubmitted: (v) =>
                         setState(() => _filters = _filters.copyWith(q: () => v.trim().isEmpty ? null : v.trim())),
                     decoration: InputDecoration(
-                      hintText: 'Search the marketplace',
+                      hintText: 'Search the marketplace'.tr,
                       prefixIcon: const Icon(Icons.search),
                       isDense: true,
                       suffixIcon: _filters.q == null
                           ? null
                           : IconButton(
-                              tooltip: 'Clear search',
+                              tooltip: 'Clear search'.tr,
                               icon: const Icon(Icons.close),
                               onPressed: () {
                                 _search.clear();
@@ -104,7 +105,7 @@ class _MarketplaceTabState extends ConsumerState<MarketplaceTab> {
                   isLabelVisible: _filters.isFiltered,
                   smallSize: 9,
                   child: IconButton.outlined(
-                    tooltip: 'Filter and sort',
+                    tooltip: 'Filter and sort'.tr,
                     onPressed: _openFilters,
                     icon: const Icon(Icons.tune),
                   ),
@@ -120,9 +121,9 @@ class _MarketplaceTabState extends ConsumerState<MarketplaceTab> {
               children: [
                 for (final c in [null, ...flat])
                   Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsetsDirectional.only(end: 8),
                     child: ChoiceChip(
-                      label: Text(c?.name ?? 'All'),
+                      label: Text(c?.name ?? 'All'.tr),
                       selected: _filters.category == c?.slug,
                       onSelected: (_) => setState(() => _filters = _filters.copyWith(category: () => c?.slug)),
                     ),
@@ -136,10 +137,10 @@ class _MarketplaceTabState extends ConsumerState<MarketplaceTab> {
               grid: true,
               fetch: (page) => repo.products(_filters, page: page),
               itemBuilder: (_, p) => ProductTile(product: p),
-              empty: const EmptyState(
+              empty: EmptyState(
                 icon: Icons.search_off,
-                title: 'No products found',
-                message: 'Try another category or remove a filter.',
+                title: 'No products found'.tr,
+                message: 'Try another category or remove a filter.'.tr,
               ),
             ),
           ),
@@ -176,17 +177,17 @@ class _FilterSheetState extends State<_FilterSheet> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
+      padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Sort and filter', style: t.textTheme.titleLarge),
+            Text('Sort and filter'.tr, style: t.textTheme.titleLarge),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _sort,
-              decoration: const InputDecoration(labelText: 'Sort by'),
-              items: [for (final e in _sorts.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+              decoration: InputDecoration(labelText: 'Sort by'.tr),
+              items: [for (final e in _sorts.entries) DropdownMenuItem(value: e.key, child: Text(e.value.tr))],
               onChanged: (v) => setState(() => _sort = v!),
             ),
             const SizedBox(height: 16),
@@ -197,7 +198,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     controller: _min,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(labelText: 'Min price (Rs)'),
+                    decoration: InputDecoration(labelText: 'Min price (Rs)'.tr),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -206,7 +207,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     controller: _max,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(labelText: 'Max price (Rs)'),
+                    decoration: InputDecoration(labelText: 'Max price (Rs)'.tr),
                   ),
                 ),
               ],
@@ -214,21 +215,21 @@ class _FilterSheetState extends State<_FilterSheet> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String?>(
               initialValue: _city,
-              decoration: const InputDecoration(labelText: 'Shop location'),
+              decoration: InputDecoration(labelText: 'Shop location'.tr),
               items: [
-                const DropdownMenuItem(value: null, child: Text('All cities')),
-                for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c)),
+                DropdownMenuItem(value: null, child: Text('All cities'.tr)),
+                for (final c in pakistanCities) DropdownMenuItem(value: c, child: Text(c.tr)),
               ],
               onChanged: (v) => setState(() => _city = v),
             ),
             const SizedBox(height: 16),
-            Text('Rating', style: t.textTheme.titleMedium),
+            Text('Rating'.tr, style: t.textTheme.titleMedium),
             Wrap(
               spacing: 8,
               children: [
                 for (final r in [null, 4, 3])
                   ChoiceChip(
-                    label: Text(r == null ? 'Any' : '$r★ & up'),
+                    label: Text(r == null ? 'Any'.tr : '{r}★ & up'.trf({'r': r})),
                     selected: _minRating == r,
                     onSelected: (_) => setState(() => _minRating = r),
                   ),
@@ -236,7 +237,7 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('In stock only'),
+              title: Text('In stock only'.tr),
               value: _inStock,
               onChanged: (v) => setState(() => _inStock = v),
             ),
@@ -253,7 +254,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   maxPrice: () => int.tryParse(_max.text),
                 ),
               ),
-              child: const Text('Show results'),
+              child: Text('Show results'.tr),
             ),
             TextButton(
               onPressed: () => Navigator.pop(
@@ -267,7 +268,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   maxPrice: () => null,
                 ),
               ),
-              child: const Text('Reset filters'),
+              child: Text('Reset filters'.tr),
             ),
           ],
         ),

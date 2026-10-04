@@ -10,6 +10,7 @@ import '../data/marketplace_repository.dart';
 import '../data/models.dart';
 import '../widgets/market_widgets.dart';
 import 'product_screen.dart' show QuantityStepper;
+import '../../../core/i18n/i18n.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -19,18 +20,18 @@ class CartScreen extends ConsumerWidget {
     final t = Theme.of(context);
     final cart = ref.watch(cartProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Your cart')),
+      appBar: AppBar(title: Text('Your cart'.tr)),
       body: AsyncBody(
         value: cart,
         onRetry: () => ref.invalidate(cartProvider),
         builder: (c) => c.shops.isEmpty && c.savedForLater.isEmpty
             ? EmptyState(
                 icon: Icons.shopping_bag_outlined,
-                title: 'Your cart is empty',
-                message: 'Find kites and accessories from verified shops.',
+                title: 'Your cart is empty'.tr,
+                message: 'Find kites and accessories from verified shops.'.tr,
                 action: FilledButton(
                   onPressed: () => context.go('/marketplace'),
-                  child: const Text('Browse the marketplace'),
+                  child: Text('Browse the marketplace'.tr),
                 ),
               )
             : RefreshIndicator(
@@ -42,7 +43,8 @@ class CartScreen extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          'Your items come from ${c.shops.length} shops, so they arrive as ${c.shops.length} separate orders.',
+                          'Your items come from {shopsLength} shops, so they arrive as {shopsLength2} separate orders.'
+                              .trf({'shopsLength': c.shops.length, 'shopsLength2': c.shops.length}),
                           style: t.textTheme.bodySmall,
                         ),
                       ),
@@ -54,7 +56,10 @@ class CartScreen extends ConsumerWidget {
                     ],
                     if (c.savedForLater.isNotEmpty) ...[
                       const Divider(height: 32),
-                      Text('Saved for later (${c.savedForLater.length})', style: t.textTheme.titleMedium),
+                      Text(
+                        'Saved for later ({savedForLaterLength})'.trf({'savedForLaterLength': c.savedForLater.length}),
+                        style: t.textTheme.titleMedium,
+                      ),
                       const SizedBox(height: 6),
                       for (final line in c.savedForLater) _CartLineTile(line: line),
                     ],
@@ -66,7 +71,7 @@ class CartScreen extends ConsumerWidget {
           ? null
           : SafeArea(
               child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
                 decoration: BoxDecoration(
                   color: t.colorScheme.surface,
                   border: Border(top: BorderSide(color: t.colorScheme.outline)),
@@ -76,7 +81,10 @@ class CartScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        Text('Subtotal (${cart.value!.itemCount} items)', style: t.textTheme.bodyMedium),
+                        Text(
+                          'Subtotal ({itemCount} items)'.trf({'itemCount': cart.value!.itemCount}),
+                          style: t.textTheme.bodyMedium,
+                        ),
                         const Spacer(),
                         Text(formatPKR(cart.value!.subtotal), style: t.textTheme.titleLarge),
                       ],
@@ -85,14 +93,14 @@ class CartScreen extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          'Fix the items marked in red to continue.',
+                          'Fix the items marked in red to continue.'.tr,
                           style: t.textTheme.bodySmall?.copyWith(color: AppColors.danger),
                         ),
                       ),
                     const SizedBox(height: 10),
                     FilledButton(
                       onPressed: cart.value!.canCheckout ? () => context.push('/checkout') : null,
-                      child: const Text('Proceed to checkout'),
+                      child: Text('Proceed to checkout'.tr),
                     ),
                   ],
                 ),
@@ -177,13 +185,13 @@ class _CartLineTileState extends ConsumerState<_CartLineTile> {
                           onPressed: _busy
                               ? null
                               : () => _run((r) => r.updateCartItem(l.id, savedForLater: !l.savedForLater)),
-                          child: Text(l.savedForLater ? 'Move to cart' : 'Save for later'),
+                          child: Text(l.savedForLater ? 'Move to cart'.tr : 'Save for later'.tr),
                         ),
                         TextButton(
                           onPressed: _busy
                               ? null
-                              : () => _run((r) => r.removeCartItem(l.id), done: 'Removed from your cart.'),
-                          child: const Text('Remove'),
+                              : () => _run((r) => r.removeCartItem(l.id), done: 'Removed from your cart.'.tr),
+                          child: Text('Remove'.tr),
                         ),
                       ],
                     ),

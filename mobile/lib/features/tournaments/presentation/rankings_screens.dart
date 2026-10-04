@@ -8,6 +8,7 @@ import '../../marketplace/widgets/market_widgets.dart';
 import '../data/tournament_models.dart';
 import '../data/tournaments_repository.dart';
 import 'tournaments_tab.dart';
+import '../../../core/i18n/i18n.dart';
 
 class RankingsScreen extends ConsumerStatefulWidget {
   const RankingsScreen({super.key});
@@ -26,7 +27,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     final repo = ref.watch(tournamentsRepositoryProvider);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Rankings')),
+      appBar: AppBar(title: Text('Rankings'.tr)),
       body: Column(
         children: [
           FutureBuilder(
@@ -34,16 +35,16 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
             builder: (c, snap) {
               final f = snap.data;
               return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 4),
                 child: Row(
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String?>(
                         initialValue: _season,
                         isDense: true,
-                        decoration: const InputDecoration(labelText: 'Season'),
+                        decoration: InputDecoration(labelText: 'Season'.tr),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text('All')),
+                          DropdownMenuItem(value: null, child: Text('All'.tr)),
                           for (final s in f?.seasons ?? const <String>[]) DropdownMenuItem(value: s, child: Text(s)),
                         ],
                         onChanged: (v) => setState(() => _season = v),
@@ -54,9 +55,9 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                       child: DropdownButtonFormField<String?>(
                         initialValue: _city,
                         isDense: true,
-                        decoration: const InputDecoration(labelText: 'City'),
+                        decoration: InputDecoration(labelText: 'City'.tr),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text('Pakistan')),
+                          DropdownMenuItem(value: null, child: Text('Pakistan'.tr)),
                           for (final s in f?.cities ?? const <String>[]) DropdownMenuItem(value: s, child: Text(s)),
                         ],
                         onChanged: (v) => setState(() => _city = v),
@@ -71,10 +72,10 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
             child: PagedView<RankingRowData>(
               key: ValueKey('$_season|$_city'),
               fetch: (page) => repo.rankings(season: _season, city: _city, page: page),
-              empty: const EmptyState(
+              empty: EmptyState(
                 icon: Icons.leaderboard_outlined,
-                title: 'No ranked players yet',
-                message: 'Rankings appear after the first tournament is completed.',
+                title: 'No ranked players yet'.tr,
+                message: 'Rankings appear after the first tournament is completed.'.tr,
               ),
               itemBuilder: (_, r) => Card(
                 child: ListTile(
@@ -88,9 +89,9 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                   subtitle: Text(
                     [
                       r.city,
-                      '${r.matches} matches',
-                      if (r.winRate != null) '${r.winRate}% won',
-                      if (r.championships > 0) '${r.championships} titles',
+                      '{matches} matches'.trf({'matches': r.matches}),
+                      if (r.winRate != null) '{winRate}% won'.trf({'winRate': r.winRate}),
+                      if (r.championships > 0) '{championships} titles'.trf({'championships': r.championships}),
                     ].whereType<String>().join(' · '),
                   ),
                   trailing: Text('${r.points}', style: theme.textTheme.titleMedium),
@@ -112,7 +113,7 @@ class PlayerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Player')),
+      appBar: AppBar(title: Text('Player'.tr)),
       body: AsyncBody(
         value: ref.watch(playerProvider(userId)),
         onRetry: () => ref.invalidate(playerProvider(userId)),
@@ -153,17 +154,17 @@ class PlayerScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          stat('Rank', s['rank'] == null ? null : '#${s['rank']}'),
-                          stat('Points', s['points']),
-                          stat('Titles', s['championships']),
+                          stat('Rank'.tr, s['rank'] == null ? null : '#${s['rank']}'),
+                          stat('Points'.tr, s['points']),
+                          stat('Titles'.tr, s['championships']),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          stat('Matches', s['matches']),
-                          stat('Wins', s['wins']),
-                          stat('Win rate', s['winRate'] == null ? null : '${s['winRate']}%'),
+                          stat('Matches'.tr, s['matches']),
+                          stat('Wins'.tr, s['wins']),
+                          stat('Win rate'.tr, s['winRate'] == null ? null : '${s['winRate']}%'),
                         ],
                       ),
                     ],
@@ -171,10 +172,10 @@ class PlayerScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Badges', style: theme.textTheme.titleLarge),
+              Text('Badges'.tr, style: theme.textTheme.titleLarge),
               const SizedBox(height: 6),
               if (p.badges.isEmpty)
-                Text('Badges are earned by playing in and winning tournaments.', style: theme.textTheme.bodySmall)
+                Text('Badges are earned by playing in and winning tournaments.'.tr, style: theme.textTheme.bodySmall)
               else
                 Wrap(
                   spacing: 8,
@@ -188,18 +189,18 @@ class PlayerScreen extends ConsumerWidget {
                   ],
                 ),
               const SizedBox(height: 16),
-              Text('Tournament results', style: theme.textTheme.titleLarge),
+              Text('Tournament results'.tr, style: theme.textTheme.titleLarge),
               if (p.results.isEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text('No results yet.', style: theme.textTheme.bodySmall),
+                  child: Text('No results yet.'.tr, style: theme.textTheme.bodySmall),
                 ),
               for (final r in p.results)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(r.name),
                   subtitle: Text('${placementLabel(r.placement)} · ${r.wins}–${r.losses}'),
-                  trailing: Text('${r.points} pts'),
+                  trailing: Text('{points} pts'.trf({'points': r.points})),
                   onTap: () => context.push('/tournament/${r.slug}'),
                 ),
             ],
@@ -215,7 +216,7 @@ class MyTournamentsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('My tournaments')),
+    appBar: AppBar(title: Text('My tournaments'.tr)),
     body: AsyncBody(
       value: ref.watch(myTournamentsProvider),
       onRetry: () => ref.invalidate(myTournamentsProvider),
@@ -223,9 +224,9 @@ class MyTournamentsScreen extends ConsumerWidget {
         if (list.isEmpty) {
           return EmptyState(
             icon: Icons.emoji_events_outlined,
-            title: 'No tournaments yet',
-            message: 'Register for an approved tournament near you.',
-            action: FilledButton(onPressed: () => context.go('/tournaments'), child: const Text('Find tournaments')),
+            title: 'No tournaments yet'.tr,
+            message: 'Register for an approved tournament near you.'.tr,
+            action: FilledButton(onPressed: () => context.go('/tournaments'), child: Text('Find tournaments'.tr)),
           );
         }
         return ListView.separated(
@@ -239,10 +240,10 @@ class MyTournamentsScreen extends ConsumerWidget {
               children: [
                 TournamentTile(t: e.tournament),
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, top: 4),
+                  padding: const EdgeInsetsDirectional.only(start: 4, top: 4),
                   child: Text(
                     [
-                      participantStatusLabels[e.status] ?? e.status,
+                      participantStatusLabels[e.status]?.tr ?? e.status,
                       if (e.placement != null) placementLabel(e.placement),
                       e.note,
                     ].whereType<String>().join(' · '),

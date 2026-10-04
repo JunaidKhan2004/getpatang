@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/kite_mark.dart';
 import 'onboarding_store.dart';
+import '../../core/i18n/i18n.dart';
 
 class _Slide {
   const _Slide(this.icon, this.title, this.body);
@@ -66,15 +67,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const KitePattern(),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              padding: const EdgeInsetsDirectional.fromSTEB(24, 8, 24, 24),
               child: Column(
                 children: [
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: TextButton(
                       onPressed: () => _finish('/home'),
                       style: TextButton.styleFrom(foregroundColor: AppColors.maroon100),
-                      child: const Text('Skip'),
+                      child: Text('Skip'.tr),
                     ),
                   ),
                   Expanded(
@@ -96,13 +97,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             const SizedBox(height: 40),
                             Text(
-                              s.title,
+                              s.title.tr,
                               textAlign: TextAlign.center,
                               style: t.textTheme.headlineMedium?.copyWith(color: AppColors.white),
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              s.body,
+                              s.body.tr,
                               textAlign: TextAlign.center,
                               style: t.textTheme.bodyLarge?.copyWith(color: AppColors.maroon100),
                             ),
@@ -136,13 +137,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     onPressed: last
                         ? () => _finish('/register')
                         : () => _page.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOut),
-                    child: Text(last ? 'Create account' : 'Next'),
+                    child: Text(last ? 'Create account'.tr : 'Next'.tr),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () => _finish('/login'),
                     style: TextButton.styleFrom(foregroundColor: AppColors.white),
-                    child: const Text('I already have an account'),
+                    child: Text('I already have an account'.tr),
                   ),
                 ],
               ),

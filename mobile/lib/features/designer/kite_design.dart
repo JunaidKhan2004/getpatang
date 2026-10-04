@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/i18n/i18n.dart';
 
 const kiteShapes = {'diamond': 'Diamond', 'patang': 'Patang', 'delta': 'Delta', 'hexagon': 'Hexagon'};
 const kiteSizes = {'small': 'Small (45 cm)', 'medium': 'Medium (60 cm)', 'large': 'Large (75 cm)'};
@@ -326,7 +327,7 @@ class KitePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Kite design preview',
+    label: 'Kite design preview'.tr,
     image: true,
     child: SizedBox(
       height: height,

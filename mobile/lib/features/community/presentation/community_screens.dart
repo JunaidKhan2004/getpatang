@@ -15,6 +15,7 @@ import '../../shell/main_shell.dart';
 import '../data/community_repository.dart';
 import 'community_widgets.dart';
 import '../../../core/widgets/loaders.dart';
+import '../../../core/i18n/i18n.dart';
 
 class CommunityTab extends ConsumerStatefulWidget {
   const CommunityTab({super.key});
@@ -32,7 +33,7 @@ class _CommunityTabState extends ConsumerState<CommunityTab> {
     final signedIn = ref.watch(authControllerProvider) is Authenticated;
     final repo = ref.watch(communityRepositoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Community'), actions: const [GlobalActions()]),
+      appBar: AppBar(title: Text('Community'.tr), actions: const [GlobalActions()]),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           if (!ensureSignedIn(context, ref)) return;
@@ -40,17 +41,17 @@ class _CommunityTabState extends ConsumerState<CommunityTab> {
           if (posted == true) setState(() => _refresh++);
         },
         icon: const Icon(Icons.edit_outlined),
-        label: const Text('Post'),
+        label: Text('Post'.tr),
       ),
       body: Column(
         children: [
           if (signedIn)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 4),
               child: SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'latest', label: Text('Latest')),
-                  ButtonSegment(value: 'following', label: Text('Following')),
+                segments: [
+                  ButtonSegment(value: 'latest', label: Text('Latest'.tr)),
+                  ButtonSegment(value: 'following', label: Text('Following'.tr)),
                 ],
                 selected: {_scope},
                 onSelectionChanged: (s) => setState(() => _scope = s.first),
@@ -63,10 +64,10 @@ class _CommunityTabState extends ConsumerState<CommunityTab> {
               itemBuilder: (_, p) => PostTile(post: p),
               empty: EmptyState(
                 icon: Icons.groups_outlined,
-                title: _scope == 'following' ? 'Nothing from people you follow' : 'No posts yet',
+                title: _scope == 'following' ? 'Nothing from people you follow'.tr : 'No posts yet'.tr,
                 message: _scope == 'following'
-                    ? 'Follow flyers from the Latest feed to see them here.'
-                    : 'Be the first to share something.',
+                    ? 'Follow flyers from the Latest feed to see them here.'.tr
+                    : 'Be the first to share something.'.tr,
               ),
             ),
           ),
@@ -119,7 +120,7 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
       }
       await repo.createPost(text, ids);
       if (!mounted) return;
-      showToast(context, 'Posted.', kind: ToastKind.success);
+      showToast(context, 'Posted.'.tr, kind: ToastKind.success);
       context.pop(true);
     } on ApiException catch (e) {
       if (mounted) showToast(context, e.message, kind: ToastKind.error);
@@ -131,16 +132,16 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('New post'),
+      title: Text('New post'.tr),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 12),
+          padding: const EdgeInsetsDirectional.only(end: 12),
           child: _posting
               ? const Center(child: KiteSpinner(size: 22))
               : FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size(72, 40)),
                   onPressed: _post,
-                  child: const Text('Post'),
+                  child: Text('Post'.tr),
                 ),
         ),
       ],
@@ -154,7 +155,7 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
           maxLength: 2000,
           maxLines: 8,
           minLines: 4,
-          decoration: const InputDecoration(hintText: 'Share a flight, a kite you made, or a tip…'),
+          decoration: InputDecoration(hintText: 'Share a flight, a kite you made, or a tip…'.tr),
         ),
         if (_media.isNotEmpty)
           Wrap(
@@ -179,7 +180,7 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
                       right: 0,
                       top: 0,
                       child: IconButton.filledTonal(
-                        tooltip: 'Remove',
+                        tooltip: 'Remove'.tr,
                         visualDensity: VisualDensity.compact,
                         onPressed: () => setState(() => _media.removeAt(i)),
                         icon: const Icon(Icons.close, size: 16),
@@ -195,17 +196,17 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
             TextButton.icon(
               onPressed: _hasVideo || _media.length >= 4 || _posting ? null : _pickPhotos,
               icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Photos'),
+              label: Text('Photos'.tr),
             ),
             TextButton.icon(
               onPressed: _media.isNotEmpty || _posting ? null : _pickVideo,
               icon: const Icon(Icons.videocam_outlined),
-              label: const Text('Video'),
+              label: Text('Video'.tr),
             ),
           ],
         ),
         Text(
-          'Up to 4 photos or one video (50 MB). Posts promoting banned strings or unsafe flying are removed.',
+          'Up to 4 photos or one video (50 MB). Posts promoting banned strings or unsafe flying are removed.'.tr,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -261,7 +262,7 @@ class _PostScreenState extends ConsumerState<PostScreen> {
   Widget _commentTile(CommentData c, bool postIsMine, {bool isReply = false}) {
     final t = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(left: isReply ? 44 : 0, top: 8),
+      padding: EdgeInsetsDirectional.only(start: isReply ? 44 : 0, top: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -294,13 +295,13 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(timeAgo(c.createdAt), style: t.textTheme.bodySmall),
-                    if (!isReply) TextButton(onPressed: () => setState(() => _replyTo = c), child: const Text('Reply')),
+                    if (!isReply) TextButton(onPressed: () => setState(() => _replyTo = c), child: Text('Reply'.tr)),
                     if (c.isMine || postIsMine)
-                      TextButton(onPressed: () => _deleteComment(c), child: const Text('Delete')),
+                      TextButton(onPressed: () => _deleteComment(c), child: Text('Delete'.tr)),
                     if (!c.isMine)
                       TextButton(
                         onPressed: () => showReportSheet(context, ref, 'comment', c.id),
-                        child: const Text('Report'),
+                        child: Text('Report'.tr),
                       ),
                   ],
                 ),
@@ -317,7 +318,7 @@ class _PostScreenState extends ConsumerState<PostScreen> {
     final post = ref.watch(postProvider(widget.postId));
     final comments = ref.watch(commentsProvider(widget.postId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Post')),
+      appBar: AppBar(title: Text('Post'.tr)),
       body: AsyncBody(
         value: post,
         onRetry: () => ref.invalidate(postProvider(widget.postId)),
@@ -334,7 +335,7 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                   children: [
                     PostTile(post: p, openOnTap: false, onDeleted: () => context.pop()),
                     const SizedBox(height: 8),
-                    Text('Comments', style: Theme.of(context).textTheme.titleLarge),
+                    Text('Comments'.tr, style: Theme.of(context).textTheme.titleLarge),
                     comments.when(
                       loading: () => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -346,9 +347,12 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                         ),
                       ),
                       error: (_, _) =>
-                          const Padding(padding: EdgeInsets.all(16), child: Text('Comments could not load.')),
+                          Padding(padding: const EdgeInsets.all(16), child: Text('Comments could not load.'.tr)),
                       data: (list) => list.isEmpty
-                          ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('No comments yet.'))
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Text('No comments yet.'.tr),
+                            )
                           : Column(
                               children: [
                                 for (final c in list) ...[
@@ -365,7 +369,7 @@ class _PostScreenState extends ConsumerState<PostScreen> {
             SafeArea(
               top: false,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 6, 6),
                 decoration: BoxDecoration(
                   border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline)),
                 ),
@@ -377,12 +381,12 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Replying to ${_replyTo!.author.name}',
+                              'Replying to {authorName}'.trf({'authorName': _replyTo!.author.name}),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Cancel reply',
+                            tooltip: 'Cancel reply'.tr,
                             onPressed: () => setState(() => _replyTo = null),
                             icon: const Icon(Icons.close, size: 18),
                           ),
@@ -396,15 +400,15 @@ class _PostScreenState extends ConsumerState<PostScreen> {
                             maxLength: 1000,
                             minLines: 1,
                             maxLines: 4,
-                            decoration: const InputDecoration(
-                              hintText: 'Write a comment…',
+                            decoration: InputDecoration(
+                              hintText: 'Write a comment…'.tr,
                               counterText: '',
                               isDense: true,
                             ),
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Send',
+                          tooltip: 'Send'.tr,
                           onPressed: _sending ? null : _send,
                           icon: _sending ? const KiteSpinner(size: 20) : const Icon(Icons.send),
                         ),
@@ -441,7 +445,7 @@ class CommunityProfileScreen extends ConsumerWidget {
     final repo = ref.read(communityRepositoryProvider);
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text('Profile'.tr)),
       body: AsyncBody(
         value: ref.watch(communityProfileProvider(userId)),
         onRetry: () => ref.invalidate(communityProfileProvider(userId)),
@@ -452,13 +456,13 @@ class CommunityProfileScreen extends ConsumerWidget {
           itemBuilder: (_, post) => PostTile(post: post),
           empty: EmptyState(
             icon: p.isBlocked ? Icons.block : Icons.article_outlined,
-            title: p.isBlocked ? 'You blocked this person' : 'No posts yet',
+            title: p.isBlocked ? 'You blocked this person'.tr : 'No posts yet'.tr,
             message: p.isBlocked
-                ? 'Unblock them to see their posts again.'
-                : 'Posts appear here when they share something.',
+                ? 'Unblock them to see their posts again.'.tr
+                : 'Posts appear here when they share something.'.tr,
           ),
           header: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -480,18 +484,18 @@ class CommunityProfileScreen extends ConsumerWidget {
                     ),
                     if (!p.isMe)
                       PopupMenuButton<String>(
-                        tooltip: 'More',
+                        tooltip: 'More'.tr,
                         onSelected: (v) => v == 'report'
                             ? showReportSheet(context, ref, 'user', userId)
                             : _run(
                                 context,
                                 ref,
                                 () => repo.setBlock(userId, !p.isBlocked),
-                                p.isBlocked ? 'Unblocked.' : 'Blocked.',
+                                p.isBlocked ? 'Unblocked.'.tr : 'Blocked.'.tr,
                               ),
                         itemBuilder: (_) => [
-                          PopupMenuItem(value: 'block', child: Text(p.isBlocked ? 'Unblock' : 'Block')),
-                          const PopupMenuItem(value: 'report', child: Text('Report profile')),
+                          PopupMenuItem(value: 'block', child: Text(p.isBlocked ? 'Unblock'.tr : 'Block'.tr)),
+                          PopupMenuItem(value: 'report', child: Text('Report profile'.tr)),
                         ],
                       ),
                   ],
@@ -502,7 +506,11 @@ class CommunityProfileScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        '${p.posts} posts · ${p.followers} followers · ${p.following} following',
+                        '{posts} posts · {followers} followers · {following} following'.trf({
+                          'posts': p.posts,
+                          'followers': p.followers,
+                          'following': p.following,
+                        }),
                         style: t.textTheme.bodySmall,
                       ),
                     ],
@@ -515,19 +523,21 @@ class CommunityProfileScreen extends ConsumerWidget {
                       Expanded(
                         child: p.isFollowing
                             ? OutlinedButton(
-                                onPressed: () => _run(context, ref, () => repo.setFollow(userId, false), 'Unfollowed.'),
-                                child: const Text('Following'),
+                                onPressed: () =>
+                                    _run(context, ref, () => repo.setFollow(userId, false), 'Unfollowed.'.tr),
+                                child: Text('Following'.tr),
                               )
                             : FilledButton(
-                                onPressed: () => _run(context, ref, () => repo.setFollow(userId, true), 'Following.'),
-                                child: const Text('Follow'),
+                                onPressed: () =>
+                                    _run(context, ref, () => repo.setFollow(userId, true), 'Following.'.tr),
+                                child: Text('Follow'.tr),
                               ),
                       ),
                     if (!p.isMe && !p.isBlocked) const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => context.push('/player/$userId'),
-                        child: const Text('Tournament record'),
+                        child: Text('Tournament record'.tr),
                       ),
                     ),
                   ],

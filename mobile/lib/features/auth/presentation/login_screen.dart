@@ -8,6 +8,7 @@ import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import '../data/auth_models.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -52,8 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      title: 'Welcome back',
-      subtitle: 'Sign in to manage your orders, tournaments and shop.',
+      title: 'Welcome back'.tr,
+      subtitle: 'Sign in to manage your orders, tournaments and shop.'.tr,
       child: Form(
         key: _form,
         child: AutofillGroup(
@@ -65,30 +66,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email, AutofillHints.telephoneNumber],
-                validator: (v) => Validators.required(v, 'Email or phone'),
-                decoration: const InputDecoration(labelText: 'Email or phone', prefixIcon: Icon(Icons.alternate_email)),
+                validator: (v) => Validators.required(v, 'Email or phone'.tr),
+                decoration: InputDecoration(
+                  labelText: 'Email or phone'.tr,
+                  prefixIcon: const Icon(Icons.alternate_email),
+                ),
               ),
               const SizedBox(height: 16),
               PasswordField(
                 controller: _password,
-                validator: (v) => Validators.required(v, 'Password'),
+                validator: (v) => Validators.required(v, 'Password'.tr),
                 onSubmitted: (_) => _submit(),
               ),
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () => context.push('/forgot-password'),
-                  child: const Text('Forgot password?'),
+                  child: Text('Forgot password?'.tr),
                 ),
               ),
               const SizedBox(height: 8),
-              LoadingButton(label: 'Sign in', loading: _loading, onPressed: _submit),
+              LoadingButton(label: 'Sign in'.tr, loading: _loading, onPressed: _submit),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('New here?'),
-                  TextButton(onPressed: () => context.go('/register'), child: const Text('Create an account')),
+                  Text('New here?'.tr),
+                  TextButton(onPressed: () => context.go('/register'), child: Text('Create an account'.tr)),
                 ],
               ),
             ],

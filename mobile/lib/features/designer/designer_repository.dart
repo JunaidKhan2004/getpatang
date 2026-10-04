@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_client.dart';
 import '../marketplace/data/models.dart' show PageResult;
 import 'kite_design.dart';
+import '../../core/i18n/i18n.dart';
 
 class SavedDesign {
   const SavedDesign(this.id, this.name, this.design, this.updatedAt);
@@ -81,7 +82,7 @@ class CustomOrderData {
 
   bool get isOpen => const ['REQUESTED', 'CLARIFICATION_NEEDED', 'QUOTED'].contains(status);
   bool get canAccept => status == 'QUOTED' && !quoteExpired;
-  String get statusLabel => quoteExpired ? 'Quote expired' : customStatusLabels[status] ?? status;
+  String get statusLabel => quoteExpired ? 'Quote expired'.tr : customStatusLabels[status]?.tr ?? status;
 
   static DateTime? _d(Object? v) => v == null ? null : DateTime.parse(v as String).toLocal();
 

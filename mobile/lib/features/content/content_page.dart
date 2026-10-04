@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_client.dart';
 import '../../core/widgets/feedback.dart';
 import '../../core/widgets/loaders.dart';
+import '../../core/i18n/i18n.dart';
 
 /// Staff-written public pages (about, contact, faq, terms, privacy), from Admin → Content.
 const contentPageTitles = {
@@ -68,7 +69,7 @@ class ContentPageScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final page = ref.watch(contentPageProvider(slug));
-    final fallback = contentPageTitles[slug] ?? 'Page';
+    final fallback = contentPageTitles[slug]?.tr ?? 'Page'.tr;
     return Scaffold(
       appBar: AppBar(title: Text(page.value?.title ?? fallback)),
       body: page.when(
@@ -81,10 +82,7 @@ class ContentPageScreen extends ConsumerWidget {
               children: [
                 Text('$e', textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => ref.invalidate(contentPageProvider(slug)),
-                  child: const Text('Try again'),
-                ),
+                OutlinedButton(onPressed: () => ref.invalidate(contentPageProvider(slug)), child: Text('Try again'.tr)),
               ],
             ),
           ),
@@ -92,8 +90,8 @@ class ContentPageScreen extends ConsumerWidget {
         data: (p) => p == null
             ? EmptyState(
                 icon: Icons.description_outlined,
-                title: 'Coming soon',
-                message: 'This page will be published before launch.',
+                title: 'Coming soon'.tr,
+                message: 'This page will be published before launch.'.tr,
               )
             : ListView(padding: const EdgeInsets.all(20), children: renderPageBody(context, p.body)),
       ),

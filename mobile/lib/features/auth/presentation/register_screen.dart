@@ -9,6 +9,7 @@ import '../../../core/widgets/feedback.dart';
 import '../application/auth_controller.dart';
 import '../data/auth_models.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../../core/i18n/i18n.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -40,7 +41,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _serverErrors = {});
     if (!_form.currentState!.validate()) return;
     if (!_acceptedTerms) {
-      showToast(context, 'Please accept the Terms and Privacy Policy to continue.', kind: ToastKind.error);
+      showToast(context, 'Please accept the Terms and Privacy Policy to continue.'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _loading = true);
@@ -73,8 +74,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return AuthScaffold(
-      title: 'Create your account',
-      subtitle: 'We will send a 6-digit code to your email to verify it.',
+      title: 'Create your account'.tr,
+      subtitle: 'We will send a 6-digit code to your email to verify it.'.tr,
       child: Form(
         key: _form,
         child: AutofillGroup(
@@ -86,8 +87,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.name],
-                validator: _withServer('fullName', (v) => Validators.name(v, 'Full name')),
-                decoration: const InputDecoration(labelText: 'Full name', prefixIcon: Icon(Icons.person_outline)),
+                validator: _withServer('fullName', (v) => Validators.name(v, 'Full name'.tr)),
+                decoration: InputDecoration(labelText: 'Full name'.tr, prefixIcon: const Icon(Icons.person_outline)),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -96,7 +97,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email],
                 validator: _withServer('email', Validators.email),
-                decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
+                decoration: InputDecoration(labelText: 'Email'.tr, prefixIcon: const Icon(Icons.mail_outline)),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -105,10 +106,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.telephoneNumber],
                 validator: _withServer('phone', Validators.optionalPhone),
-                decoration: const InputDecoration(
-                  labelText: 'Mobile number (optional)',
-                  hintText: '03XX XXXXXXX',
-                  prefixIcon: Icon(Icons.phone_outlined),
+                decoration: InputDecoration(
+                  labelText: 'Mobile number (optional)'.tr,
+                  hintText: '03XX XXXXXXX'.tr,
+                  prefixIcon: const Icon(Icons.phone_outlined),
                 ),
               ),
               const SizedBox(height: 16),
@@ -121,7 +122,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 16),
               PasswordField(
                 controller: _confirm,
-                label: 'Confirm password',
+                label: 'Confirm password'.tr,
                 autofillHints: const [AutofillHints.newPassword],
                 validator: Validators.confirm(() => _password.text),
                 onSubmitted: (_) => _submit(),
@@ -138,19 +139,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextSpan(
                           style: t.textTheme.bodySmall,
                           children: [
-                            const TextSpan(text: 'I agree to the '),
+                            TextSpan(text: 'I agree to the '.tr),
                             TextSpan(
-                              text: 'Terms',
+                              text: 'Terms'.tr,
                               style: TextStyle(color: t.colorScheme.primary, fontWeight: FontWeight.w600),
                               recognizer: TapGestureRecognizer()..onTap = () => context.push('/legal/terms'),
                             ),
-                            const TextSpan(text: ' and '),
+                            TextSpan(text: ' and '.tr),
                             TextSpan(
-                              text: 'Privacy Policy',
+                              text: 'Privacy Policy'.tr,
                               style: TextStyle(color: t.colorScheme.primary, fontWeight: FontWeight.w600),
                               recognizer: TapGestureRecognizer()..onTap = () => context.push('/legal/privacy'),
                             ),
-                            const TextSpan(text: ', and confirm I will follow local kite-flying laws.'),
+                            TextSpan(text: ', and confirm I will follow local kite-flying laws.'.tr),
                           ],
                         ),
                       ),
@@ -159,13 +160,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              LoadingButton(label: 'Create account', loading: _loading, onPressed: _submit),
+              LoadingButton(label: 'Create account'.tr, loading: _loading, onPressed: _submit),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already registered?'),
-                  TextButton(onPressed: () => context.go('/login'), child: const Text('Sign in')),
+                  Text('Already registered?'.tr),
+                  TextButton(onPressed: () => context.go('/login'), child: Text('Sign in'.tr)),
                 ],
               ),
             ],

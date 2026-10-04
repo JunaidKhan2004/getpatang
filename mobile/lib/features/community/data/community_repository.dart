@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../marketplace/data/models.dart' show PageResult;
+import '../../../core/i18n/i18n.dart';
 
 class AuthorData {
   const AuthorData(this.id, this.name, this.city);
@@ -131,10 +132,10 @@ const reportReasons = {
 
 String timeAgo(DateTime d) {
   final s = DateTime.now().difference(d).inSeconds;
-  if (s < 60) return 'just now';
-  if (s < 3600) return '${s ~/ 60}m';
-  if (s < 86400) return '${s ~/ 3600}h';
-  if (s < 7 * 86400) return '${s ~/ 86400}d';
+  if (s < 60) return 'just now'.tr;
+  if (s < 3600) return '{n}m'.trf({'n': s ~/ 60});
+  if (s < 86400) return '{n}h'.trf({'n': s ~/ 3600});
+  if (s < 7 * 86400) return '{n}d'.trf({'n': s ~/ 86400});
   return '${d.day}/${d.month}/${d.year}';
 }
 

@@ -10,6 +10,8 @@ dependencies:
   dio: ^5.11.1
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: ^3.4.3
   flutter_secure_storage: ^11.2.0
   go_router: ^18.0.2
@@ -26,3 +28,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    # Urdu text (Nastaliq). SIL Open Font License: assets/fonts/NotoNastaliqUrdu-OFL.txt
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf
+        - asset: assets/fonts/NotoNastaliqUrdu-Bold.ttf
+          weight: 700
