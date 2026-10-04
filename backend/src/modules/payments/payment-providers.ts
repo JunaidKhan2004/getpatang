@@ -67,13 +67,62 @@ export class BankTransferProvider implements PaymentProvider {
   }
 }
 
+/**
+ * JazzCash / Easypaisa without a merchant API: the customer sends money to the platform's mobile
+ * account and enters the transaction ID; staff check it like a bank transfer. When a merchant
+ * account exists, a gateway provider can replace these without changing orders.
+ */
+@Injectable()
+abstract class WalletTransferProvider implements PaymentProvider {
+  abstract readonly key: 'jazzcash' | 'easypaisa';
+  abstract readonly label: string;
+  readonly description = 'Send money from your mobile account. Your order is confirmed once the payment is verified.';
+
+  constructor(private readonly settings: SettingsService) {}
+
+  private setting() {
+    return this.settings.get(this.key === 'jazzcash' ? 'payments.jazzcash' : 'payments.easypaisa');
+  }
+
+  async isAvailable() {
+    const s = await this.setting();
+    return s.enabled && Boolean(s.accountTitle && s.number);
+  }
+
+  async initiate(ctx: PaymentContext): Promise<PaymentInitiation> {
+    const s = await this.setting();
+    return {
+      status: PaymentStatus.PENDING,
+      instructions:
+        `Send Rs ${ctx.amount.toLocaleString('en-PK')} with ${this.label} to ${s.number} (${s.accountTitle}). ` +
+        `Then open your order and enter the transaction ID for ${ctx.orderNumbers.join(', ')}.`,
+    };
+  }
+}
+
+@Injectable()
+export class JazzCashProvider extends WalletTransferProvider {
+  readonly key = 'jazzcash';
+  readonly label = 'JazzCash';
+}
+
+@Injectable()
+export class EasypaisaProvider extends WalletTransferProvider {
+  readonly key = 'easypaisa';
+  readonly label = 'Easypaisa';
+}
+
+/** Methods paid by hand (bank or wallet) that staff verify from the customer's transaction reference. */
+export const MANUAL_TRANSFER_METHODS = ['bank_transfer', 'jazzcash', 'easypaisa'];
+export const isManualTransfer = (method: string | null | undefined) => MANUAL_TRANSFER_METHODS.includes(method ?? '');
+
 /** Looks up payment methods by key. Add a provider here to offer it at checkout. */
 @Injectable()
 export class PaymentsService {
   private readonly providers: PaymentProvider[];
 
-  constructor(cod: CashOnDeliveryProvider, bank: BankTransferProvider) {
-    this.providers = [cod, bank];
+  constructor(cod: CashOnDeliveryProvider, bank: BankTransferProvider, jazzcash: JazzCashProvider, easypaisa: EasypaisaProvider) {
+    this.providers = [cod, jazzcash, easypaisa, bank];
   }
 
   async available() {
@@ -93,7 +142,7 @@ export class PaymentsService {
 
 @Global()
 @Module({
-  providers: [PaymentsService, CashOnDeliveryProvider, BankTransferProvider],
+  providers: [PaymentsService, CashOnDeliveryProvider, BankTransferProvider, JazzCashProvider, EasypaisaProvider],
   exports: [PaymentsService],
 })
 export class PaymentsModule {}

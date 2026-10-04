@@ -56,10 +56,10 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
       {order.payment?.canSubmitProof && (
         <section aria-labelledby="transfer" className="grid gap-3 rounded-md border border-border bg-surface p-5">
           <h2 id="transfer" className="font-display font-semibold">
-            {order.payment.status === "VERIFYING" ? tr("We are checking your transfer") : tr("Paid by bank transfer? Tell us")}
+            {order.payment.status === "VERIFYING" ? tr("We are checking your transfer") : tr("Paid by bank, JazzCash or Easypaisa? Tell us")}
           </h2>
           {order.payment.status === "VERIFYING" && (
-            <p className="text-sm text-muted">{tr("Reference {reference}, sent", { reference: order.payment.reference })}{" "}{order.payment.submittedAt && formatDate(order.payment.submittedAt, true)}. The shop starts preparing once it is verified.</p>
+            <p className="text-sm text-muted">{tr("Reference {reference}, sent {sentAt}. The shop starts preparing once it is verified.", { reference: order.payment.reference, sentAt: order.payment.submittedAt ? formatDate(order.payment.submittedAt, true) : "" })}</p>
           )}
           <PaymentProofForm orderNumber={order.orderNumber} resubmit={order.payment.status === "VERIFYING"} />
         </section>

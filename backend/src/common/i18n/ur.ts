@@ -142,6 +142,23 @@ export const UR: Record<string, string> = {
   'Rs {amount}, paid by {method}. Confirm it from your dashboard.': '{amount} روپے، ادائیگی بذریعہ {method}۔ اپنے ڈیش بورڈ سے کنفرم کریں۔',
   'cash on delivery': 'کیش آن ڈیلیوری',
   'bank transfer': 'بینک ٹرانسفر',
+  JazzCash: 'جاز کیش',
+  Easypaisa: 'ایزی پیسہ',
+  'Send money from your mobile account. Your order is confirmed once the payment is verified.':
+    'اپنے موبائل اکاؤنٹ سے رقم بھیجیں۔ ادائیگی کی تصدیق ہوتے ہی آپ کا آرڈر کنفرم ہو جائے گا۔',
+  'Send Rs {amount} with {wallet} to {number} ({title}). Then open your order and enter the transaction ID for {refs}.':
+    '{amount} روپے {wallet} سے {number} ({title}) پر بھیجیں۔ پھر اپنا آرڈر کھولیں اور {refs} کے لیے ٹرانزیکشن آئی ڈی درج کریں۔',
+  'There is no payment waiting for details on this order.': 'اس آرڈر پر کوئی ادائیگی تفصیل کی منتظر نہیں۔',
+  'Payment to verify': 'تصدیق کے لیے ادائیگی',
+  'The payment was verified. You can prepare and ship the order.': 'ادائیگی کی تصدیق ہو گئی۔ اب آپ آرڈر تیار کر کے بھیج سکتے ہیں۔',
+  'Wait until the payment is verified before preparing this order.': 'یہ آرڈر تیار کرنے سے پہلے ادائیگی کی تصدیق کا انتظار کریں۔',
+  'Enter the transaction ID or reference (4–64 characters)': 'ٹرانزیکشن آئی ڈی یا ریفرنس درج کریں (4 سے 64 حروف)',
+  'Choose whether {name} is on.': 'منتخب کریں کہ {name} چالو ہے یا نہیں۔',
+  'Enter the mobile number as 03XXXXXXXXX.': 'موبائل نمبر 03XXXXXXXXX کی صورت میں درج کریں۔',
+  'Enter the account title and number before turning {name} on.': '{name} چالو کرنے سے پہلے اکاؤنٹ ٹائٹل اور نمبر درج کریں۔',
+  'The account title is too long.': 'اکاؤنٹ ٹائٹل بہت لمبا ہے۔',
+  'Mobile account customers send money to. Orders wait until staff check the transaction ID.':
+    'وہ موبائل اکاؤنٹ جس میں گاہک رقم بھیجتے ہیں۔ عملے کے ٹرانزیکشن آئی ڈی چیک کرنے تک آرڈرز انتظار کرتے ہیں۔',
   'Order {orderNumber} was cancelled': 'آرڈر {orderNumber} منسوخ ہو گیا',
   'The customer cancelled it: {reason}': 'گاہک نے اسے منسوخ کر دیا: {reason}',
   'The customer cancelled this order. The items are back in stock.': 'گاہک نے یہ آرڈر منسوخ کر دیا۔ چیزیں واپس اسٹاک میں آ گئیں۔',

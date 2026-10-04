@@ -251,6 +251,10 @@ export const ORDER_STATUS_TONE: Record<OrderStatus, "neutral" | "success" | "war
   RETURNED: "neutral",
 };
 
+/** Paid by hand (bank or mobile wallet) and verified by staff from the transaction reference. */
+export const MANUAL_TRANSFER_METHODS = ["bank_transfer", "jazzcash", "easypaisa"];
+export const isManualTransfer = (method: string | null | undefined) => MANUAL_TRANSFER_METHODS.includes(method ?? "");
+
 export const formatPKR = (n: number, lang: Lang = currentLang()) => translate(lang, "Rs {amount}", { amount: n.toLocaleString("en-PK") });
 
 export const formatDate = (iso: string, withTime = false, lang: Lang = currentLang()) =>

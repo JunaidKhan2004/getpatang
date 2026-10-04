@@ -14,6 +14,7 @@ const input = "h-10 w-full rounded-md border border-border bg-surface px-3 text-
 
 type Delivery = { key: string; label: string; description: string; fee: number; freeAbove: number | null };
 type Bank = { enabled: boolean; bankName: string; accountTitle: string; iban: string };
+type Wallet = { enabled: boolean; accountTitle: string; number: string };
 type Points = { placement: Record<string, number>; participation: number; perWin: number };
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -88,6 +89,21 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
           <label className="grid gap-1 text-sm">{t("Bank")}<input value={b.bankName} onChange={(e) => set({ bankName: e.target.value })} className={input} /></label>
           <label className="grid gap-1 text-sm">{t("Account title")}<input value={b.accountTitle} onChange={(e) => set({ accountTitle: e.target.value })} className={input} /></label>
           <label className="grid gap-1 text-sm">{t("IBAN")}<input value={b.iban} onChange={(e) => set({ iban: e.target.value })} placeholder="PK36SCBL0000001123456702" className={input} /></label>
+        </div>
+      );
+      break;
+    }
+    case "payments.jazzcash":
+    case "payments.easypaisa": {
+      const w = value as Wallet;
+      const set = (patch: Partial<Wallet>) => setValue({ ...w, ...patch });
+      const name = setting.key === "payments.jazzcash" ? "JazzCash" : "Easypaisa";
+      editor = (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2"><Toggle checked={w.enabled} onChange={(enabled) => set({ enabled })} label={t("Offer {name}", { name: t(name) })} /></div>
+          <label className="grid gap-1 text-sm">{t("Account title")}<input value={w.accountTitle} onChange={(e) => set({ accountTitle: e.target.value })} className={input} /></label>
+          <label className="grid gap-1 text-sm">{t("Mobile account number")}<input value={w.number} onChange={(e) => set({ number: e.target.value })} placeholder="03XXXXXXXXX" inputMode="tel" dir="ltr" className={input} /></label>
+          <p className="text-xs text-muted sm:col-span-2">{t("Customers send money to this number and enter the transaction ID. Check it in your {name} app, then approve it under Payments.", { name: t(name) })}</p>
         </div>
       );
       break;

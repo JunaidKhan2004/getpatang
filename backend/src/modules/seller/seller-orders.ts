@@ -12,7 +12,7 @@ import { AuditService } from '../audit/audit.service.js';
 import { restockOrder } from '../orders/order-effects.js';
 import { ORDER_TRANSITIONS } from '../orders/order-status.js';
 import { NotificationsService } from '../notifications/notifications.js';
-import { PaymentsService } from '../payments/payment-providers.js';
+import { isManualTransfer, PaymentsService } from '../payments/payment-providers.js';
 import { closeOrderPayments } from '../payments/payment-review.js';
 import { SellerOrderQueryDto, UpdateOrderStatusDto } from './seller.dto.js';
 import { SellerContext } from './seller-shop.js';
@@ -117,10 +117,10 @@ export class SellerOrdersService {
     if (!sellerNextStatuses(order.status).includes(dto.status)) {
       throw new AppException('STATUS_NOT_ALLOWED', `An order that is ${order.status.toLowerCase().replace(/_/g, ' ')} cannot be marked ${dto.status.toLowerCase().replace(/_/g, ' ')}.`, HttpStatus.CONFLICT);
     }
-    // Bank transfers must be verified before the shop spends anything on the order.
+    // Bank and wallet transfers must be verified before the shop spends anything on the order.
     const needsPayment: OrderStatus[] = [OrderStatus.PREPARING, OrderStatus.SHIPPED];
-    if (order.paymentMethod === 'bank_transfer' && order.paymentStatus !== PaymentStatus.PAID && needsPayment.includes(dto.status)) {
-      throw new AppException('PAYMENT_NOT_VERIFIED', 'Wait until the bank transfer is verified before preparing this order.', HttpStatus.CONFLICT);
+    if (isManualTransfer(order.paymentMethod) && order.paymentStatus !== PaymentStatus.PAID && needsPayment.includes(dto.status)) {
+      throw new AppException('PAYMENT_NOT_VERIFIED', 'Wait until the payment is verified before preparing this order.', HttpStatus.CONFLICT);
     }
     if (dto.status === OrderStatus.CANCELLED && !dto.note) {
       throw new AppException('NOTE_REQUIRED', 'Tell the customer why the order is cancelled.', 400, [{ field: 'note', message: 'A reason is required' }]);

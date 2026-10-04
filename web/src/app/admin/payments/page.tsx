@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/dashboard/dashboard-shell";
 import { Pagination } from "@/components/market/pagination";
 import { Alert, Badge, EmptyState } from "@/components/ui/feedback";
 import { apiPage } from "@/lib/api";
-import { formatDate, formatPKR, ORDER_STATUS_LABEL, type OrderStatus, PAYMENT_STATUS_LABEL, PAYMENT_STATUS_TONE, type PaymentStatus } from "@/lib/market";
+import { formatDate, formatPKR, isManualTransfer, ORDER_STATUS_LABEL, type OrderStatus, PAYMENT_STATUS_LABEL, PAYMENT_STATUS_TONE, type PaymentStatus } from "@/lib/market";
 import { getAccessToken } from "@/lib/session";
 
 import { CompleteRefund, ReviewPayment } from "./payment-actions";
@@ -18,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 interface PaymentRow {
   id: string;
+  provider: string;
   providerLabel: string;
   amount: number;
   status: PaymentStatus;
@@ -61,7 +62,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <PageHeader title={t("Payments")} description={t("Verify bank transfers and record refunds. Cash on delivery is marked paid when the order is delivered.")} />
+      <PageHeader title={t("Payments")} description={t("Verify bank, JazzCash and Easypaisa transfers and record refunds. Cash on delivery is marked paid when the order is delivered.")} />
       <nav aria-label={t("Section")} className="mb-3 flex gap-1 border-b border-border pb-3">
         <Link href="/admin/payments" aria-current={!refundsView ? "page" : undefined} className={tab}>{t("Payments")}</Link>
         <Link href="/admin/payments?view=refunds" aria-current={refundsView ? "page" : undefined} className={tab}>{t("Refunds")}</Link>
@@ -84,7 +85,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
             ))}
           </nav>
           {!payments && <Alert tone="error">{t("Payments could not load. You may not have permission to manage payments.")}</Alert>}
-          {payments && payments.data.length === 0 && <EmptyState title={t("Nothing here")} message={status === "VERIFYING" ? t("No bank transfers are waiting to be checked.") : t("No payments with this status.")} />}
+          {payments && payments.data.length === 0 && <EmptyState title={t("Nothing here")} message={status === "VERIFYING" ? t("No transfers are waiting to be checked.") : t("No payments with this status.")} />}
           {payments && payments.data.length > 0 && (
             <>
               <ul className="grid gap-3">
@@ -108,7 +109,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                         </p>
                       )}
                     </div>
-                    {(p.status === "VERIFYING" || (p.status === "PENDING" && p.providerLabel === "Bank transfer")) && p.order.status !== "CANCELLED" && (
+                    {(p.status === "VERIFYING" || (p.status === "PENDING" && isManualTransfer(p.provider))) && p.order.status !== "CANCELLED" && (
                       <ReviewPayment id={p.id} canReject={p.status === "VERIFYING"} />
                     )}
                   </li>

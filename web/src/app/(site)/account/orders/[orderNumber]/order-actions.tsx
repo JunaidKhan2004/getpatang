@@ -95,7 +95,7 @@ export function ReviewItem({ productSlug }: { productSlug: string }) {
   );
 }
 
-/** Bank transfer: the customer sends the transaction reference and, optionally, a receipt. */
+/** Bank or wallet transfer: the customer sends the transaction reference and, optionally, a receipt. */
 export function PaymentProofForm({ orderNumber, resubmit }: { orderNumber: string; resubmit: boolean }) {
   const t = useT();
   const [open, setOpen] = useState(!resubmit);
@@ -120,7 +120,7 @@ export function PaymentProofForm({ orderNumber, resubmit }: { orderNumber: strin
         });
       }}
     >
-      <Field label={t("Transaction reference")} value={reference} onChange={(e) => setReference(e.target.value)} required minLength={4} maxLength={64} error={error} hint={t("From your bank app or receipt.")} />
+      <Field label={t("Transaction ID / reference")} value={reference} onChange={(e) => setReference(e.target.value)} required minLength={4} maxLength={64} error={error} hint={t("From your JazzCash, Easypaisa or bank app, or the receipt.")} />
       <SingleUpload label={t("Receipt (optional)")} purpose="payment_proof" value={receipt} onChange={setReceipt} hint={t("Screenshot or PDF. Only our payments team can see it.")} />
       <div><Button type="submit" size="sm" loading={pending}>{t("I have paid")}</Button></div>
     </form>

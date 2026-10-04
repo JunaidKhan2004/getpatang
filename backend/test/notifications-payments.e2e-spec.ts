@@ -139,6 +139,41 @@ describe('Notifications & payments (e2e)', () => {
     expect((await inbox(users[buyer].token, 'refund.completed')).body).toContain('RF-777');
   });
 
+  it('takes JazzCash payments by hand and verifies them like a bank transfer', async () => {
+    const bad = await as(admin).put('/api/v1/admin/settings/payments.jazzcash', { value: { enabled: true, accountTitle: 'GetPatang', number: '12345' } }).expect(400);
+    expect(bad.body.error.message).toContain('03XXXXXXXXX');
+    await as(admin).put('/api/v1/admin/settings/payments.jazzcash', { value: { enabled: true, accountTitle: 'GetPatang', number: '0300-1234567' } }).expect(200);
+    const buyer1 = users[1].token;
+    const options = await as(buyer1).get('/api/v1/checkout/options').expect(200);
+    expect(options.body.data.paymentMethods.map((m: { key: string }) => m.key)).toEqual(expect.arrayContaining(['cod', 'jazzcash', 'bank_transfer']));
+    expect(options.body.data.paymentMethods.map((m: { key: string }) => m.key)).not.toContain('easypaisa');
+
+    const design = await as(buyer1)
+      .post('/api/v1/designs', { name: 'Wallet kite', design: { shape: 'patang', size: 'small', background: '#420000', pattern: 'none', patternColor: '#F6F6F6', textColor: '#F6F6F6', font: 'sans', tail: false, tailColor: '#D4D7DD' } })
+      .expect(201);
+    const req = (await as(buyer1).post('/api/v1/custom-orders', { designId: design.body.data.id, shopId, quantity: 2, requirements: 'Two kites for the weekend.' }).expect(201)).body.data.id;
+    await as(seller).post(`/api/v1/seller/custom-orders/${req}/quote`, { price: 900, deliveryDays: 3, validDays: 3 }).expect(200);
+    const address = await as(buyer1).post('/api/v1/addresses', { fullName: 'Buyer One', phone: '03001234568', line1: 'House 5, Gulberg', city: 'Lahore' }).expect(201);
+    const accepted = await as(buyer1)
+      .post(`/api/v1/custom-orders/${req}/accept`, { addressId: address.body.data.id, deliveryMethod: 'standard', paymentMethod: 'jazzcash' })
+      .expect(200);
+    const number = accepted.body.data.order.orderNumber;
+    expect(accepted.body.data.paymentInstructions).toContain('with JazzCash to 03001234567 (GetPatang)');
+
+    const urdu = await as(buyer1).get(`/api/v1/orders/${number}`).set('Accept-Language', 'ur').expect(200);
+    expect(urdu.body.data.payment.instructions).toContain('جاز کیش سے 03001234567');
+    expect(urdu.body.data.payment).toMatchObject({ method: 'jazzcash', canSubmitProof: true });
+
+    await as(seller).post(`/api/v1/seller/orders/${number}/status`, { status: 'CONFIRMED' }).expect(200);
+    await as(seller).post(`/api/v1/seller/orders/${number}/status`, { status: 'PREPARING' }).expect(409);
+    await as(buyer1).post(`/api/v1/orders/${number}/payment-proof`, { reference: '012345678901' }).expect(200);
+    const queue = await as(admin).get('/api/v1/admin/payments?status=VERIFYING&provider=jazzcash').expect(200);
+    const row = queue.body.data.find((p: { order: { orderNumber: string } }) => p.order.orderNumber === number);
+    expect(row).toMatchObject({ provider: 'jazzcash', reference: '012345678901' });
+    await as(admin).post(`/api/v1/admin/payments/${row.id}/review`, { decision: 'approve' }).expect(200);
+    await as(seller).post(`/api/v1/seller/orders/${number}/status`, { status: 'PREPARING' }).expect(200);
+  });
+
   it('manages the inbox, preferences and devices', async () => {
     const t = users[buyer].token;
     const count = (await as(t).get('/api/v1/notifications/unread-count').expect(200)).body.data.count;

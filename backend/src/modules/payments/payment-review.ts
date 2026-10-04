@@ -14,7 +14,7 @@ import { AuditService } from '../audit/audit.service.js';
 import { NotificationsService } from '../notifications/notifications.js';
 import { canTransition } from '../orders/order-status.js';
 import { UploadsService } from '../storage/uploads.js';
-import { PaymentsService } from './payment-providers.js';
+import { isManualTransfer, MANUAL_TRANSFER_METHODS, PaymentsService } from './payment-providers.js';
 
 type Tx = Prisma.TransactionClient;
 const OPEN_PAYMENT: PaymentStatus[] = [PaymentStatus.PENDING, PaymentStatus.VERIFYING];
@@ -44,7 +44,7 @@ export class PaymentProofDto {
   @ApiProperty({ description: 'Transaction id or reference from the bank / wallet' })
   @Transform(trim)
   @IsString()
-  @Length(4, 64, { message: 'Enter the transaction reference from your bank (4–64 characters)' })
+  @Length(4, 64, { message: 'Enter the transaction ID or reference (4–64 characters)' })
   reference: string;
 
   @ApiPropertyOptional({ description: 'Upload id (purpose payment_proof): receipt screenshot or PDF' })
@@ -93,18 +93,18 @@ export class PaymentReviewService {
   ) {}
 
   /**
-   * The customer reports a bank transfer. One transfer can cover every order from the same checkout,
-   * so the details apply to all of that checkout's unpaid bank-transfer orders.
+   * The customer reports a bank or wallet transfer. One transfer can cover every order from the same checkout,
+   * so the details apply to all of that checkout's unpaid orders paid by transfer.
    */
   async submitProof(userId: string, orderNumber: string, dto: PaymentProofDto, meta: RequestMeta) {
     const order = await this.prisma.order.findFirst({ where: { orderNumber, userId } });
     if (!order) throw Errors.notFound('Order');
     const siblings = await this.prisma.order.findMany({
-      where: { checkoutId: order.checkoutId, userId, paymentMethod: 'bank_transfer', status: { notIn: [OrderStatus.CANCELLED] } },
+      where: { checkoutId: order.checkoutId, userId, paymentMethod: { in: MANUAL_TRANSFER_METHODS }, status: { notIn: [OrderStatus.CANCELLED] } },
       include: { payments: { where: { status: { in: OPEN_PAYMENT } } } },
     });
     const payable = siblings.filter((o) => o.payments.length > 0);
-    if (!payable.length) throw new AppException('PAYMENT_NOT_OPEN', 'There is no bank transfer waiting for details on this order.', HttpStatus.CONFLICT);
+    if (!payable.length) throw new AppException('PAYMENT_NOT_OPEN', 'There is no payment waiting for details on this order.', HttpStatus.CONFLICT);
     const [proof] = await this.uploads.ownedUploads(userId, dto.proofUploadId ? [dto.proofUploadId] : [], 'payment_proof');
 
     await this.prisma.$transaction(async (tx) => {
@@ -122,7 +122,7 @@ export class PaymentReviewService {
       exclude: userId,
       category: 'account',
       type: 'payment.to_verify',
-      title: 'Bank transfer to verify',
+      title: 'Payment to verify',
       body: `${payable.map((o) => o.orderNumber).join(', ')}: reference ${dto.reference}.`,
       link: '/admin/payments?status=VERIFYING',
     });
@@ -178,7 +178,7 @@ export class PaymentReviewService {
     }
     const payment = await this.prisma.payment.findUnique({ where: { id }, include: { order: true } });
     if (!payment) throw Errors.notFound('Payment');
-    if (payment.status !== PaymentStatus.VERIFYING && !(dto.decision === 'approve' && payment.status === PaymentStatus.PENDING && payment.provider === 'bank_transfer')) {
+    if (payment.status !== PaymentStatus.VERIFYING && !(dto.decision === 'approve' && payment.status === PaymentStatus.PENDING && isManualTransfer(payment.provider))) {
       throw new AppException('PAYMENT_STATE', 'Only payments waiting for verification can be reviewed.', HttpStatus.CONFLICT);
     }
     if (payment.order.status === OrderStatus.CANCELLED) throw new AppException('PAYMENT_STATE', 'This order was cancelled.', HttpStatus.CONFLICT);
@@ -212,7 +212,7 @@ export class PaymentReviewService {
         category: 'shop',
         type: 'payment.verified_seller',
         title: `Order ${payment.order.orderNumber} is paid`,
-        body: 'The bank transfer was verified. You can prepare and ship the order.',
+        body: 'The payment was verified. You can prepare and ship the order.',
         link: `/seller/orders/${payment.order.orderNumber}`,
       });
     }
@@ -297,7 +297,7 @@ export class OrderPaymentController {
 
   @Post(':orderNumber/payment-proof')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send bank transfer details for verification' })
+  @ApiOperation({ summary: 'Send bank or wallet transfer details for verification' })
   submit(@CurrentUser() user: AuthUser, @Param('orderNumber') orderNumber: string, @Body() dto: PaymentProofDto, @ReqMeta() meta: RequestMeta) {
     return this.review.submitProof(user.id, orderNumber, dto, meta);
   }
@@ -317,7 +317,7 @@ export class AdminPaymentsController {
 
   @Post('payments/:id/review')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Approve or reject a bank transfer' })
+  @ApiOperation({ summary: 'Approve or reject a bank or wallet transfer' })
   reviewPayment(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() dto: ReviewPaymentDto, @ReqMeta() meta: RequestMeta) {
     return this.review.review(user.id, id, dto, meta);
   }

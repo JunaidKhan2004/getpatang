@@ -20,6 +20,16 @@ const obj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' 
 /** Safety words required by the platform rules; admins can add words but not remove these. */
 export const REQUIRED_BANNED_KEYWORDS = SETTING_DEFAULTS['products.banned_keywords'];
 
+/** JazzCash / Easypaisa: an account title and a Pakistani mobile number. */
+function wallet(v: unknown, name: string): ReturnType<Check> {
+  if (!obj(v) || typeof v.enabled !== 'boolean') return { error: `Choose whether ${name} is on.` };
+  const value = { enabled: v.enabled, accountTitle: text(v.accountTitle).trim(), number: text(v.number).replace(/[\s-]/g, '') };
+  if (value.number && !/^03\d{9}$/.test(value.number)) return { error: 'Enter the mobile number as 03XXXXXXXXX.' };
+  if (value.enabled && (!value.accountTitle || !value.number)) return { error: `Enter the account title and number before turning ${name} on.` };
+  if (value.accountTitle.length > 80) return { error: 'The account title is too long.' };
+  return { value };
+}
+
 const CHECKS: Record<SettingKey, Check> = {
   'checkout.delivery_methods': (v) => {
     if (!Array.isArray(v) || v.length < 1 || v.length > 5) return { error: 'Add between 1 and 5 delivery methods.' };
@@ -51,6 +61,8 @@ const CHECKS: Record<SettingKey, Check> = {
     if (value.bankName.length > 60 || value.accountTitle.length > 80) return { error: 'The bank name or account title is too long.' };
     return { value };
   },
+  'payments.jazzcash': (v) => wallet(v, 'JazzCash'),
+  'payments.easypaisa': (v) => wallet(v, 'Easypaisa'),
   'products.require_approval': (v) => (typeof v === 'boolean' ? { value: v } : { error: 'Choose on or off.' }),
   'products.banned_keywords': (v) => {
     if (!Array.isArray(v) || v.some((w) => typeof w !== 'string')) return { error: 'Enter one word or phrase per line.' };
@@ -84,6 +96,8 @@ const META: Record<SettingKey, { group: string; label: string; description: stri
   'checkout.delivery_methods': { group: 'Checkout', label: 'Delivery methods', description: 'Options and fees shown at checkout. The fee applies per shop order.' },
   'payments.cod': { group: 'Payments', label: 'Cash on delivery', description: 'Let customers pay the rider in cash.' },
   'payments.bank_transfer': { group: 'Payments', label: 'Bank transfer', description: 'Account customers transfer to. Orders wait until staff verify the transfer.' },
+  'payments.jazzcash': { group: 'Payments', label: 'JazzCash', description: 'Mobile account customers send money to. Orders wait until staff check the transaction ID.' },
+  'payments.easypaisa': { group: 'Payments', label: 'Easypaisa', description: 'Mobile account customers send money to. Orders wait until staff check the transaction ID.' },
   'marketplace.commission_percent': { group: 'Payments', label: 'Platform commission (%)', description: 'Taken from delivered orders when computing seller earnings.' },
   'products.require_approval': { group: 'Marketplace', label: 'Approve products before they go live', description: 'New and edited products wait for a moderator.' },
   'products.banned_keywords': {

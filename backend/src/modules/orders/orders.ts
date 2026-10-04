@@ -8,7 +8,7 @@ import { Paginated, PaginationQueryDto } from '../../common/pagination.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { NotificationsService } from '../notifications/notifications.js';
-import { PaymentsService } from '../payments/payment-providers.js';
+import { isManualTransfer, PaymentsService } from '../payments/payment-providers.js';
 import { closeOrderPayments } from '../payments/payment-review.js';
 import { ShoppingModule } from '../shopping/shopping.module.js';
 import { CheckoutService } from './checkout.service.js';
@@ -105,7 +105,7 @@ export class OrdersService {
             submittedAt: payment.submittedAt,
             reviewNote: payment.reviewNote,
             canSubmitProof:
-              payment.provider === 'bank_transfer' &&
+              isManualTransfer(payment.provider) &&
               (payment.status === PaymentStatus.PENDING || payment.status === PaymentStatus.VERIFYING) &&
               order.status !== OrderStatus.CANCELLED,
           }

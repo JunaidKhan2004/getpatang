@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { ButtonLink } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { api } from "@/lib/api";
-import { formatPKR } from "@/lib/market";
+import { formatPKR, isManualTransfer } from "@/lib/market";
 import { getAccessToken, requireUser } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
 
@@ -44,8 +44,8 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
       </div>
 
       {result.paymentInstructions && <Alert>{result.paymentInstructions}</Alert>}
-      {result.paymentMethod === "bank_transfer" && (
-        <p className="text-sm text-muted">{t("After transferring, open your order and send the transaction reference so we can verify it.")}</p>
+      {isManualTransfer(result.paymentMethod) && (
+        <p className="text-sm text-muted">{t("After paying, open your order and send the transaction ID so we can verify it.")}</p>
       )}
 
       <ul className="divide-y divide-border rounded-md border border-border bg-surface">

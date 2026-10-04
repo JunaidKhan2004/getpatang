@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/dashboard/dashboard-shell";
 import { ProductImage } from "@/components/market/product-card";
 import { Badge } from "@/components/ui/feedback";
 import { api, ApiError } from "@/lib/api";
-import { formatDate, formatPKR, ORDER_STATUS_LABEL, ORDER_STATUS_TONE, PAYMENT_STATUS_LABEL, type PaymentStatus } from "@/lib/market";
+import { formatDate, formatPKR, isManualTransfer, ORDER_STATUS_LABEL, ORDER_STATUS_TONE, PAYMENT_STATUS_LABEL, type PaymentStatus } from "@/lib/market";
 import type { SellerOrderDetail } from "@/lib/seller";
 import { getAccessToken } from "@/lib/session";
 
@@ -97,7 +97,7 @@ export default async function SellerOrderPage({ params }: { params: Promise<{ or
             <h2 id="pay" className="mb-1 font-display text-base font-semibold">{tr("Payment")}</h2>
             <p>{o.payment.label}</p>
             <p className="text-muted">{tr("Status:")}{" "}{tr(PAYMENT_STATUS_LABEL[o.payment.status as PaymentStatus]) ?? o.payment.status.toLowerCase()}</p>
-            {o.payment.method === "bank_transfer" && o.payment.status !== "PAID" && !["CANCELLED", "REFUNDED"].includes(o.status) && (
+            {isManualTransfer(o.payment.method) && o.payment.status !== "PAID" && !["CANCELLED", "REFUNDED"].includes(o.status) && (
               <p className="text-muted">{tr("Wait until our team verifies the transfer before preparing. You will get a notification.")}</p>
             )}
             {o.payment.method === "cod" && o.status !== "DELIVERED" && <p className="text-muted">{tr("Collect {total} in cash on delivery.", { total: formatPKR(o.total) })}</p>}

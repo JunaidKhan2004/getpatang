@@ -438,7 +438,7 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
   Future<void> _send() async {
     final ref_ = _reference.text.trim();
     if (ref_.length < 4) {
-      showToast(context, 'Enter the transaction reference from your bank.'.tr, kind: ToastKind.error);
+      showToast(context, 'Enter the transaction ID or reference.'.tr, kind: ToastKind.error);
       return;
     }
     setState(() => _busy = true);
@@ -467,7 +467,7 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              o.paymentStatus == 'VERIFYING' ? 'We are checking your transfer'.tr : 'Paid by bank transfer? Tell us'.tr,
+              o.paymentStatus == 'VERIFYING' ? 'We are checking your transfer'.tr : 'Paid by bank, JazzCash or Easypaisa? Tell us'.tr,
               style: t.textTheme.titleMedium,
             ),
             if (o.paymentStatus == 'VERIFYING')
@@ -491,8 +491,8 @@ class _PaymentProofCardState extends ConsumerState<_PaymentProofCard> {
                 controller: _reference,
                 maxLength: 64,
                 decoration: InputDecoration(
-                  labelText: 'Transaction reference'.tr,
-                  helperText: 'From your bank app or receipt.'.tr,
+                  labelText: 'Transaction ID / reference'.tr,
+                  helperText: 'From your JazzCash, Easypaisa or bank app, or the receipt.'.tr,
                 ),
               ),
               OutlinedButton.icon(

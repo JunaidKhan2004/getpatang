@@ -42,7 +42,7 @@ export function ReviewPayment({ id, canReject }: { id: string; canReject: boolea
         size="sm"
         loading={pending}
         onClick={() => {
-          if (window.confirm(t("Confirm the money has arrived in the bank account?"))) run("approve");
+          if (window.confirm(t("Confirm the money has arrived in the account?"))) run("approve");
         }}
       >
         {t("Mark as received")}</Button>

@@ -20,6 +20,14 @@ export interface BankTransferSetting {
   iban: string;
 }
 
+/** A JazzCash or Easypaisa mobile account customers send money to by hand. */
+export interface WalletSetting {
+  enabled: boolean;
+  accountTitle: string;
+  /** 03XXXXXXXXX */
+  number: string;
+}
+
 /**
  * Platform settings and their defaults. Values in the `settings` table override these,
  * so admins can change them without a deploy (admin settings UI arrives in Phase 8).
@@ -62,6 +70,9 @@ export const SETTING_DEFAULTS = {
   'marketplace.commission_percent': 0 as number,
   // Disabled until an admin enters real account details.
   'payments.bank_transfer': { enabled: false, bankName: '', accountTitle: '', iban: '' } as BankTransferSetting,
+  // Mobile wallets, paid by hand and verified by staff like bank transfers. Off until a number is entered.
+  'payments.jazzcash': { enabled: false, accountTitle: '', number: '' } as WalletSetting,
+  'payments.easypaisa': { enabled: false, accountTitle: '', number: '' } as WalletSetting,
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;
