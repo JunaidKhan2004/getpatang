@@ -2,8 +2,10 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { api } from "@/lib/api";
 import { getAccessToken, getCurrentUser } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const t = await getT();
   const user = await getCurrentUser();
   const token = user ? await getAccessToken() : undefined;
   const [cartCount, unreadCount] = user
@@ -14,9 +16,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     : [0, 0];
   return (
     <div className="flex min-h-dvh flex-col">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
-        Skip to content
-      </a>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
+        {t("Skip to content")}</a>
       <SiteHeader userName={user ? (user.profile?.displayName ?? user.fullName) : null} cartCount={cartCount} unreadCount={unreadCount} />
       <main id="main" className="flex-1">
         {children}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ButtonLink } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Home page hero: a dusk sky in the brand maroons with one large kite flying on the right,
@@ -104,6 +105,7 @@ export interface HeroStats {
 }
 
 export function HomeHero({ stats }: { stats: HeroStats }) {
+  const t = useT();
   const ref = useRef<HTMLElement>(null);
   const reduce = usePrefersReducedMotion();
 
@@ -142,7 +144,7 @@ export function HomeHero({ stats }: { stats: HeroStats }) {
   return (
     <section ref={ref} className="hero-sky relative isolate overflow-hidden bg-maroon-950 text-white">
       {/* Breathing glow and the faint kite pattern */}
-      <div aria-hidden="true" className="hero-glow pointer-events-none absolute -top-1/3 right-[-10%] -z-10 h-[140%] w-[70%] rounded-full" />
+      <div aria-hidden="true" className="hero-glow pointer-events-none absolute -top-1/3 end-[-10%] -z-10 h-[140%] w-[70%] rounded-full" />
       <div aria-hidden="true" className="kite-pattern pointer-events-none absolute inset-0 -z-10" />
 
       {/* Distant kites */}
@@ -151,7 +153,7 @@ export function HomeHero({ stats }: { stats: HeroStats }) {
           <div
             key={i}
             className="hero-parallax absolute"
-            style={{ left: `${k.x}%`, top: `${k.y}%`, ["--depth" as string]: k.depth, opacity: 0.15 + k.depth * 0.9, filter: k.depth < 0.15 ? "blur(1px)" : undefined }}
+            style={{ insetInlineStart: `${k.x}%`, top: `${k.y}%`, ["--depth" as string]: k.depth, opacity: 0.15 + k.depth * 0.9, filter: k.depth < 0.15 ? "blur(1px)" : undefined }}
           >
             <div className="hero-drift" style={{ animationDuration: `${k.dur}s`, animationDelay: `${k.delay}s`, rotate: `${k.tilt}deg` }}>
               <SmallKite size={k.size} />
@@ -163,21 +165,17 @@ export function HomeHero({ stats }: { stats: HeroStats }) {
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[3fr_2fr]">
         <div className="grid gap-6">
           <p className="hero-reveal text-sm font-semibold tracking-[0.1em] text-maroon-100 uppercase" style={{ ["--d" as string]: "0ms" }}>
-            Pakistan’s kite platform
-          </p>
+            {t("Pakistan’s kite platform")}</p>
           <h1 className="hero-reveal max-w-2xl text-4xl leading-tight font-bold sm:text-5xl" style={{ ["--d" as string]: "120ms" }}>
-            Kite shops, organised tournaments and <span className="hero-underline">the people who fly.</span>
+            {t("Kite shops, organised tournaments and")}{" "}<span className="hero-underline">{t("the people who fly.")}</span>
           </h1>
           <p className="hero-reveal max-w-xl text-lg text-maroon-100" style={{ ["--d" as string]: "240ms" }}>
-            Buy from trusted sellers, register for approved competitions and follow official rankings, all in one place.
-          </p>
+            {t("Buy from trusted sellers, register for approved competitions and follow official rankings, all in one place.")}</p>
           <div className="hero-reveal flex flex-wrap gap-3" style={{ ["--d" as string]: "360ms" }}>
             <ButtonLink href="/marketplace" size="lg" className="!bg-white !text-maroon-900 shadow-lg shadow-black/20 transition-transform hover:-translate-y-0.5 hover:!bg-maroon-100">
-              Browse the marketplace
-            </ButtonLink>
+              {t("Browse the marketplace")}</ButtonLink>
             <ButtonLink href="/tournaments" size="lg" variant="secondary" className="!border-white/40 !bg-white/5 !text-white backdrop-blur-sm transition-transform hover:-translate-y-0.5 hover:!bg-white/10">
-              See tournaments
-            </ButtonLink>
+              {t("See tournaments")}</ButtonLink>
           </div>
           {liveStats.length > 0 && (
             <dl className="hero-reveal mt-2 flex flex-wrap gap-x-8 gap-y-3" style={{ ["--d" as string]: "480ms" }}>

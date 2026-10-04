@@ -23,8 +23,10 @@ import {
   SIZE_LABEL,
   SWATCHES,
 } from "@/lib/designer";
+import { useT } from "@/lib/i18n/client";
 
 function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (c: string) => void }) {
+  const t = useT();
   return (
     <fieldset className="grid gap-2">
       <legend className="mb-1 text-sm font-medium">{label}</legend>
@@ -42,8 +44,7 @@ function ColorPicker({ label, value, onChange }: { label: string; value: string;
         ))}
         <label className="inline-flex items-center gap-2 text-sm text-muted">
           <input type="color" value={value} onChange={(e) => onChange(e.target.value.toUpperCase())} className="size-8 cursor-pointer rounded border border-border bg-surface" />
-          Custom
-        </label>
+          {t("Custom")}</label>
       </div>
     </fieldset>
   );
@@ -71,6 +72,7 @@ function Choice<T extends string>({ label, options, value, onChange, labels }: {
 }
 
 export function Designer({ initial }: { initial: { id: string; name: string; design: KiteDesign } | null }) {
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const [design, setDesign] = useState<KiteDesign>(initial?.design ?? DEFAULT_DESIGN);
@@ -114,48 +116,47 @@ export function Designer({ initial }: { initial: { id: string; name: string; des
     <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="kite-pattern grid place-items-center rounded-md border border-border bg-surface-2 p-6">
-          <KitePreview design={design} className="h-[380px] w-full max-w-[300px]" title={`Preview of ${name || "your kite"}`} />
+          <KitePreview design={design} className="h-[380px] w-full max-w-[300px]" title={t("Preview of {kite}", { kite: name || "your kite" })} />
         </div>
-        <p className="mt-2 text-center text-xs text-muted">Preview only. The shop confirms materials, exact colours and size in its quote.</p>
+        <p className="mt-2 text-center text-xs text-muted">{t("Preview only. The shop confirms materials, exact colours and size in its quote.")}</p>
       </div>
 
       <div className="grid content-start gap-6">
         <section className={card} aria-labelledby="d-shape">
-          <h2 id="d-shape" className="font-display font-semibold">Shape and size</h2>
-          <Choice label="Shape" options={KITE_SHAPES} value={design.shape} onChange={(v) => set("shape", v)} labels={SHAPE_LABEL} />
-          <Choice label="Size" options={KITE_SIZES} value={design.size} onChange={(v) => set("size", v)} labels={SIZE_LABEL} />
+          <h2 id="d-shape" className="font-display font-semibold">{t("Shape and size")}</h2>
+          <Choice label={t("Shape")} options={KITE_SHAPES} value={design.shape} onChange={(v) => set("shape", v)} labels={SHAPE_LABEL} />
+          <Choice label={t("Size")} options={KITE_SIZES} value={design.size} onChange={(v) => set("size", v)} labels={SIZE_LABEL} />
         </section>
 
         <section className={card} aria-labelledby="d-colour">
-          <h2 id="d-colour" className="font-display font-semibold">Colours and pattern</h2>
-          <ColorPicker label="Kite colour" value={design.background} onChange={(c) => set("background", c)} />
-          <Choice label="Pattern" options={KITE_PATTERNS} value={design.pattern} onChange={(v) => set("pattern", v)} labels={PATTERN_LABEL} />
-          {design.pattern !== "none" && <ColorPicker label="Pattern colour" value={design.patternColor} onChange={(c) => set("patternColor", c)} />}
+          <h2 id="d-colour" className="font-display font-semibold">{t("Colours and pattern")}</h2>
+          <ColorPicker label={t("Kite colour")} value={design.background} onChange={(c) => set("background", c)} />
+          <Choice label={t("Pattern")} options={KITE_PATTERNS} value={design.pattern} onChange={(v) => set("pattern", v)} labels={PATTERN_LABEL} />
+          {design.pattern !== "none" && <ColorPicker label={t("Pattern colour")} value={design.patternColor} onChange={(c) => set("patternColor", c)} />}
         </section>
 
         <section className={card} aria-labelledby="d-text">
-          <h2 id="d-text" className="font-display font-semibold">Text and logo</h2>
-          <Field label="Text on the kite (optional)" maxLength={24} value={design.text ?? ""} onChange={(e) => set("text", e.target.value)} error={errors.text} hint={`${(design.text ?? "").length}/24 characters`} />
+          <h2 id="d-text" className="font-display font-semibold">{t("Text and logo")}</h2>
+          <Field label={t("Text on the kite (optional)")} maxLength={24} value={design.text ?? ""} onChange={(e) => set("text", e.target.value)} error={errors.text} hint={`${(design.text ?? "").length}/24 characters`} />
           {design.text && (
             <>
-              <Choice label="Lettering" options={KITE_FONTS} value={design.font} onChange={(v) => set("font", v)} labels={FONT_LABEL} />
-              <ColorPicker label="Text colour" value={design.textColor} onChange={(c) => set("textColor", c)} />
+              <Choice label={t("Lettering")} options={KITE_FONTS} value={design.font} onChange={(v) => set("font", v)} labels={FONT_LABEL} />
+              <ColorPicker label={t("Text colour")} value={design.textColor} onChange={(c) => set("textColor", c)} />
             </>
           )}
           <div className="grid gap-2">
-            <span className="text-sm font-medium">Logo or photo (optional)</span>
+            <span className="text-sm font-medium">{t("Logo or photo (optional)")}</span>
             {design.imageUrl ? (
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={design.imageUrl} alt="" className="size-14 rounded-full border border-border object-cover" />
                 <Button type="button" variant="secondary" size="sm" onClick={() => setDesign((d) => ({ ...d, imageUploadId: null, imageUrl: null }))}>
-                  <X className="size-4" aria-hidden="true" /> Remove
-                </Button>
+                  <X className="size-4" aria-hidden="true" /> {" "}{t("Remove")}</Button>
               </div>
             ) : (
               <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading} className="inline-flex w-fit items-center gap-2 rounded-md border-2 border-dashed border-border px-4 py-3 text-sm text-muted hover:border-primary hover:text-primary">
                 {uploading ? <Spinner /> : <ImagePlus className="size-4" aria-hidden="true" />}
-                {uploading ? "Uploading…" : "Add a logo (JPG, PNG or WebP)"}
+                {uploading ? t("Uploading…") : t("Add a logo (JPG, PNG or WebP)")}
               </button>
             )}
             <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" tabIndex={-1} onChange={(e) => pickImage(e.target.files?.[0])} />
@@ -164,20 +165,19 @@ export function Designer({ initial }: { initial: { id: string; name: string; des
         </section>
 
         <section className={card} aria-labelledby="d-tail">
-          <h2 id="d-tail" className="font-display font-semibold">Tail</h2>
+          <h2 id="d-tail" className="font-display font-semibold">{t("Tail")}</h2>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={design.tail} onChange={(e) => set("tail", e.target.checked)} className="size-4 accent-[var(--primary)]" />
-            Add a tail
-          </label>
-          {design.tail && <ColorPicker label="Tail colour" value={design.tailColor} onChange={(c) => set("tailColor", c)} />}
+            {t("Add a tail")}</label>
+          {design.tail && <ColorPicker label={t("Tail colour")} value={design.tailColor} onChange={(c) => set("tailColor", c)} />}
         </section>
 
         <section className={card} aria-labelledby="d-save">
-          <h2 id="d-save" className="font-display font-semibold">Save</h2>
-          <Field label="Design name" required minLength={2} maxLength={60} value={name} onChange={(e) => setName(e.target.value)} error={errors.name} placeholder="e.g. Team Falcon patang" />
+          <h2 id="d-save" className="font-display font-semibold">{t("Save")}</h2>
+          <Field label={t("Design name")} required minLength={2} maxLength={60} value={name} onChange={(e) => setName(e.target.value)} error={errors.name} placeholder={t("e.g. Team Falcon patang")} />
           <div className="flex flex-wrap gap-2">
-            <Button type="button" loading={pending} disabled={name.trim().length < 2} onClick={() => save(true)}>Save and request a quote</Button>
-            <Button type="button" variant="secondary" loading={pending} disabled={name.trim().length < 2} onClick={() => save(false)}>Save design</Button>
+            <Button type="button" loading={pending} disabled={name.trim().length < 2} onClick={() => save(true)}>{t("Save and request a quote")}</Button>
+            <Button type="button" variant="secondary" loading={pending} disabled={name.trim().length < 2} onClick={() => save(false)}>{t("Save design")}</Button>
           </div>
         </section>
       </div>

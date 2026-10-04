@@ -9,6 +9,7 @@ import type { CommentView, PostView } from "@/lib/community";
 import { getAccessToken, getCurrentUser } from "@/lib/session";
 
 import { Comments } from "./comments";
+import { getT } from "@/lib/i18n/server";
 
 const getPost = cache(async (id: string) => {
   try {
@@ -20,21 +21,23 @@ const getPost = cache(async (id: string) => {
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const t = await getT();
   const p = await getPost((await params).id);
-  return { title: `${p.author.name} on GetPatang`, description: p.body.slice(0, 160) };
+  return { title: t("{name} on GetPatang", { name: p.author.name }), description: p.body.slice(0, 160) };
 }
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getT();
   const { id } = await params;
   const [post, user] = await Promise.all([getPost(id), getCurrentUser()]);
   const comments = await apiPage<CommentView>(`/posts/${id}/comments`, { token: await getAccessToken(), query: { pageSize: 100 } }).catch(() => null);
 
   return (
     <div className="mx-auto grid max-w-2xl gap-6 px-4 py-8 sm:px-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-muted"><Link href="/community" className="hover:text-primary">Community</Link> / Post</nav>
+      <nav aria-label={t("Breadcrumb")} className="text-sm text-muted"><Link href="/community" className="hover:text-primary">{t("Community")}</Link> / Post</nav>
       <PostCard post={post} linkToPost={false} />
       <section id="comments" aria-labelledby="comments-h" className="grid gap-4 scroll-mt-24">
-        <h2 id="comments-h" className="text-lg font-semibold">Comments ({post.commentCount})</h2>
+        <h2 id="comments-h" className="text-lg font-semibold">{t("Comments ({commentCount})", { commentCount: post.commentCount })}</h2>
         <Comments postId={id} initial={comments?.data ?? []} signedIn={Boolean(user)} postIsMine={post.isMine} />
       </section>
     </div>

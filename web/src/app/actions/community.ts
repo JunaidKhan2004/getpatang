@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { api, ApiError } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 export interface CResult<T = unknown> {
   ok: boolean;
@@ -14,16 +15,17 @@ export interface CResult<T = unknown> {
 }
 
 async function run<T>(fn: (token: string) => Promise<T>, success?: string, paths: string[] = [], needsAuth = true): Promise<CResult<T>> {
+  const tr = await getT();
   const token = await getAccessToken();
-  if (needsAuth && !token) return { ok: false, signIn: true, message: "Please sign in to continue." };
+  if (needsAuth && !token) return { ok: false, signIn: true, message: tr("Please sign in to continue.") };
   try {
     const data = await fn(token ?? "");
     paths.forEach((p) => revalidatePath(p));
-    return { ok: true, message: success, data };
+    return { ok: true, message: success && tr(success), data };
   } catch (e) {
     if (e instanceof ApiError) return { ok: false, message: e.message, fieldErrors: e.fieldErrors, signIn: e.status === 401 };
     console.error(e);
-    return { ok: false, message: "Something went wrong. Please try again." };
+    return { ok: false, message: tr("Something went wrong. Please try again.") };
   }
 }
 

@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/feedback";
 import { api, ApiError, apiPage } from "@/lib/api";
 import { formatDate, type ProductCard, type Review, type ShopDetail } from "@/lib/market";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 const getShop = cache(async (slug: string) => {
   try {
@@ -24,8 +25,9 @@ const getShop = cache(async (slug: string) => {
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const tr = await getT();
   const shop = await getShop((await params).slug);
-  return { title: shop.name, description: shop.description ?? `Kites and accessories from ${shop.name}, ${shop.city}.` };
+  return { title: shop.name, description: shop.description ?? tr("Kites and accessories from {name}, {city}.", { name: shop.name, city: shop.city }) };
 }
 
 export default async function ShopPage({
@@ -35,6 +37,7 @@ export default async function ShopPage({
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ tab?: string; page?: string; sort?: string }>;
 }) {
+  const tr = await getT();
   const { slug } = await params;
   const { tab = "products", page, sort } = await searchParams;
   const shop = await getShop(slug);
@@ -59,12 +62,12 @@ export default async function ShopPage({
           <div className="grid min-w-0 flex-1 gap-1">
             <h1 className="flex items-center gap-2 text-2xl font-bold">
               {shop.name}
-              {shop.isVerified && <BadgeCheck className="size-5 text-info" aria-label="Verified shop" />}
+              {shop.isVerified && <BadgeCheck className="size-5 text-info" aria-label={tr("Verified shop")} />}
             </h1>
             <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
               <span className="flex items-center gap-1"><MapPin className="size-3.5" aria-hidden="true" />{shop.city}</span>
               <Stars value={shop.ratingAvg} count={shop.ratingCount} />
-              <span>{shop.productCount} products</span>
+              <span>{tr("{productCount} products", { productCount: shop.productCount })}</span>
             </p>
           </div>
           <FollowButton shopSlug={shop.slug} initial={shop.isFollowing} initialCount={shop.followerCount} />
@@ -72,21 +75,21 @@ export default async function ShopPage({
 
         <div className="grid gap-8 py-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="grid content-start gap-4 rounded-md border border-border bg-surface p-5 text-sm">
-            <h2 className="font-display text-base font-semibold">About</h2>
-            <p className="text-muted">{shop.description ?? "This shop has not added a description yet."}</p>
+            <h2 className="font-display text-base font-semibold">{tr("About")}</h2>
+            <p className="text-muted">{shop.description ?? tr("This shop has not added a description yet.")}</p>
             <ul className="grid gap-2">
               {shop.address && <li className="flex gap-2"><MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />{shop.address}</li>}
               {shop.phone && <li className="flex gap-2"><Phone className="size-4 shrink-0 text-primary" aria-hidden="true" /><a href={`tel:${shop.phone}`} className="hover:underline">{shop.phone}</a></li>}
               {shop.email && <li className="flex gap-2"><Mail className="size-4 shrink-0 text-primary" aria-hidden="true" /><a href={`mailto:${shop.email}`} className="break-all hover:underline">{shop.email}</a></li>}
             </ul>
-            <p className="text-xs text-muted">On GetPatang since {formatDate(shop.createdAt)}</p>
-            <ReportButton targetType="shop" targetId={shop.id} label="Report shop" />
+            <p className="text-xs text-muted">{tr("On GetPatang since {createdAt}", { createdAt: formatDate(shop.createdAt) })}</p>
+            <ReportButton targetType="shop" targetId={shop.id} label={tr("Report shop")} />
           </aside>
 
           <section className="min-w-0">
-            <nav aria-label="Shop sections" className="mb-5 flex gap-2">
-              <Link href={`/shops/${slug}`} className={tabLink("products")} aria-current={tab === "products" ? "page" : undefined}>Products</Link>
-              <Link href={`/shops/${slug}?tab=reviews`} className={tabLink("reviews")} aria-current={tab === "reviews" ? "page" : undefined}>Reviews ({shop.ratingCount})</Link>
+            <nav aria-label={tr("Shop sections")} className="mb-5 flex gap-2">
+              <Link href={`/shops/${slug}`} className={tabLink("products")} aria-current={tab === "products" ? "page" : undefined}>{tr("Products")}</Link>
+              <Link href={`/shops/${slug}?tab=reviews`} className={tabLink("reviews")} aria-current={tab === "reviews" ? "page" : undefined}>{tr("Reviews ({ratingCount})", { ratingCount: shop.ratingCount })}</Link>
             </nav>
 
             {tab === "products" && products && (
@@ -96,7 +99,7 @@ export default async function ShopPage({
                   <Pagination meta={products.meta} basePath={`/shops/${slug}`} params={{ sort }} />
                 </>
               ) : (
-                <EmptyState title="No products yet" message="This shop has not listed any products yet." />
+                <EmptyState title={tr("No products yet")} message={tr("This shop has not listed any products yet.")} />
               )
             )}
 
@@ -109,7 +112,7 @@ export default async function ShopPage({
                         <Stars value={r.rating} />
                         {r.comment && <p>{r.comment}</p>}
                         <p className="text-sm text-muted">
-                          {r.author.name} on <Link href={`/products/${r.product!.slug}`} className="text-primary hover:underline">{r.product!.title}</Link> · {formatDate(r.createdAt)}
+                          {tr("{name} on", { name: r.author.name })}{" "}<Link href={`/products/${r.product!.slug}`} className="text-primary hover:underline">{r.product!.title}</Link> · {formatDate(r.createdAt)}
                         </p>
                       </li>
                     ))}
@@ -117,7 +120,7 @@ export default async function ShopPage({
                   <Pagination meta={reviews.meta} basePath={`/shops/${slug}`} params={{ tab: "reviews" }} />
                 </>
               ) : (
-                <EmptyState title="No reviews yet" message="Reviews appear after customers receive their orders." />
+                <EmptyState title={tr("No reviews yet")} message={tr("Reviews appear after customers receive their orders.")} />
               )
             )}
           </section>

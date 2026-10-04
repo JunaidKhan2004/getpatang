@@ -8,18 +8,20 @@ import { Alert } from "@/components/ui/feedback";
 import { Field, SelectField } from "@/components/ui/field";
 import type { FormState } from "@/lib/types";
 import { PAKISTAN_CITIES } from "@/lib/validation";
+import { useT } from "@/lib/i18n/client";
 
 export function ProfileForm({ defaultName, next }: { defaultName: string; next: string }) {
+  const t = useT();
   const [state, action, pending] = useActionState(saveProfileAction, {} as FormState);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} className="grid gap-5">
       {state.error && <Alert tone="error">{state.error}</Alert>}
       <input type="hidden" name="next" value={next} />
-      <Field label="Display name" name="displayName" required minLength={2} maxLength={40} defaultValue={state.values?.displayName ?? defaultName} error={fe.displayName} />
-      <SelectField label="City" name="city" required options={PAKISTAN_CITIES} defaultValue={state.values?.city} error={fe.city} />
+      <Field label={t("Display name")} name="displayName" required minLength={2} maxLength={40} defaultValue={state.values?.displayName ?? defaultName} error={fe.displayName} />
+      <SelectField label={t("City")} name="city" required options={PAKISTAN_CITIES} defaultValue={state.values?.city} error={fe.city} />
       <div className="grid gap-1.5">
-        <label htmlFor="bio" className="text-sm font-medium">Short bio (optional)</label>
+        <label htmlFor="bio" className="text-sm font-medium">{t("Short bio (optional)")}</label>
         <textarea
           id="bio"
           name="bio"
@@ -31,8 +33,7 @@ export function ProfileForm({ defaultName, next }: { defaultName: string; next: 
         {fe.bio && <p className="text-sm text-danger">{fe.bio}</p>}
       </div>
       <Button type="submit" size="lg" loading={pending}>
-        Continue
-      </Button>
+        {t("Continue")}</Button>
     </form>
   );
 }

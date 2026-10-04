@@ -9,8 +9,10 @@ import { Alert } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
 import type { FormState } from "@/lib/types";
 import { OTP_PATTERN } from "@/lib/validation";
+import { useT } from "@/lib/i18n/client";
 
 export function VerifyForm({ email, next }: { email: string; next: string }) {
+  const t = useT();
   const [state, action, pending] = useActionState(verifyAction, {} as FormState);
   return (
     <form action={action} className="grid gap-5">
@@ -18,7 +20,7 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
       <input type="hidden" name="email" value={email} />
       <input type="hidden" name="next" value={next} />
       <Field
-        label="Verification code"
+        label={t("Verification code")}
         name="code"
         inputMode="numeric"
         autoComplete="one-time-code"
@@ -30,8 +32,7 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
         error={state.fieldErrors?.code}
       />
       <Button type="submit" size="lg" loading={pending}>
-        Verify and continue
-      </Button>
+        {t("Verify and continue")}</Button>
       <ResendCode email={email} purpose="VERIFY_ACCOUNT" />
     </form>
   );

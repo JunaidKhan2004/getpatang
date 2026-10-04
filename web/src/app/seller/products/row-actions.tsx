@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { deleteProductAction, productVisibilityAction, updateStockAction } from "@/app/actions/seller";
 import { Button } from "@/components/ui/button";
 import type { SellerProduct } from "@/lib/seller";
+import { useT } from "@/lib/i18n/client";
 
 /** Per-row menu: edit, quick stock, pause/show, delete (with an inline confirmation). */
 export function ProductRowActions({ product: p }: { product: SellerProduct }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"menu" | "stock" | "delete">("menu");
   const [pending, start] = useTransition();
@@ -27,22 +29,22 @@ export function ProductRowActions({ product: p }: { product: SellerProduct }) {
       } else toast.error(res.message);
     });
 
-  const item = "block w-full rounded px-3 py-2 text-left text-sm hover:bg-surface-2";
+  const item = "block w-full rounded px-3 py-2 text-start text-sm hover:bg-surface-2";
   return (
-    <div className="relative inline-block text-left">
-      <button type="button" aria-label={`Actions for ${p.title}`} aria-expanded={open} onClick={() => setOpen((o) => !o)} className="rounded-md p-2 hover:bg-surface-2">
+    <div className="relative inline-block text-start">
+      <button type="button" aria-label={t("Actions for {title}", { title: p.title })} aria-expanded={open} onClick={() => setOpen((o) => !o)} className="rounded-md p-2 hover:bg-surface-2">
         <MoreHorizontal className="size-4" />
       </button>
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-64 rounded-md border border-border bg-surface p-1 shadow-lg">
+        <div className="absolute end-0 z-20 mt-1 w-64 rounded-md border border-border bg-surface p-1 shadow-lg">
           {mode === "menu" && (
             <>
-              <Link href={`/seller/products/${p.id}`} className={item}>Edit</Link>
-              <button type="button" className={item} onClick={() => setMode("stock")}>Update stock</button>
-              {p.status === "ACTIVE" && <button type="button" className={item} disabled={pending} onClick={() => act(() => productVisibilityAction(p.id, false))}>Pause (hide from shop)</button>}
-              {p.status === "HIDDEN" && <button type="button" className={item} disabled={pending} onClick={() => act(() => productVisibilityAction(p.id, true))}>Show in shop again</button>}
-              {p.status === "ACTIVE" && <a href={`/products/${p.slug}`} target="_blank" className={item}>View in shop</a>}
-              <button type="button" className={`${item} text-danger`} onClick={() => setMode("delete")}>Delete</button>
+              <Link href={`/seller/products/${p.id}`} className={item}>{t("Edit")}</Link>
+              <button type="button" className={item} onClick={() => setMode("stock")}>{t("Update stock")}</button>
+              {p.status === "ACTIVE" && <button type="button" className={item} disabled={pending} onClick={() => act(() => productVisibilityAction(p.id, false))}>{t("Pause (hide from shop)")}</button>}
+              {p.status === "HIDDEN" && <button type="button" className={item} disabled={pending} onClick={() => act(() => productVisibilityAction(p.id, true))}>{t("Show in shop again")}</button>}
+              {p.status === "ACTIVE" && <a href={`/products/${p.slug}`} target="_blank" className={item}>{t("View in shop")}</a>}
+              <button type="button" className={`${item} text-danger`} onClick={() => setMode("delete")}>{t("Delete")}</button>
             </>
           )}
           {mode === "stock" && (
@@ -54,8 +56,7 @@ export function ProductRowActions({ product: p }: { product: SellerProduct }) {
               }}
             >
               {p.variants.length === 0 ? (
-                <label className="grid gap-1 text-sm">Units in stock
-                  <input type="number" min={0} value={simpleStock} onChange={(e) => setSimpleStock(Number(e.target.value))} className="h-9 rounded border border-border bg-surface px-2" />
+                <label className="grid gap-1 text-sm">{t("Units in stock")}<input type="number" min={0} value={simpleStock} onChange={(e) => setSimpleStock(Number(e.target.value))} className="h-9 rounded border border-border bg-surface px-2" />
                 </label>
               ) : (
                 p.variants.map((v) => (
@@ -66,17 +67,17 @@ export function ProductRowActions({ product: p }: { product: SellerProduct }) {
                 ))
               )}
               <div className="flex gap-2">
-                <Button type="submit" size="sm" loading={pending}>Save</Button>
-                <Button type="button" size="sm" variant="secondary" onClick={() => setMode("menu")}>Back</Button>
+                <Button type="submit" size="sm" loading={pending}>{t("Save")}</Button>
+                <Button type="button" size="sm" variant="secondary" onClick={() => setMode("menu")}>{t("Back")}</Button>
               </div>
             </form>
           )}
           {mode === "delete" && (
             <div className="grid gap-2 p-2 text-sm">
-              <p>Delete <strong>{p.title}</strong>? Products with past orders are kept in your records but removed from the shop.</p>
+              <p>{t("Delete")}{" "}<strong>{p.title}</strong>{t("? Products with past orders are kept in your records but removed from the shop.")}</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="danger" loading={pending} onClick={() => act(() => deleteProductAction(p.id))}>Delete</Button>
-                <Button size="sm" variant="secondary" onClick={() => setMode("menu")}>Keep</Button>
+                <Button size="sm" variant="danger" loading={pending} onClick={() => act(() => deleteProductAction(p.id))}>{t("Delete")}</Button>
+                <Button size="sm" variant="secondary" onClick={() => setMode("menu")}>{t("Keep")}</Button>
               </div>
             </div>
           )}

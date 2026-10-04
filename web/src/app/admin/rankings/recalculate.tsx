@@ -5,8 +5,10 @@ import { toast } from "sonner";
 
 import { recalculateRankingsAction } from "@/app/actions/tournaments";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 
 export function RecalculateButton() {
+  const t = useT();
   const [pending, start] = useTransition();
   return (
     <Button
@@ -20,7 +22,6 @@ export function RecalculateButton() {
         })
       }
     >
-      Recalculate all rankings
-    </Button>
+      {t("Recalculate all rankings")}</Button>
   );
 }

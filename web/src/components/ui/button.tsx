@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
+import { Tx } from "@/lib/i18n/client";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "md" | "lg" | "sm";
@@ -54,10 +55,10 @@ export function ButtonLink({
 
 export function Spinner({ className = "size-4" }: { className?: string }) {
   return (
-    <span
-      role="status"
-      aria-label="Loading"
-      className={`inline-block animate-spin rounded-full border-2 border-current border-r-transparent ${className}`}
-    />
+    <span role="status" className={`inline-block animate-spin rounded-full border-2 border-current border-e-transparent ${className}`}>
+      <span className="sr-only">
+        <Tx text="Loading" />
+      </span>
+    </span>
   );
 }

@@ -5,6 +5,7 @@ import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 
 export interface Uploaded {
   id: string;
@@ -46,6 +47,7 @@ export function ImageListUpload({
   onChange: (next: { uploadId: string; url: string }[]) => void;
   max?: number;
 }) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(0);
 
@@ -59,7 +61,7 @@ export function ImageListUpload({
         const u = await uploadFile(file, "product_image");
         added.push({ uploadId: u.id, url: u.url! });
       } catch (e) {
-        toast.error(`${file.name}: ${(e as Error).message}`);
+        toast.error(`${file.name}: ${t((e as Error).message)}`);
       }
       setBusy((n) => n - 1);
     }
@@ -73,23 +75,22 @@ export function ImageListUpload({
         {value.map((img, i) => (
           <li key={img.uploadId} className="group relative aspect-square overflow-hidden rounded-md border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img.url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+            <img src={img.url} alt={t("Photo {i}", { i: i + 1 })} className="h-full w-full object-cover" />
             {i === 0 ? (
-              <span className="absolute bottom-1 left-1 rounded bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-ink">Cover</span>
+              <span className="absolute bottom-1 start-1 rounded bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-ink">{t("Cover")}</span>
             ) : (
               <button
                 type="button"
                 onClick={() => onChange([img, ...value.filter((_, j) => j !== i)])}
-                className="absolute bottom-1 left-1 inline-flex items-center gap-1 rounded bg-surface/90 px-1.5 py-0.5 text-[11px] font-semibold"
+                className="absolute bottom-1 start-1 inline-flex items-center gap-1 rounded bg-surface/90 px-1.5 py-0.5 text-[11px] font-semibold"
               >
-                <Star className="size-3" aria-hidden="true" /> Make cover
-              </button>
+                <Star className="size-3" aria-hidden="true" /> {" "}{t("Make cover")}</button>
             )}
             <button
               type="button"
-              aria-label={`Remove photo ${i + 1}`}
+              aria-label={t("Remove photo {i}", { i: i + 1 })}
               onClick={() => onChange(value.filter((_, j) => j !== i))}
-              className="absolute top-1 right-1 rounded-full bg-surface/90 p-1 hover:bg-surface"
+              className="absolute top-1 end-1 rounded-full bg-surface/90 p-1 hover:bg-surface"
             >
               <X className="size-3.5" />
             </button>
@@ -104,13 +105,13 @@ export function ImageListUpload({
               className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border text-sm text-muted hover:border-primary hover:text-primary"
             >
               {busy > 0 ? <Spinner className="size-5" /> : <ImagePlus className="size-6" aria-hidden="true" />}
-              {busy > 0 ? `Uploading ${busy}…` : "Add photos"}
+              {busy > 0 ? t("Uploading {busy}…", { busy }) : t("Add photos")}
             </button>
           </li>
         )}
       </ul>
       <input ref={input} type="file" accept={ACCEPT.product_image} multiple hidden onChange={(e) => add(e.target.files)} />
-      <p className="text-xs text-muted">JPG, PNG or WebP, up to 5 MB each. The first photo is the cover. Up to {max} photos.</p>
+      <p className="text-xs text-muted">{t("JPG, PNG or WebP, up to 5 MB each. The first photo is the cover. Up to {max} photos.", { max })}</p>
     </div>
   );
 }
@@ -131,6 +132,7 @@ export function SingleUpload({
   hint?: string;
   required?: boolean;
 }) {
+  const t = useT();
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -142,7 +144,7 @@ export function SingleUpload({
     try {
       onChange(await uploadFile(file, purpose));
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(t((e as Error).message));
     } finally {
       setBusy(false);
       if (input.current) input.current.value = "";
@@ -164,7 +166,7 @@ export function SingleUpload({
             {value ? <FileText className="size-5" /> : <Upload className="size-5" />}
           </span>
         )}
-        <span className="min-w-0 flex-1 truncate text-sm">{value ? value.originalName : <span className="text-muted">No file chosen</span>}</span>
+        <span className="min-w-0 flex-1 truncate text-sm">{value ? value.originalName : <span className="text-muted">{t("No file chosen")}</span>}</span>
         <button
           type="button"
           aria-describedby={id}
@@ -173,12 +175,11 @@ export function SingleUpload({
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
         >
           {busy && <Spinner />}
-          {value ? "Replace" : "Choose file"}
+          {value ? t("Replace") : t("Choose file")}
         </button>
         {value && !required && (
           <button type="button" onClick={() => onChange(null)} className="text-sm font-medium text-danger hover:underline">
-            Remove
-          </button>
+            {t("Remove")}</button>
         )}
       </div>
       {hint && <p className="text-xs text-muted">{hint}</p>}

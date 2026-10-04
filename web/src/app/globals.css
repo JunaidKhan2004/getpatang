@@ -85,6 +85,22 @@ h1, h2, h3, h4 {
   text-wrap: balance;
 }
 
+/* Urdu: Noto Nastaliq Urdu with Latin text and digits falling back to Inter. Nastaliq is tall
+   and its letters join, so lines get more room and letter-spacing is removed. */
+html[lang="ur"] {
+  --font-sans: var(--font-nastaliq), var(--font-inter), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-nastaliq), var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+}
+
+html[lang="ur"] body * {
+  letter-spacing: 0 !important;
+  line-height: 1.95 !important;
+}
+
+html[lang="ur"] :is(h1, h2, h3, h4) {
+  line-height: 1.7 !important;
+}
+
 /* Faint kite-diamond pattern for maroon surfaces */
 .kite-pattern {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07'%3E%3Cpath d='M32 4 52 32 32 60 12 32Z'/%3E%3Cpath d='M32 4v56M12 32h40'/%3E%3C/g%3E%3C/svg%3E");

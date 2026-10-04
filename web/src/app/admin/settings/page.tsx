@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/dashboard/dashboard-shell";
 import { Alert } from "@/components/ui/feedback";
 import type { SettingRow } from "@/lib/admin";
@@ -6,17 +7,22 @@ import { formatDate } from "@/lib/market";
 import { getAccessToken } from "@/lib/session";
 
 import { SettingEditor } from "./setting-editor";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Settings" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Settings") };
+}
 
 export default async function AdminSettingsPage() {
+  const t = await getT();
   const settings = await api<SettingRow[]>("/admin/settings", { token: await getAccessToken() }).catch(() => null);
   const groups = settings ? [...new Set(settings.map((s) => s.group))] : [];
 
   return (
     <>
-      <PageHeader title="Settings" description="Platform rules that change without a new release. Every change is checked and recorded in the audit log." />
-      {!settings && <Alert tone="error">Settings could not load. You may not have permission to change them.</Alert>}
+      <PageHeader title={t("Settings")} description={t("Platform rules that change without a new release. Every change is checked and recorded in the audit log.")} />
+      {!settings && <Alert tone="error">{t("Settings could not load. You may not have permission to change them.")}</Alert>}
       <div className="grid gap-8">
         {groups.map((g) => (
           <section key={g} aria-labelledby={`g-${g}`} className="grid gap-4">
@@ -26,7 +32,7 @@ export default async function AdminSettingsPage() {
                 <header className="grid gap-0.5">
                   <h3 className="font-display font-semibold">{s.label}</h3>
                   <p className="text-sm text-muted">{s.description}</p>
-                  <p className="text-xs text-muted">{s.isDefault ? "Using the default" : `Changed${s.updatedBy ? ` by ${s.updatedBy}` : ""}${s.updatedAt ? ` on ${formatDate(s.updatedAt, true)}` : ""}`}</p>
+                  <p className="text-xs text-muted">{s.isDefault ? t("Using the default") : t("Changed{updatedBy}{true}", { updatedBy: s.updatedBy ? ` by ${s.updatedBy}` : "", true: s.updatedAt ? ` on ${formatDate(s.updatedAt, true)}` : "" })}</p>
                 </header>
                 <SettingEditor setting={s} />
               </article>

@@ -6,16 +6,18 @@ import { toast } from "sonner";
 
 import { disputeAction } from "@/app/actions/tournaments";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 
 /** Shown to a player on their own live or finished match. */
 export function DisputeButton({ matchId, slug }: { matchId: string; slug: string }) {
+  const t = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [pending, start] = useTransition();
 
   if (!open) {
-    return <button type="button" onClick={() => setOpen(true)} className="text-xs font-semibold text-warning hover:underline">Dispute</button>;
+    return <button type="button" onClick={() => setOpen(true)} className="text-xs font-semibold text-warning hover:underline">{t("Dispute")}</button>;
   }
   return (
     <form
@@ -32,11 +34,11 @@ export function DisputeButton({ matchId, slug }: { matchId: string; slug: string
         });
       }}
     >
-      <label htmlFor={`d-${matchId}`} className="text-xs font-medium">What went wrong?</label>
+      <label htmlFor={`d-${matchId}`} className="text-xs font-medium">{t("What went wrong?")}</label>
       <textarea id={`d-${matchId}`} required minLength={10} maxLength={1000} rows={2} value={reason} onChange={(e) => setReason(e.target.value)} className="rounded-md border border-border bg-surface px-2 py-1 text-sm" />
       <div className="flex gap-2">
-        <Button type="submit" size="sm" loading={pending}>Send dispute</Button>
-        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+        <Button type="submit" size="sm" loading={pending}>{t("Send dispute")}</Button>
+        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(false)}>{t("Cancel")}</Button>
       </div>
     </form>
   );

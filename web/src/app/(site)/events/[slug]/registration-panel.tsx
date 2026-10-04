@@ -8,9 +8,11 @@ import { cancelEventRegistrationAction, registerEventAction } from "@/app/action
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/feedback";
 import type { EventDetail } from "@/lib/events";
-import { formatDate } from "@/lib/market";
+import { useT, useFormat } from "@/lib/i18n/client";
 
 export function EventRegistrationPanel({ e }: { e: EventDetail }) {
+  const { formatDate } = useFormat();
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const [guests, setGuests] = useState(0);
@@ -28,8 +30,8 @@ export function EventRegistrationPanel({ e }: { e: EventDetail }) {
   if (!e.registrationRequired) {
     return (
       <section className={box}>
-        <h2 className="font-display font-semibold">Open to everyone</h2>
-        <p className="text-sm text-muted">No registration needed. Just come along.</p>
+        <h2 className="font-display font-semibold">{t("Open to everyone")}</h2>
+        <p className="text-sm text-muted">{t("No registration needed. Just come along.")}</p>
       </section>
     );
   }
@@ -38,11 +40,11 @@ export function EventRegistrationPanel({ e }: { e: EventDetail }) {
     const r = e.myRegistration;
     return (
       <section className={box} aria-labelledby="my-reg">
-        <h2 id="my-reg" className="font-display font-semibold">You are registered</h2>
-        <Badge tone={r.status === "CONFIRMED" ? "success" : "warning"}>{r.status === "CONFIRMED" ? "Confirmed" : "On the waiting list"}</Badge>
-        <p className="text-sm text-muted">{r.guests ? `You plus ${r.guests} guest${r.guests > 1 ? "s" : ""}.` : "Just you."}</p>
+        <h2 id="my-reg" className="font-display font-semibold">{t("You are registered")}</h2>
+        <Badge tone={r.status === "CONFIRMED" ? "success" : "warning"}>{r.status === "CONFIRMED" ? t("Confirmed") : t("On the waiting list")}</Badge>
+        <p className="text-sm text-muted">{r.guests ? t("You plus {guests} guest{s}.", { guests: r.guests, s: r.guests > 1 ? "s" : "" }) : t("Just you.")}</p>
         {e.status === "PUBLISHED" && new Date(e.startsAt) > new Date() && (
-          <Button variant="secondary" loading={pending} onClick={() => start(async () => done(await cancelEventRegistrationAction(e.slug)))}>Cancel registration</Button>
+          <Button variant="secondary" loading={pending} onClick={() => start(async () => done(await cancelEventRegistrationAction(e.slug)))}>{t("Cancel registration")}</Button>
         )}
       </section>
     );
@@ -51,8 +53,8 @@ export function EventRegistrationPanel({ e }: { e: EventDetail }) {
   if (!e.registrationOpen) {
     return (
       <section className={box}>
-        <h2 className="font-display font-semibold">Registration</h2>
-        <p className="text-sm text-muted">Registration is closed.</p>
+        <h2 className="font-display font-semibold">{t("Registration")}</h2>
+        <p className="text-sm text-muted">{t("Registration is closed.")}</p>
       </section>
     );
   }
@@ -60,21 +62,20 @@ export function EventRegistrationPanel({ e }: { e: EventDetail }) {
   const left = e.capacity === null ? null : Math.max(0, e.capacity - e.attending);
   return (
     <section className={box} aria-labelledby="reg">
-      <h2 id="reg" className="font-display font-semibold">Register</h2>
+      <h2 id="reg" className="font-display font-semibold">{t("Register")}</h2>
       <p className="text-sm text-muted">
-        {left === null ? "No limit on places." : left === 0 ? "The event is full. You can join the waiting list." : `${left} places left.`}
-        {e.registrationClosesAt && ` Closes ${formatDate(e.registrationClosesAt, true)}.`}
+        {left === null ? t("No limit on places.") : left === 0 ? t("The event is full. You can join the waiting list.") : `${left} places left.`}
+        {e.registrationClosesAt && t("Closes {true}.", { true: formatDate(e.registrationClosesAt, true) })}
       </p>
       {e.maxGuests > 0 && (
         <label className="grid gap-1 text-sm font-medium">
-          Guests coming with you
-          <select value={guests} onChange={(ev) => setGuests(Number(ev.target.value))} className="h-11 rounded-md border border-border bg-surface px-3">
-            {Array.from({ length: e.maxGuests + 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? "None" : i}</option>)}
+          {t("Guests coming with you")}<select value={guests} onChange={(ev) => setGuests(Number(ev.target.value))} className="h-11 rounded-md border border-border bg-surface px-3">
+            {Array.from({ length: e.maxGuests + 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? t("None") : i}</option>)}
           </select>
         </label>
       )}
       <Button loading={pending} onClick={() => start(async () => done(await registerEventAction(e.slug, guests)))}>
-        {left === 0 ? "Join the waiting list" : "Register"}
+        {left === 0 ? t("Join the waiting list") : t("Register")}
       </Button>
     </section>
   );

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { api, ApiError } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 export interface TResult {
   ok: boolean;
@@ -15,17 +16,18 @@ export interface TResult {
 }
 
 async function run(fn: (token: string) => Promise<unknown>, success?: string, paths: string[] = [], returnTo = "/tournaments"): Promise<TResult> {
+  const tr = await getT();
   const token = await getAccessToken();
   if (!token) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
   try {
     const res = await fn(token);
     paths.forEach((p) => revalidatePath(p));
     const msg = (res as { message?: string } | null)?.message;
-    return { ok: true, message: msg ?? success, id: (res as { id?: string } | null)?.id };
+    return { ok: true, message: msg ?? (success && (await getT())(success)), id: (res as { id?: string } | null)?.id };
   } catch (e) {
     if (e instanceof ApiError) return { ok: false, message: e.message, fieldErrors: e.fieldErrors, signIn: e.status === 401 };
     console.error(e);
-    return { ok: false, message: "Something went wrong. Please try again." };
+    return { ok: false, message: tr("Something went wrong. Please try again.") };
   }
 }
 

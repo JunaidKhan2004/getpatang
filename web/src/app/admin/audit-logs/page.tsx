@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/dashboard/dashboard-shell";
@@ -7,12 +8,17 @@ import type { AuditRow } from "@/lib/admin";
 import { apiPage } from "@/lib/api";
 import { formatDate } from "@/lib/market";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Audit logs" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Audit logs") };
+}
 
 const AREAS = ["auth.", "user.", "seller.", "product.", "order.", "payment.", "refund.", "tournament.", "match.", "event.", "moderation.", "setting.", "content."];
 
 export default async function AuditLogsPage({ searchParams }: { searchParams: Promise<{ action?: string; q?: string; actorId?: string; entityId?: string; from?: string; to?: string; page?: string }> }) {
+  const t = await getT();
   const params = await searchParams;
   const query = {
     ...params,
@@ -25,36 +31,35 @@ export default async function AuditLogsPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title="Audit logs" description="Every sign-in and staff or member action that changes data. Kept for review and disputes." />
+      <PageHeader title={t("Audit logs")} description={t("Every sign-in and staff or member action that changes data. Kept for review and disputes.")} />
       <form className="mb-4 flex flex-wrap items-end gap-2">
         {params.actorId && <input type="hidden" name="actorId" value={params.actorId} />}
         <label className="grid gap-1 text-xs text-muted">
-          Area
-          <select name="action" defaultValue={params.action ?? ""} className={input}>
-            <option value="">All</option>
+          {t("Area")}<select name="action" defaultValue={params.action ?? ""} className={input}>
+            <option value="">{t("All")}</option>
             {AREAS.map((a) => <option key={a} value={a}>{a.replace(".", "")}</option>)}
           </select>
         </label>
-        <label className="grid gap-1 text-xs text-muted">Person<input name="q" defaultValue={params.q} placeholder="Name or email" className={input} /></label>
-        <label className="grid gap-1 text-xs text-muted">From<input type="date" name="from" defaultValue={params.from} className={input} /></label>
-        <label className="grid gap-1 text-xs text-muted">To<input type="date" name="to" defaultValue={params.to} className={input} /></label>
-        <button className="h-10 rounded-md bg-primary px-4 font-display text-sm font-semibold text-primary-ink hover:bg-primary-hover">Filter</button>
-        {(params.actorId || params.entityId) && <Link href="/admin/audit-logs" className="h-10 content-center text-sm text-primary hover:underline">Clear person filter</Link>}
+        <label className="grid gap-1 text-xs text-muted">{t("Person")}<input name="q" defaultValue={params.q} placeholder={t("Name or email")} className={input} /></label>
+        <label className="grid gap-1 text-xs text-muted">{t("From")}<input type="date" name="from" defaultValue={params.from} className={input} /></label>
+        <label className="grid gap-1 text-xs text-muted">{t("To")}<input type="date" name="to" defaultValue={params.to} className={input} /></label>
+        <button className="h-10 rounded-md bg-primary px-4 font-display text-sm font-semibold text-primary-ink hover:bg-primary-hover">{t("Filter")}</button>
+        {(params.actorId || params.entityId) && <Link href="/admin/audit-logs" className="h-10 content-center text-sm text-primary hover:underline">{t("Clear person filter")}</Link>}
       </form>
 
-      {!result && <Alert tone="error">Audit logs could not load. You may not have permission to read them.</Alert>}
-      {result && result.data.length === 0 && <EmptyState title="Nothing recorded" message="No actions match these filters." />}
+      {!result && <Alert tone="error">{t("Audit logs could not load. You may not have permission to read them.")}</Alert>}
+      {result && result.data.length === 0 && <EmptyState title={t("Nothing recorded")} message={t("No actions match these filters.")} />}
       {result && result.data.length > 0 && (
         <>
           <div className="overflow-x-auto rounded-md border border-border bg-surface">
-            <table className="w-full min-w-[860px] text-left text-sm">
+            <table className="w-full min-w-[860px] text-start text-sm">
               <thead className="border-b border-border text-xs tracking-wide text-muted uppercase">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">When</th>
-                  <th className="px-4 py-3 font-semibold">Who</th>
-                  <th className="px-4 py-3 font-semibold">Action</th>
-                  <th className="px-4 py-3 font-semibold">On</th>
-                  <th className="px-4 py-3 font-semibold">Details</th>
+                  <th className="px-4 py-3 font-semibold">{t("When")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("Who")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("Action")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("On")}</th>
+                  <th className="px-4 py-3 font-semibold">{t("Details")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border align-top">
@@ -62,7 +67,7 @@ export default async function AuditLogsPage({ searchParams }: { searchParams: Pr
                   <tr key={l.id}>
                     <td className="px-4 py-3 whitespace-nowrap text-muted">{formatDate(l.createdAt, true)}</td>
                     <td className="px-4 py-3">
-                      {l.actor ? <Link href={`/admin/users/${l.actor.id}`} className="text-primary hover:underline">{l.actor.fullName}</Link> : <span className="text-muted">System</span>}
+                      {l.actor ? <Link href={`/admin/users/${l.actor.id}`} className="text-primary hover:underline">{l.actor.fullName}</Link> : <span className="text-muted">{t("System")}</span>}
                       {l.ipAddress && <div className="text-xs text-muted">{l.ipAddress}</div>}
                     </td>
                     <td className="px-4 py-3 font-mono text-xs">{l.action}</td>

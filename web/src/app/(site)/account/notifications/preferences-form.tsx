@@ -6,16 +6,18 @@ import { toast } from "sonner";
 import { savePreferencesAction } from "@/app/actions/notifications";
 import { Button } from "@/components/ui/button";
 import type { NotificationPreferences } from "@/lib/notifications";
+import { useT } from "@/lib/i18n/client";
 
 type Channel = "inApp" | "email" | "push";
 
 export function PreferencesForm({ initial }: { initial: NotificationPreferences }) {
+  const t = useT();
   const [rows, setRows] = useState(initial.categories);
   const [pending, start] = useTransition();
   const channels: { key: Channel; label: string }[] = [
-    { key: "inApp", label: "In app" },
-    { key: "email", label: "Email" },
-    ...(initial.channels.push ? [{ key: "push" as const, label: "Push" }] : []),
+    { key: "inApp", label: t("In app") },
+    { key: "email", label: t("Email") },
+    ...(initial.channels.push ? [{ key: "push" as const, label: t("Push") }] : []),
   ];
 
   const toggle = (key: string, ch: Channel) => setRows((r) => r.map((c) => (c.key === key ? { ...c, [ch]: !c[ch] } : c)));
@@ -31,11 +33,11 @@ export function PreferencesForm({ initial }: { initial: NotificationPreferences 
   return (
     <div className="grid gap-4">
       <div className="overflow-x-auto rounded-md border border-border bg-surface">
-        <table className="w-full min-w-[520px] text-left text-sm">
-          <caption className="sr-only">Notification channels for each category</caption>
+        <table className="w-full min-w-[520px] text-start text-sm">
+          <caption className="sr-only">{t("Notification channels for each category")}</caption>
           <thead className="border-b border-border text-xs tracking-wide text-muted uppercase">
             <tr>
-              <th scope="col" className="px-4 py-3 font-semibold">Updates about</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t("Updates about")}</th>
               {channels.map((c) => <th key={c.key} scope="col" className="px-4 py-3 text-center font-semibold">{c.label}</th>)}
             </tr>
           </thead>
@@ -62,8 +64,8 @@ export function PreferencesForm({ initial }: { initial: NotificationPreferences 
           </tbody>
         </table>
       </div>
-      {!initial.channels.push && <p className="text-xs text-muted">Phone push notifications will be added here once the mobile app can receive them.</p>}
-      <div><Button loading={pending} onClick={save}>Save settings</Button></div>
+      {!initial.channels.push && <p className="text-xs text-muted">{t("Phone push notifications will be added here once the mobile app can receive them.")}</p>}
+      <div><Button loading={pending} onClick={save}>{t("Save settings")}</Button></div>
     </div>
   );
 }

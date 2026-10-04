@@ -6,13 +6,15 @@ import { api, ApiError } from "@/lib/api";
 import { clearSession, getAccessToken, getRefreshToken, setSession } from "@/lib/session";
 import { type FormState, isSeller, isStaff, type PublicUser, type Tokens } from "@/lib/types";
 import { safeNext } from "@/lib/validation";
+import { getT } from "@/lib/i18n/server";
 
 const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
 
-function fail(e: unknown, values?: Record<string, string>): FormState {
+async function fail(e: unknown, values?: Record<string, string>): Promise<FormState> {
   if (e instanceof ApiError) return { error: e.message, fieldErrors: e.fieldErrors, values };
   console.error(e);
-  return { error: "Something went wrong. Please try again.", values };
+  const t = await getT();
+  return { error: t("Something went wrong. Please try again."), values };
 }
 
 /** Where a user lands after signing in when no `next` was requested. */
@@ -44,11 +46,12 @@ export async function loginAction(_prev: FormState, fd: FormData): Promise<FormS
 }
 
 export async function registerAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const t = await getT();
   const values = { fullName: str(fd, "fullName"), email: str(fd, "email"), phone: str(fd, "phone").replace(/[\s-]/g, "") };
   if (fd.get("password") !== fd.get("confirmPassword")) {
-    return { fieldErrors: { confirmPassword: "Passwords do not match" }, values };
+    return { fieldErrors: { confirmPassword: (await getT())("Passwords do not match") }, values };
   }
-  if (!fd.get("terms")) return { error: "Please accept the Terms and Privacy Policy to continue.", values };
+  if (!fd.get("terms")) return { error: t("Please accept the Terms and Privacy Policy to continue."), values };
   try {
     await api("/auth/register", {
       method: "POST",
@@ -91,7 +94,7 @@ export async function forgotPasswordAction(_prev: FormState, fd: FormData): Prom
 }
 
 export async function resetPasswordAction(_prev: FormState, fd: FormData): Promise<FormState> {
-  if (fd.get("newPassword") !== fd.get("confirmPassword")) return { fieldErrors: { confirmPassword: "Passwords do not match" } };
+  if (fd.get("newPassword") !== fd.get("confirmPassword")) return { fieldErrors: { confirmPassword: (await getT())("Passwords do not match") } };
   try {
     await api("/auth/reset-password", {
       method: "POST",

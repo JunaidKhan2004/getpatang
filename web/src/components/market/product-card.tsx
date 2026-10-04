@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatPKR, type ImageRef, type ProductCard as Product } from "@/lib/market";
 
 import { KiteMark } from "../ui/kite-mark";
+import { Tx } from "@/lib/i18n/client";
 
 /** Product photo, or a branded placeholder when the seller has not uploaded one yet. */
 export function ProductImage({ image, title, className = "" }: { image: ImageRef | null; title: string; className?: string }) {
@@ -27,8 +28,8 @@ export function Stars({ value, count, size = "sm" }: { value: number; count?: nu
         {"★".repeat(full)}
         <span className="text-border">{"★".repeat(5 - full)}</span>
       </span>
-      <span className="sr-only">Rated {value} out of 5</span>
-      {count !== undefined && <span>{count > 0 ? `${value.toFixed(1)} (${count})` : "No reviews yet"}</span>}
+      <span className="sr-only"><Tx text="Rated {value} out of 5" values={{ value }} /></span>
+      {count !== undefined && <span>{count > 0 ? `${value.toFixed(1)} (${count})` : <Tx text="No reviews yet" />}</span>}
     </span>
   );
 }
@@ -38,7 +39,7 @@ export function Price({ price, compareAtPrice, from = false }: { price: number; 
   return (
     <span className="inline-flex flex-wrap items-baseline gap-x-2 tabular-nums">
       <span className="font-semibold text-ink">
-        {from && <span className="text-xs font-normal text-muted">From </span>}
+        {from && <span className="text-xs font-normal text-muted"><Tx text="From" /> </span>}
         {formatPKR(price)}
       </span>
       {discount > 0 && (
@@ -60,13 +61,18 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative">
         <ProductImage image={product.image} title={product.title} className="aspect-[4/3] w-full" />
         {!product.inStock && (
-          <span className="absolute top-2 left-2 rounded bg-ink/80 px-2 py-0.5 text-xs font-semibold text-surface">Out of stock</span>
+          <span className="absolute top-2 start-2 rounded bg-ink/80 px-2 py-0.5 text-xs font-semibold text-surface"><Tx text="Out of stock" /></span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <span className="flex items-center gap-1 text-xs text-muted">
           {product.shop.name}
-          {product.shop.isVerified && <BadgeCheck className="size-3.5 text-info" aria-label="Verified shop" />}
+          {product.shop.isVerified && (
+            <>
+              <BadgeCheck className="size-3.5 text-info" aria-hidden="true" />
+              <span className="sr-only"><Tx text="Verified shop" /></span>
+            </>
+          )}
         </span>
         <span className="line-clamp-2 font-display text-[15px] leading-snug font-semibold group-hover:text-primary">{product.title}</span>
         <Stars value={product.ratingAvg} count={product.ratingCount} />

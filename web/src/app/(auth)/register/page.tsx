@@ -3,13 +3,18 @@ import type { Metadata } from "next";
 import { AuthHeading } from "@/components/auth/auth-heading";
 
 import { RegisterForm } from "./register-form";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Create account" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Create account") };
+}
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const t = await getT();
   return (
     <>
-      <AuthHeading title="Create your account" subtitle="We will email you a 6-digit code to verify your address." />
+      <AuthHeading title={t("Create your account")} subtitle={t("We will email you a 6-digit code to verify your address.")} />
       <RegisterForm />
     </>
   );

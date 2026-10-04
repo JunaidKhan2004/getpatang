@@ -3,11 +3,13 @@
 import { useId } from "react";
 
 import { bodyPoints, type KiteDesign, STAR_POINTS, starPath, tailAnchor, tailPath, textSize } from "@/lib/designer";
+import { useT } from "@/lib/i18n/client";
 
 const FONT_FAMILY = { sans: "var(--font-inter), Inter, sans-serif", display: "var(--font-poppins), Poppins, sans-serif", serif: "Georgia, 'Times New Roman', serif" } as const;
 
 /** Live SVG drawing of a design. Same rules as the mobile painter. */
 export function KitePreview({ design, className = "", title }: { design: KiteDesign; className?: string; title?: string }) {
+  const t = useT();
   const clip = `kite-${useId().replace(/:/g, "")}`;
   const pts = bodyPoints(design.shape, design.size);
   const poly = pts.map((p) => p.join(",")).join(" ");
@@ -21,7 +23,7 @@ export function KitePreview({ design, className = "", title }: { design: KiteDes
   const pc = design.patternColor;
 
   return (
-    <svg viewBox="0 0 200 260" role="img" aria-label={title ?? "Kite design preview"} className={className}>
+    <svg viewBox="0 0 200 260" role="img" aria-label={title ?? t("Kite design preview")} className={className}>
       <defs>
         <clipPath id={clip}><polygon points={poly} /></clipPath>
       </defs>

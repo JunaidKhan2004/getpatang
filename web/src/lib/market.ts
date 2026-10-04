@@ -1,5 +1,8 @@
 /** Marketplace response types. Mirror backend/src/modules/catalog, shopping and orders. */
 
+import { intlLocale, type Lang, translate } from "./i18n/core";
+import { currentLang } from "./i18n/current";
+
 export interface ImageRef {
   url: string;
   alt: string | null;
@@ -248,10 +251,10 @@ export const ORDER_STATUS_TONE: Record<OrderStatus, "neutral" | "success" | "war
   RETURNED: "neutral",
 };
 
-export const formatPKR = (n: number) => `Rs ${n.toLocaleString("en-PK")}`;
+export const formatPKR = (n: number, lang: Lang = currentLang()) => translate(lang, "Rs {amount}", { amount: n.toLocaleString("en-PK") });
 
-export const formatDate = (iso: string, withTime = false) =>
-  new Date(iso).toLocaleString("en-PK", {
+export const formatDate = (iso: string, withTime = false, lang: Lang = currentLang()) =>
+  new Date(iso).toLocaleString(intlLocale(lang), {
     day: "numeric",
     month: "short",
     year: "numeric",

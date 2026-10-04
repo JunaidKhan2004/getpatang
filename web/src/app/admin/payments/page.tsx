@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/dashboard/dashboard-shell";
@@ -8,8 +9,12 @@ import { formatDate, formatPKR, ORDER_STATUS_LABEL, type OrderStatus, PAYMENT_ST
 import { getAccessToken } from "@/lib/session";
 
 import { CompleteRefund, ReviewPayment } from "./payment-actions";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Payments" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Payments") };
+}
 
 interface PaymentRow {
   id: string;
@@ -41,6 +46,7 @@ interface RefundRow {
 const PAYMENT_TABS: (PaymentStatus | undefined)[] = ["VERIFYING", "PENDING", "PAID", "REFUNDED", "FAILED", undefined];
 
 export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<{ view?: string; status?: string; q?: string; page?: string }> }) {
+  const t = await getT();
   const params = await searchParams;
   const token = await getAccessToken();
   const refundsView = params.view === "refunds";
@@ -55,30 +61,30 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <PageHeader title="Payments" description="Verify bank transfers and record refunds. Cash on delivery is marked paid when the order is delivered." />
-      <nav aria-label="Section" className="mb-3 flex gap-1 border-b border-border pb-3">
-        <Link href="/admin/payments" aria-current={!refundsView ? "page" : undefined} className={tab}>Payments</Link>
-        <Link href="/admin/payments?view=refunds" aria-current={refundsView ? "page" : undefined} className={tab}>Refunds</Link>
+      <PageHeader title={t("Payments")} description={t("Verify bank transfers and record refunds. Cash on delivery is marked paid when the order is delivered.")} />
+      <nav aria-label={t("Section")} className="mb-3 flex gap-1 border-b border-border pb-3">
+        <Link href="/admin/payments" aria-current={!refundsView ? "page" : undefined} className={tab}>{t("Payments")}</Link>
+        <Link href="/admin/payments?view=refunds" aria-current={refundsView ? "page" : undefined} className={tab}>{t("Refunds")}</Link>
       </nav>
 
       <form className="mb-4 flex flex-wrap items-center gap-2">
         {refundsView && <input type="hidden" name="view" value="refunds" />}
         <input type="hidden" name="status" value={status} />
-        <label htmlFor="pay-q" className="sr-only">Search</label>
-        <input id="pay-q" name="q" defaultValue={params.q} placeholder="Order number or reference" className="h-10 w-64 rounded-md border border-border bg-surface px-3 text-sm" />
+        <label htmlFor="pay-q" className="sr-only">{t("Search")}</label>
+        <input id="pay-q" name="q" defaultValue={params.q} placeholder={t("Order number or reference")} className="h-10 w-64 rounded-md border border-border bg-surface px-3 text-sm" />
       </form>
 
       {!refundsView && (
         <>
-          <nav aria-label="Status" className="mb-4 flex gap-1 overflow-x-auto">
+          <nav aria-label={t("Status")} className="mb-4 flex gap-1 overflow-x-auto">
             {PAYMENT_TABS.map((s) => (
               <Link key={s ?? "ALL"} href={`/admin/payments?status=${s ?? "ALL"}`} aria-current={status === (s ?? "ALL") ? "page" : undefined} className={tab}>
-                {s ? PAYMENT_STATUS_LABEL[s] : "All"} ({s ? (counts[s] ?? 0) : Object.values(counts).reduce((a, b) => a + b, 0)})
+                {s ? t(PAYMENT_STATUS_LABEL[s]) : t("All")} ({s ? (counts[s] ?? 0) : Object.values(counts).reduce((a, b) => a + b, 0)})
               </Link>
             ))}
           </nav>
-          {!payments && <Alert tone="error">Payments could not load. You may not have permission to manage payments.</Alert>}
-          {payments && payments.data.length === 0 && <EmptyState title="Nothing here" message={status === "VERIFYING" ? "No bank transfers are waiting to be checked." : "No payments with this status."} />}
+          {!payments && <Alert tone="error">{t("Payments could not load. You may not have permission to manage payments.")}</Alert>}
+          {payments && payments.data.length === 0 && <EmptyState title={t("Nothing here")} message={status === "VERIFYING" ? t("No bank transfers are waiting to be checked.") : t("No payments with this status.")} />}
           {payments && payments.data.length > 0 && (
             <>
               <ul className="grid gap-3">
@@ -87,18 +93,18 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                     <div className="grid gap-1 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-display text-base font-semibold">{formatPKR(p.amount)}</span>
-                        <Badge tone={PAYMENT_STATUS_TONE[p.status]}>{PAYMENT_STATUS_LABEL[p.status]}</Badge>
+                        <Badge tone={PAYMENT_STATUS_TONE[p.status]}>{t(PAYMENT_STATUS_LABEL[p.status])}</Badge>
                         <span className="text-muted">{p.providerLabel}</span>
                       </div>
                       <p>
-                        Order <span className="font-medium">{p.order.orderNumber}</span> ({ORDER_STATUS_LABEL[p.order.status]}) · {p.order.shop} · {p.order.customer}{" "}
+                        {t("Order")}{" "}<span className="font-medium">{p.order.orderNumber}</span> ({t(ORDER_STATUS_LABEL[p.order.status])}) · {p.order.shop} · {p.order.customer}{" "}
                         <span className="text-muted">({p.order.email})</span>
                       </p>
-                      {p.reference && <p>Reference: <span className="font-mono">{p.reference}</span>{p.submittedAt && <span className="text-muted"> · sent {formatDate(p.submittedAt, true)}</span>}</p>}
-                      {p.proofUploadId && <a href={`/api/files/${p.proofUploadId}`} target="_blank" rel="noopener" className="w-fit font-medium text-primary hover:underline">Open receipt</a>}
+                      {p.reference && <p>{t("Reference:")}{" "}<span className="font-mono">{p.reference}</span>{p.submittedAt && <span className="text-muted"> {" "}{t("· sent {true}", { true: formatDate(p.submittedAt, true) })}</span>}</p>}
+                      {p.proofUploadId && <a href={`/api/files/${p.proofUploadId}`} target="_blank" rel="noopener" className="w-fit font-medium text-primary hover:underline">{t("Open receipt")}</a>}
                       {p.reviewedAt && (
                         <p className="text-muted">
-                          Reviewed by {p.reviewedBy ?? "staff"} on {formatDate(p.reviewedAt, true)}{p.reviewNote ? `: ${p.reviewNote}` : ""}
+                          {t("Reviewed by")}{" "}{p.reviewedBy ?? "staff"} {" "}{t("on {true}", { true: formatDate(p.reviewedAt, true) })}{p.reviewNote ? `: ${p.reviewNote}` : ""}
                         </p>
                       )}
                     </div>
@@ -116,13 +122,13 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
 
       {refundsView && (
         <>
-          <nav aria-label="Status" className="mb-4 flex gap-1">
-            {[{ v: "PENDING", l: "To send" }, { v: "COMPLETED", l: "Sent" }, { v: "ALL", l: "All" }].map((s) => (
+          <nav aria-label={t("Status")} className="mb-4 flex gap-1">
+            {[{ v: "PENDING", l: t("To send") }, { v: "COMPLETED", l: t("Sent") }, { v: "ALL", l: t("All") }].map((s) => (
               <Link key={s.v} href={`/admin/payments?view=refunds&status=${s.v}`} aria-current={status === s.v ? "page" : undefined} className={tab}>{s.l}</Link>
             ))}
           </nav>
-          {!refunds && <Alert tone="error">Refunds could not load. You may not have permission to manage payments.</Alert>}
-          {refunds && refunds.data.length === 0 && <EmptyState title="No refunds here" message="Refunds appear when a paid order is cancelled or returned." />}
+          {!refunds && <Alert tone="error">{t("Refunds could not load. You may not have permission to manage payments.")}</Alert>}
+          {refunds && refunds.data.length === 0 && <EmptyState title={t("No refunds here")} message={t("Refunds appear when a paid order is cancelled or returned.")} />}
           {refunds && refunds.data.length > 0 && (
             <>
               <ul className="grid gap-3">
@@ -131,12 +137,12 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                     <div className="grid gap-1 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-display text-base font-semibold">{formatPKR(r.amount)}</span>
-                        <Badge tone={r.status === "COMPLETED" ? "success" : "warning"}>{r.status === "COMPLETED" ? "Sent" : "To send"}</Badge>
-                        <span className="text-muted">paid by {r.order.method}</span>
+                        <Badge tone={r.status === "COMPLETED" ? "success" : "warning"}>{r.status === "COMPLETED" ? t("Sent") : t("To send")}</Badge>
+                        <span className="text-muted">{t("paid by {method}", { method: r.order.method })}</span>
                       </div>
-                      <p>Order <span className="font-medium">{r.order.orderNumber}</span> · {r.order.customer} <span className="text-muted">({[r.order.email, r.order.phone].filter(Boolean).join(", ")})</span></p>
-                      <p className="text-muted">{r.reason} · opened {formatDate(r.createdAt, true)}</p>
-                      {r.status === "COMPLETED" && <p>Sent by {r.processedBy ?? "staff"}{r.processedAt && ` on ${formatDate(r.processedAt, true)}`}, reference <span className="font-mono">{r.reference}</span></p>}
+                      <p>{t("Order")}{" "}<span className="font-medium">{r.order.orderNumber}</span> · {r.order.customer} <span className="text-muted">({[r.order.email, r.order.phone].filter(Boolean).join(", ")})</span></p>
+                      <p className="text-muted">{t("{reason} · opened {true}", { reason: r.reason, true: formatDate(r.createdAt, true) })}</p>
+                      {r.status === "COMPLETED" && <p>{t("Sent by")}{" "}{r.processedBy ?? "staff"}{r.processedAt && ` on ${formatDate(r.processedAt, true)}`}{t(", reference")}{" "}<span className="font-mono">{r.reference}</span></p>}
                     </div>
                     {r.status === "PENDING" && <CompleteRefund id={r.id} />}
                   </li>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { shopDecisionAction, shopVerificationAction } from "@/app/actions/seller";
 import { Button } from "@/components/ui/button";
 import type { ShopStatus } from "@/lib/seller";
+import { useT } from "@/lib/i18n/client";
 
 const OPTIONS: Record<ShopStatus, { decision: string; label: string; variant: "primary" | "secondary" | "danger"; needsNote?: boolean }[]> = {
   PENDING: [
@@ -23,6 +24,7 @@ const OPTIONS: Record<ShopStatus, { decision: string; label: string; variant: "p
 };
 
 export function ShopDecision({ shopId, status, isVerified }: { shopId: string; status: ShopStatus; isVerified: boolean }) {
+  const t = useT();
   const [pending, start] = useTransition();
   const [noteFor, setNoteFor] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -40,13 +42,13 @@ export function ShopDecision({ shopId, status, isVerified }: { shopId: string; s
 
   return (
     <section aria-labelledby="decision" className="grid gap-3 rounded-md border border-primary/30 bg-primary-soft p-5">
-      <h2 id="decision" className="font-display font-semibold">Decision</h2>
-      {status === "REJECTED" && <p className="text-sm text-muted">Waiting for the seller to fix and resubmit.</p>}
+      <h2 id="decision" className="font-display font-semibold">{t("Decision")}</h2>
+      {status === "REJECTED" && <p className="text-sm text-muted">{t("Waiting for the seller to fix and resubmit.")}</p>}
       {!noteFor && (
         <div className="flex flex-wrap gap-2">
           {options.map((o) => (
             <Button key={o.decision} variant={o.variant} disabled={pending} onClick={() => (o.needsNote ? setNoteFor(o.decision) : decide(o.decision))}>
-              {o.label}
+              {t(o.label)}
             </Button>
           ))}
         </div>
@@ -59,11 +61,11 @@ export function ShopDecision({ shopId, status, isVerified }: { shopId: string; s
             decide(noteFor);
           }}
         >
-          <label htmlFor="note" className="text-sm font-medium">Reason (the seller will see this)</label>
+          <label htmlFor="note" className="text-sm font-medium">{t("Reason (the seller will see this)")}</label>
           <textarea id="note" required maxLength={500} rows={3} value={note} onChange={(e) => setNote(e.target.value)} className="rounded-md border border-border bg-surface px-3 py-2 text-sm" />
           <div className="flex gap-2">
-            <Button type="submit" variant="danger" loading={pending}>Confirm</Button>
-            <Button type="button" variant="secondary" onClick={() => setNoteFor(null)}>Back</Button>
+            <Button type="submit" variant="danger" loading={pending}>{t("Confirm")}</Button>
+            <Button type="button" variant="secondary" onClick={() => setNoteFor(null)}>{t("Back")}</Button>
           </div>
         </form>
       )}
@@ -82,8 +84,7 @@ export function ShopDecision({ shopId, status, isVerified }: { shopId: string; s
             }
             className="size-4 accent-[var(--primary)]"
           />
-          Show the “Verified shop” badge
-        </label>
+          {t("Show the “Verified shop” badge")}</label>
       )}
     </section>
   );

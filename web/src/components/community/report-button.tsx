@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { reportAction } from "@/app/actions/community";
 import { Button } from "@/components/ui/button";
 import { REPORT_REASONS } from "@/lib/community";
+import { useT } from "@/lib/i18n/client";
 
 /** Inline report form for any post, comment, user, product or shop. */
 export function ReportButton({ targetType, targetId, label = "Report", compact = false }: { targetType: string; targetId: string; label?: string; compact?: boolean }) {
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -21,7 +23,7 @@ export function ReportButton({ targetType, targetId, label = "Report", compact =
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)} className={`inline-flex items-center gap-1.5 text-sm text-muted hover:text-danger ${compact ? "text-xs" : ""}`}>
-        <Flag className="size-3.5" aria-hidden="true" /> {label}
+        <Flag className="size-3.5" aria-hidden="true" /> {t(label)}
       </button>
     );
   }
@@ -44,20 +46,19 @@ export function ReportButton({ targetType, targetId, label = "Report", compact =
       }}
     >
       <fieldset className="grid gap-1">
-        <legend className="mb-1 text-sm font-semibold">Why are you reporting this?</legend>
+        <legend className="mb-1 text-sm font-semibold">{t("Why are you reporting this?")}</legend>
         {REPORT_REASONS.map((r) => (
           <label key={r.value} className="flex items-center gap-2 text-sm">
             <input type="radio" name={`reason-${targetId}`} required value={r.value} checked={reason === r.value} onChange={() => setReason(r.value)} className="accent-[var(--primary)]" />
-            {r.label}
+            {t(r.label)}
           </label>
         ))}
       </fieldset>
-      <label className="grid gap-1 text-sm">Anything else? (optional)
-        <textarea rows={2} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} className="rounded-md border border-border bg-surface px-2 py-1" />
+      <label className="grid gap-1 text-sm">{t("Anything else? (optional)")}<textarea rows={2} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} className="rounded-md border border-border bg-surface px-2 py-1" />
       </label>
       <div className="flex gap-2">
-        <Button type="submit" size="sm" variant="danger" loading={pending} disabled={!reason}>Send report</Button>
-        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+        <Button type="submit" size="sm" variant="danger" loading={pending} disabled={!reason}>{t("Send report")}</Button>
+        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(false)}>{t("Cancel")}</Button>
       </div>
     </form>
   );

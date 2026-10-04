@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { api, ApiError } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 export interface SellerActionResult {
   ok: boolean;
@@ -19,14 +20,15 @@ async function token() {
 }
 
 async function run(fn: (token: string) => Promise<unknown>, success?: string, paths: string[] = []): Promise<SellerActionResult> {
+  const tr = await getT();
   try {
     await fn(await token());
     paths.forEach((p) => revalidatePath(p));
-    return { ok: true, message: success };
+    return { ok: true, message: success && (await getT())(success) };
   } catch (e) {
     if (e instanceof ApiError) return { ok: false, message: e.message, fieldErrors: e.fieldErrors };
     console.error(e);
-    return { ok: false, message: "Something went wrong. Please try again." };
+    return { ok: false, message: tr("Something went wrong. Please try again.") };
   }
 }
 

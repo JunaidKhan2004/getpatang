@@ -9,21 +9,22 @@ import { Alert } from "@/components/ui/feedback";
 import { Field, PasswordField } from "@/components/ui/field";
 import type { FormState } from "@/lib/types";
 import { OTP_PATTERN, PASSWORD_HINT, PASSWORD_PATTERN } from "@/lib/validation";
+import { useT } from "@/lib/i18n/client";
 
 export function ResetForm({ email }: { email: string }) {
+  const t = useT();
   const [state, action, pending] = useActionState(resetPasswordAction, {} as FormState);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} className="grid gap-5">
       {state.error && <Alert tone="error">{state.error}</Alert>}
       <input type="hidden" name="email" value={email} />
-      <Field label="Reset code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern={OTP_PATTERN} maxLength={6} required error={fe.code} />
-      <PasswordField label="New password" name="newPassword" autoComplete="new-password" required pattern={PASSWORD_PATTERN} hint={PASSWORD_HINT} error={fe.newPassword} />
-      <PasswordField label="Confirm new password" name="confirmPassword" autoComplete="new-password" required error={fe.confirmPassword} />
+      <Field label={t("Reset code")} name="code" inputMode="numeric" autoComplete="one-time-code" pattern={OTP_PATTERN} maxLength={6} required error={fe.code} />
+      <PasswordField label={t("New password")} name="newPassword" autoComplete="new-password" required pattern={PASSWORD_PATTERN} hint={PASSWORD_HINT} error={fe.newPassword} />
+      <PasswordField label={t("Confirm new password")} name="confirmPassword" autoComplete="new-password" required error={fe.confirmPassword} />
       <Button type="submit" size="lg" loading={pending}>
-        Update password
-      </Button>
-      <p className="text-center text-sm text-muted">You will be signed out on your other devices.</p>
+        {t("Update password")}</Button>
+      <p className="text-center text-sm text-muted">{t("You will be signed out on your other devices.")}</p>
       <ResendCode email={email} purpose="RESET_PASSWORD" />
     </form>
   );

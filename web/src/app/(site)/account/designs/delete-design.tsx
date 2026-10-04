@@ -6,8 +6,10 @@ import { toast } from "sonner";
 
 import { deleteDesignAction } from "@/app/actions/custom-orders";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 
 export function DeleteDesign({ id, name }: { id: string; name: string }) {
+  const t = useT();
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
@@ -16,7 +18,7 @@ export function DeleteDesign({ id, name }: { id: string; name: string }) {
       variant="ghost"
       loading={pending}
       onClick={() => {
-        if (!window.confirm(`Delete “${name}”? Requests already sent keep their copy.`)) return;
+        if (!window.confirm(t("Delete “{name}”? Requests already sent keep their copy.", { name }))) return;
         start(async () => {
           const res = await deleteDesignAction(id);
           if (res.ok) {
@@ -26,7 +28,6 @@ export function DeleteDesign({ id, name }: { id: string; name: string }) {
         });
       }}
     >
-      Delete
-    </Button>
+      {t("Delete")}</Button>
   );
 }

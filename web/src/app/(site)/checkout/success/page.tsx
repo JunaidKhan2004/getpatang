@@ -8,8 +8,12 @@ import { Alert } from "@/components/ui/feedback";
 import { api } from "@/lib/api";
 import { formatPKR } from "@/lib/market";
 import { getAccessToken, requireUser } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Order placed" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Order placed") };
+}
 
 interface CheckoutResult {
   checkoutId: string;
@@ -20,6 +24,7 @@ interface CheckoutResult {
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const t = await getT();
   await requireUser("/account/orders");
   const { id } = await searchParams;
   if (!id) redirect("/account/orders");
@@ -30,17 +35,17 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     <div className="mx-auto grid max-w-2xl gap-6 px-4 py-12 sm:px-6">
       <div className="grid justify-items-center gap-3 text-center">
         <CircleCheck className="size-14 text-success" aria-hidden="true" />
-        <h1 className="text-3xl font-bold">Thank you, your order is placed</h1>
+        <h1 className="text-3xl font-bold">{t("Thank you, your order is placed")}</h1>
         <p className="text-muted">
           {result.orders.length > 1
-            ? `Your items come from ${result.orders.length} shops, so you have ${result.orders.length} orders.`
-            : "The shop will confirm your order soon."}
+            ? t("Your items come from {orders} shops, so you have {orders} orders.", { orders: result.orders.length })
+            : t("The shop will confirm your order soon.")}
         </p>
       </div>
 
       {result.paymentInstructions && <Alert>{result.paymentInstructions}</Alert>}
       {result.paymentMethod === "bank_transfer" && (
-        <p className="text-sm text-muted">After transferring, open your order and send the transaction reference so we can verify it.</p>
+        <p className="text-sm text-muted">{t("After transferring, open your order and send the transaction reference so we can verify it.")}</p>
       )}
 
       <ul className="divide-y divide-border rounded-md border border-border bg-surface">
@@ -53,12 +58,12 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             <span className="font-semibold tabular-nums">{formatPKR(o.total)}</span>
           </li>
         ))}
-        <li className="flex justify-between p-4 font-display text-lg font-bold tabular-nums"><span>Total</span><span>{formatPKR(result.total)}</span></li>
+        <li className="flex justify-between p-4 font-display text-lg font-bold tabular-nums"><span>{t("Total")}</span><span>{formatPKR(result.total)}</span></li>
       </ul>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <ButtonLink href="/account/orders">View my orders</ButtonLink>
-        <ButtonLink href="/marketplace" variant="secondary">Continue shopping</ButtonLink>
+        <ButtonLink href="/account/orders">{t("View my orders")}</ButtonLink>
+        <ButtonLink href="/marketplace" variant="secondary">{t("Continue shopping")}</ButtonLink>
       </div>
     </div>
   );

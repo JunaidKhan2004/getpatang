@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/market";
+import { getT } from "@/lib/i18n/server";
 
 /** Public pages written by staff in Admin → Content. Until one is published, it says so honestly. */
 const SECTIONS: Record<string, string> = {
@@ -30,10 +31,11 @@ export const revalidate = 300;
 export async function generateMetadata({ params }: { params: Promise<{ section: string }> }): Promise<Metadata> {
   const { section } = await params;
   const page = SECTIONS[section] ? await getPage(section) : null;
-  return { title: page?.title ?? SECTIONS[section] };
+  return { title: page?.title ?? (await getT())(SECTIONS[section]) };
 }
 
 export default async function SectionPage({ params }: { params: Promise<{ section: string }> }) {
+  const t = await getT();
   const { section } = await params;
   if (!SECTIONS[section]) notFound();
   const page = await getPage(section);
@@ -42,11 +44,11 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
       <h1 className="mb-2 text-3xl font-bold">{page?.title ?? SECTIONS[section]}</h1>
       {page ? (
         <>
-          <p className="mb-8 text-sm text-muted">Last updated {formatDate(page.updatedAt)}</p>
+          <p className="mb-8 text-sm text-muted">{t("Last updated {updatedAt}", { updatedAt: formatDate(page.updatedAt) })}</p>
           <PageBody body={page.body} />
         </>
       ) : (
-        <EmptyState title="Coming soon" message="This page will be published before launch." action={<ButtonLink href="/" variant="secondary">Back to home</ButtonLink>} />
+        <EmptyState title={t("Coming soon")} message={t("This page will be published before launch.")} action={<ButtonLink href="/" variant="secondary">{t("Back to home")}</ButtonLink>} />
       )}
     </div>
   );

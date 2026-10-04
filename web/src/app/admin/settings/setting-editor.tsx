@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { resetSettingAction, saveSettingAction } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import type { SettingRow } from "@/lib/admin";
+import { useT } from "@/lib/i18n/client";
 
 const input = "h-10 w-full rounded-md border border-border bg-surface px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30";
 
@@ -27,6 +28,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 const num = (v: string) => (v.trim() === "" ? NaN : Number(v));
 
 export function SettingEditor({ setting }: { setting: SettingRow }) {
+  const t = useT();
   const router = useRouter();
   const [value, setValue] = useState<unknown>(setting.value);
   const [text, setText] = useState(Array.isArray(setting.value) && setting.key === "products.banned_keywords" ? (setting.value as string[]).join("\n") : "");
@@ -46,7 +48,7 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
 
   const reset = () =>
     start(async () => {
-      if (!window.confirm("Go back to the default value?")) return;
+      if (!window.confirm(t("Go back to the default value?"))) return;
       const res = await resetSettingAction(setting.key);
       if (res.ok) {
         toast.success(res.message);
@@ -57,10 +59,10 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
   let editor: React.ReactNode;
   switch (setting.key) {
     case "products.require_approval":
-      editor = <Toggle checked={value as boolean} onChange={setValue} label="New and edited products wait for approval" />;
+      editor = <Toggle checked={value as boolean} onChange={setValue} label={t("New and edited products wait for approval")} />;
       break;
     case "payments.cod":
-      editor = <Toggle checked={(value as { enabled: boolean }).enabled} onChange={(enabled) => setValue({ enabled })} label="Offer cash on delivery" />;
+      editor = <Toggle checked={(value as { enabled: boolean }).enabled} onChange={(enabled) => setValue({ enabled })} label={t("Offer cash on delivery")} />;
       break;
     case "community.auto_hide_reports":
     case "marketplace.commission_percent":
@@ -82,10 +84,10 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
       const set = (patch: Partial<Bank>) => setValue({ ...b, ...patch });
       editor = (
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="sm:col-span-3"><Toggle checked={b.enabled} onChange={(enabled) => set({ enabled })} label="Offer bank transfer" /></div>
-          <label className="grid gap-1 text-sm">Bank<input value={b.bankName} onChange={(e) => set({ bankName: e.target.value })} className={input} /></label>
-          <label className="grid gap-1 text-sm">Account title<input value={b.accountTitle} onChange={(e) => set({ accountTitle: e.target.value })} className={input} /></label>
-          <label className="grid gap-1 text-sm">IBAN<input value={b.iban} onChange={(e) => set({ iban: e.target.value })} placeholder="PK36SCBL0000001123456702" className={input} /></label>
+          <div className="sm:col-span-3"><Toggle checked={b.enabled} onChange={(enabled) => set({ enabled })} label={t("Offer bank transfer")} /></div>
+          <label className="grid gap-1 text-sm">{t("Bank")}<input value={b.bankName} onChange={(e) => set({ bankName: e.target.value })} className={input} /></label>
+          <label className="grid gap-1 text-sm">{t("Account title")}<input value={b.accountTitle} onChange={(e) => set({ accountTitle: e.target.value })} className={input} /></label>
+          <label className="grid gap-1 text-sm">{t("IBAN")}<input value={b.iban} onChange={(e) => set({ iban: e.target.value })} placeholder="PK36SCBL0000001123456702" className={input} /></label>
         </div>
       );
       break;
@@ -97,13 +99,13 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
         <div className="grid gap-3">
           {list.map((m, i) => (
             <fieldset key={i} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[120px_1fr_1fr_110px_130px_auto] sm:items-end">
-              <legend className="sr-only">Delivery method {i + 1}</legend>
-              <label className="grid gap-1 text-xs text-muted">Key<input value={m.key} onChange={(e) => set(i, { key: e.target.value })} className={input} /></label>
-              <label className="grid gap-1 text-xs text-muted">Label<input value={m.label} onChange={(e) => set(i, { label: e.target.value })} className={input} /></label>
-              <label className="grid gap-1 text-xs text-muted">Description<input value={m.description} onChange={(e) => set(i, { description: e.target.value })} className={input} /></label>
-              <label className="grid gap-1 text-xs text-muted">Fee (Rs)<input type="number" min={0} value={String(m.fee)} onChange={(e) => set(i, { fee: num(e.target.value) })} className={input} /></label>
-              <label className="grid gap-1 text-xs text-muted">Free above (Rs)<input type="number" min={1} value={m.freeAbove === null ? "" : String(m.freeAbove)} placeholder="Never" onChange={(e) => set(i, { freeAbove: e.target.value ? num(e.target.value) : null })} className={input} /></label>
-              <Button type="button" size="sm" variant="ghost" aria-label={`Remove ${m.label || "method"}`} disabled={list.length === 1} onClick={() => setValue(list.filter((_, j) => j !== i))}>
+              <legend className="sr-only">{t("Delivery method {i}", { i: i + 1 })}</legend>
+              <label className="grid gap-1 text-xs text-muted">{t("Key")}<input value={m.key} onChange={(e) => set(i, { key: e.target.value })} className={input} /></label>
+              <label className="grid gap-1 text-xs text-muted">{t("Label")}<input value={m.label} onChange={(e) => set(i, { label: e.target.value })} className={input} /></label>
+              <label className="grid gap-1 text-xs text-muted">{t("Description")}<input value={m.description} onChange={(e) => set(i, { description: e.target.value })} className={input} /></label>
+              <label className="grid gap-1 text-xs text-muted">{t("Fee (Rs)")}<input type="number" min={0} value={String(m.fee)} onChange={(e) => set(i, { fee: num(e.target.value) })} className={input} /></label>
+              <label className="grid gap-1 text-xs text-muted">{t("Free above (Rs)")}<input type="number" min={1} value={m.freeAbove === null ? "" : String(m.freeAbove)} placeholder={t("Never")} onChange={(e) => set(i, { freeAbove: e.target.value ? num(e.target.value) : null })} className={input} /></label>
+              <Button type="button" size="sm" variant="ghost" aria-label={t("Remove {method}", { method: m.label || "method" })} disabled={list.length === 1} onClick={() => setValue(list.filter((_, j) => j !== i))}>
                 <Trash2 className="size-4" />
               </Button>
             </fieldset>
@@ -111,8 +113,7 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
           {list.length < 5 && (
             <div>
               <Button type="button" size="sm" variant="secondary" onClick={() => setValue([...list, { key: "", label: "", description: "", fee: 0, freeAbove: null }])}>
-                <Plus className="size-4" aria-hidden="true" /> Add method
-              </Button>
+                <Plus className="size-4" aria-hidden="true" /> {" "}{t("Add method")}</Button>
             </div>
           )}
         </div>
@@ -128,15 +129,15 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
           <div className="grid gap-2 sm:grid-cols-3">
             {rows.map(([place, pts], i) => (
               <div key={i} className="flex items-end gap-2">
-                <label className="grid gap-1 text-xs text-muted">Place<input type="number" min={1} value={place} onChange={(e) => setPlacement(rows.map((r, j) => (j === i ? [e.target.value, r[1]] : r)))} className={`${input} w-20`} /></label>
-                <label className="grid gap-1 text-xs text-muted">Points<input type="number" min={0} value={String(pts)} onChange={(e) => setPlacement(rows.map((r, j) => (j === i ? [r[0], num(e.target.value)] : r)))} className={`${input} w-24`} /></label>
+                <label className="grid gap-1 text-xs text-muted">{t("Place")}<input type="number" min={1} value={place} onChange={(e) => setPlacement(rows.map((r, j) => (j === i ? [e.target.value, r[1]] : r)))} className={`${input} w-20`} /></label>
+                <label className="grid gap-1 text-xs text-muted">{t("Points")}<input type="number" min={0} value={String(pts)} onChange={(e) => setPlacement(rows.map((r, j) => (j === i ? [r[0], num(e.target.value)] : r)))} className={`${input} w-24`} /></label>
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted">Places are bracket finishes: 1 champion, 2 runner-up, 3 semi-finalists, 5 quarter-finalists, 9 last 16, 17 last 32.</p>
+          <p className="text-xs text-muted">{t("Places are bracket finishes: 1 champion, 2 runner-up, 3 semi-finalists, 5 quarter-finalists, 9 last 16, 17 last 32.")}</p>
           <div className="flex flex-wrap gap-4">
-            <label className="grid gap-1 text-xs text-muted">For taking part<input type="number" min={0} value={String(p.participation)} onChange={(e) => setValue({ ...p, participation: num(e.target.value) })} className={`${input} w-28`} /></label>
-            <label className="grid gap-1 text-xs text-muted">Per match won<input type="number" min={0} value={String(p.perWin)} onChange={(e) => setValue({ ...p, perWin: num(e.target.value) })} className={`${input} w-28`} /></label>
+            <label className="grid gap-1 text-xs text-muted">{t("For taking part")}<input type="number" min={0} value={String(p.participation)} onChange={(e) => setValue({ ...p, participation: num(e.target.value) })} className={`${input} w-28`} /></label>
+            <label className="grid gap-1 text-xs text-muted">{t("Per match won")}<input type="number" min={0} value={String(p.perWin)} onChange={(e) => setValue({ ...p, perWin: num(e.target.value) })} className={`${input} w-28`} /></label>
           </div>
         </div>
       );
@@ -145,9 +146,9 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
     case "products.banned_keywords":
       editor = (
         <div className="grid gap-2">
-          <label htmlFor="banned" className="text-sm font-medium">One word or phrase per line</label>
+          <label htmlFor="banned" className="text-sm font-medium">{t("One word or phrase per line")}</label>
           <textarea id="banned" rows={8} value={text} onChange={(e) => setText(e.target.value)} className="rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm" />
-          {setting.required && <p className="text-xs text-muted">Always kept: {setting.required.join(", ")}.</p>}
+          {setting.required && <p className="text-xs text-muted">{t("Always kept: {required}.", { required: setting.required.join(", ") })}</p>}
         </div>
       );
       break;
@@ -160,8 +161,8 @@ export function SettingEditor({ setting }: { setting: SettingRow }) {
       {editor}
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" loading={pending} onClick={save}>Save</Button>
-        {!setting.isDefault && <Button size="sm" variant="secondary" disabled={pending} onClick={reset}>Use default</Button>}
+        <Button size="sm" loading={pending} onClick={save}>{t("Save")}</Button>
+        {!setting.isDefault && <Button size="sm" variant="secondary" disabled={pending} onClick={reset}>{t("Use default")}</Button>}
       </div>
     </div>
   );

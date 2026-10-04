@@ -12,7 +12,7 @@ export function PageBody({ body }: { body: string }) {
         const lines = b.split("\n");
         if (lines.every((l) => l.startsWith("- "))) {
           return (
-            <ul key={i} className="grid list-disc gap-1 pl-6">
+            <ul key={i} className="grid list-disc gap-1 ps-6">
               {lines.map((l, j) => <li key={j}>{l.slice(2)}</li>)}
             </ul>
           );

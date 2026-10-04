@@ -1,13 +1,19 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/dashboard/dashboard-shell";
 
 import { EventForm } from "../event-form";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "New event" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("New event") };
+}
 
-export default function NewEventPage() {
+export default async function NewEventPage() {
+  const t = await getT();
   return (
     <>
-      <PageHeader title="New event" description="Save as a draft, then publish when the details are final." />
+      <PageHeader title={t("New event")} description={t("Save as a draft, then publish when the details are final.")} />
       <EventForm initial={null} />
     </>
   );

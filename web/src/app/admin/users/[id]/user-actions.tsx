@@ -7,11 +7,13 @@ import { toast } from "sonner";
 import { setUserRolesAction, setUserStatusAction, verifyUserAction } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import type { RoleInfo } from "@/lib/admin";
+import { useT } from "@/lib/i18n/client";
 
 type Status = "ACTIVE" | "SUSPENDED" | "BANNED";
 const box = "grid gap-3 rounded-md border border-border bg-surface p-5";
 
 export function StatusActions({ id, status, isVerified }: { id: string; status: string; isVerified: boolean }) {
+  const t = useT();
   const router = useRouter();
   const [next, setNext] = useState<Status | null>(null);
   const [reason, setReason] = useState("");
@@ -27,35 +29,36 @@ export function StatusActions({ id, status, isVerified }: { id: string; status: 
   };
 
   const options: { s: Status; label: string; variant: "primary" | "secondary" | "danger" }[] = [
-    ...(status !== "ACTIVE" ? [{ s: "ACTIVE" as const, label: "Restore account", variant: "primary" as const }] : []),
-    ...(status !== "SUSPENDED" ? [{ s: "SUSPENDED" as const, label: "Suspend", variant: "secondary" as const }] : []),
-    ...(status !== "BANNED" ? [{ s: "BANNED" as const, label: "Ban", variant: "danger" as const }] : []),
+    ...(status !== "ACTIVE" ? [{ s: "ACTIVE" as const, label: t("Restore account"), variant: "primary" as const }] : []),
+    ...(status !== "SUSPENDED" ? [{ s: "SUSPENDED" as const, label: t("Suspend"), variant: "secondary" as const }] : []),
+    ...(status !== "BANNED" ? [{ s: "BANNED" as const, label: t("Ban"), variant: "danger" as const }] : []),
   ];
 
   return (
     <section className={box} aria-labelledby="access">
-      <h2 id="access" className="font-display font-semibold">Access</h2>
+      <h2 id="access" className="font-display font-semibold">{t("Access")}</h2>
       {next ? (
         <form className="grid gap-2" onSubmit={(e) => { e.preventDefault(); start(async () => done(await setUserStatusAction(id, next, reason.trim()))); }}>
-          <label htmlFor="status-reason" className="text-sm font-medium">Reason (sent to the person)</label>
+          <label htmlFor="status-reason" className="text-sm font-medium">{t("Reason (sent to the person)")}</label>
           <textarea id="status-reason" required minLength={5} maxLength={500} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} className="rounded-md border border-border bg-surface px-3 py-2 text-sm" />
           <div className="flex gap-2">
-            <Button type="submit" size="sm" variant={next === "ACTIVE" ? "primary" : "danger"} loading={pending}>Confirm</Button>
-            <Button type="button" size="sm" variant="secondary" onClick={() => setNext(null)}>Back</Button>
+            <Button type="submit" size="sm" variant={next === "ACTIVE" ? "primary" : "danger"} loading={pending}>{t("Confirm")}</Button>
+            <Button type="button" size="sm" variant="secondary" onClick={() => setNext(null)}>{t("Back")}</Button>
           </div>
         </form>
       ) : (
         <div className="flex flex-wrap gap-2">
           {options.map((o) => <Button key={o.s} size="sm" variant={o.variant} onClick={() => setNext(o.s)}>{o.label}</Button>)}
-          {!isVerified && <Button size="sm" variant="secondary" loading={pending} onClick={() => start(async () => done(await verifyUserAction(id)))}>Mark email verified</Button>}
+          {!isVerified && <Button size="sm" variant="secondary" loading={pending} onClick={() => start(async () => done(await verifyUserAction(id)))}>{t("Mark email verified")}</Button>}
         </div>
       )}
-      <p className="text-xs text-muted">Suspending or banning signs the person out on every device straight away.</p>
+      <p className="text-xs text-muted">{t("Suspending or banning signs the person out on every device straight away.")}</p>
     </section>
   );
 }
 
 export function RolesEditor({ id, current, roles, isSuperAdmin }: { id: string; current: string[]; roles: RoleInfo[]; isSuperAdmin: boolean }) {
+  const t = useT();
   const router = useRouter();
   const [selected, setSelected] = useState(current);
   const [pending, start] = useTransition();
@@ -63,7 +66,7 @@ export function RolesEditor({ id, current, roles, isSuperAdmin }: { id: string; 
 
   return (
     <section className={box} aria-labelledby="roles">
-      <h2 id="roles" className="font-display font-semibold">Staff roles</h2>
+      <h2 id="roles" className="font-display font-semibold">{t("Staff roles")}</h2>
       <ul className="grid gap-2">
         {roles.filter((r) => r.assignable).map((r) => {
           const locked = r.protected && !isSuperAdmin;
@@ -86,7 +89,7 @@ export function RolesEditor({ id, current, roles, isSuperAdmin }: { id: string; 
           );
         })}
       </ul>
-      <p className="text-xs text-muted">Seller and Customer roles come from shop approval and sign-up. Only a Super Admin can change admin roles.</p>
+      <p className="text-xs text-muted">{t("Seller and Customer roles come from shop approval and sign-up. Only a Super Admin can change admin roles.")}</p>
       <div>
         <Button
           size="sm"
@@ -102,8 +105,7 @@ export function RolesEditor({ id, current, roles, isSuperAdmin }: { id: string; 
             })
           }
         >
-          Save roles
-        </Button>
+          {t("Save roles")}</Button>
       </div>
     </section>
   );

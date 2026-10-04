@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
 
 export function Stat({ label, value, sub, href }: { label: string; value: string; sub?: string; href?: string }) {
   const body = (
@@ -13,9 +14,10 @@ export function Stat({ label, value, sub, href }: { label: string; value: string
 }
 
 /** 7 / 30 / 90-day switch using plain links. */
-export function RangeSwitch({ days, basePath }: { days: number; basePath: string }) {
+export async function RangeSwitch({ days, basePath }: { days: number; basePath: string }) {
+  const t = await getT();
   return (
-    <nav aria-label="Time range" className="inline-flex rounded-md border border-border bg-surface p-1 text-sm">
+    <nav aria-label={t("Time range")} className="inline-flex rounded-md border border-border bg-surface p-1 text-sm">
       {[7, 30, 90].map((d) => (
         <Link
           key={d}
@@ -23,8 +25,7 @@ export function RangeSwitch({ days, basePath }: { days: number; basePath: string
           aria-current={d === days ? "page" : undefined}
           className="rounded px-3 py-1.5 font-medium text-muted aria-[current=page]:bg-primary aria-[current=page]:text-primary-ink"
         >
-          {d} days
-        </Link>
+          {t("{d} days", { d })}</Link>
       ))}
     </nav>
   );

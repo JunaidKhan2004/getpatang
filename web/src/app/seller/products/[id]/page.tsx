@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,10 +9,15 @@ import { categoryOptions, type SellerApplication, type SellerProduct } from "@/l
 import { getAccessToken } from "@/lib/session";
 
 import { ProductForm } from "../product-form";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Edit product" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Edit product") };
+}
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getT();
   const { id } = await params;
   const token = await getAccessToken();
   let product: SellerProduct;
@@ -27,8 +33,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     <>
       <PageHeader
         title={product.title}
-        description={`${product.salesCount} sold · ${product.stock} in stock`}
-        actions={product.status === "ACTIVE" ? <Link href={`/products/${product.slug}`} target="_blank" className="text-sm font-semibold text-primary hover:underline">View in shop</Link> : undefined}
+        description={t("{salesCount} sold · {stock} in stock", { salesCount: product.salesCount, stock: product.stock })}
+        actions={product.status === "ACTIVE" ? <Link href={`/products/${product.slug}`} target="_blank" className="text-sm font-semibold text-primary hover:underline">{t("View in shop")}</Link> : undefined}
       />
       <ProductForm product={product} categories={categoryOptions(categories)} requiresApproval={shop.requireApproval ?? true} />
     </>

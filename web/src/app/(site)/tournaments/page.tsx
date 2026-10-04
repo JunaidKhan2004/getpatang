@@ -8,8 +8,12 @@ import { Alert, EmptyState } from "@/components/ui/feedback";
 import { apiPage } from "@/lib/api";
 import type { TournamentCard as T } from "@/lib/tournaments";
 import { PAKISTAN_CITIES } from "@/lib/validation";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "Tournaments", description: "Approved kite-flying tournaments across Pakistan: register, follow brackets and results." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Tournaments"), description: tr("Approved kite-flying tournaments across Pakistan: register, follow brackets and results.") };
+}
 
 const VIEWS = [
   { value: "", label: "All" },
@@ -20,18 +24,19 @@ const VIEWS = [
 ];
 
 export default async function TournamentsPage({ searchParams }: { searchParams: Promise<{ view?: string; city?: string; page?: string; q?: string }> }) {
+  const tr = await getT();
   const params = await searchParams;
   const result = await apiPage<T>("/tournaments", { query: { ...params, pageSize: 12 } }).catch(() => null);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6 grid gap-1">
-        <h1 className="text-3xl font-bold">Tournaments</h1>
-        <p className="text-muted">Every event listed here has a local permit and published safety rules.</p>
+        <h1 className="text-3xl font-bold">{tr("Tournaments")}</h1>
+        <p className="text-muted">{tr("Every event listed here has a local permit and published safety rules.")}</p>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="Tournament view" className="flex gap-1 overflow-x-auto">
+        <nav aria-label={tr("Tournament view")} className="flex gap-1 overflow-x-auto">
           {VIEWS.map((v) => (
             <Link
               key={v.value}
@@ -39,22 +44,22 @@ export default async function TournamentsPage({ searchParams }: { searchParams: 
               aria-current={(params.view ?? "") === v.value ? "page" : undefined}
               className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-muted hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
             >
-              {v.label}
+              {tr(v.label)}
             </Link>
           ))}
         </nav>
         <form className="flex items-center gap-2">
           {params.view && <input type="hidden" name="view" value={params.view} />}
-          <label htmlFor="t-city" className="text-sm">City</label>
+          <label htmlFor="t-city" className="text-sm">{tr("City")}</label>
           <AutoSubmitSelect id="t-city" name="city" defaultValue={params.city ?? ""} className="h-10 rounded-md border border-border bg-surface px-3 text-sm">
-            <option value="">All cities</option>
+            <option value="">{tr("All cities")}</option>
             {PAKISTAN_CITIES.map((c) => <option key={c}>{c}</option>)}
           </AutoSubmitSelect>
         </form>
       </div>
 
-      {!result && <Alert tone="error">Tournaments could not load. Please refresh the page.</Alert>}
-      {result && result.data.length === 0 && <EmptyState title="No tournaments here yet" message="Check back soon, or try another city or view." />}
+      {!result && <Alert tone="error">{tr("Tournaments could not load. Please refresh the page.")}</Alert>}
+      {result && result.data.length === 0 && <EmptyState title={tr("No tournaments here yet")} message={tr("Check back soon, or try another city or view.")} />}
       {result && result.data.length > 0 && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{result.data.map((t) => <TournamentCard key={t.id} t={t} />)}</div>

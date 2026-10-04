@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 interface Point {
   date: string;
@@ -30,6 +31,7 @@ const FORMATS = {
 };
 
 export function DailyBarChart({ points, label, kind }: { points: Point[]; label: string; kind: keyof typeof FORMATS }) {
+  const tr = useT();
   const format = FORMATS[kind];
   const [active, setActive] = useState<number | null>(null);
   const max = niceMax(Math.max(...points.map((p) => p.value)));
@@ -45,7 +47,7 @@ export function DailyBarChart({ points, label, kind }: { points: Point[]; label:
   return (
     <figure className="grid gap-2">
       <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`${label} per day`} onMouseLeave={() => setActive(null)}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={tr("{label} per day", { label })} onMouseLeave={() => setActive(null)}>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} strokeDasharray={t === 0 ? undefined : "2 4"} />
@@ -103,8 +105,8 @@ export function DailyBarChart({ points, label, kind }: { points: Point[]; label:
       </div>
       <figcaption className="sr-only">
         <table>
-          <caption>{label} per day</caption>
-          <thead><tr><th>Date</th><th>{label}</th></tr></thead>
+          <caption>{tr("{label} per day", { label })}</caption>
+          <thead><tr><th>{tr("Date")}</th><th>{label}</th></tr></thead>
           <tbody>{points.map((p) => <tr key={p.date}><td>{p.date}</td><td>{format(p.value)}</td></tr>)}</tbody>
         </table>
       </figcaption>

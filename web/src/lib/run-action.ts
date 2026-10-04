@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { ApiError } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
+import { getT } from "@/lib/i18n/server";
 
 export interface EResult {
   ok: boolean;
@@ -21,11 +22,11 @@ export async function runAction(fn: (token: string) => Promise<unknown>, success
     const res = await fn(token);
     paths.forEach((p) => revalidatePath(p));
     const msg = (res as { message?: string } | null)?.message;
-    return { ok: true, message: msg ?? success, id: (res as { id?: string } | null)?.id };
+    return { ok: true, message: msg ?? (success && (await getT())(success)), id: (res as { id?: string } | null)?.id };
   } catch (e) {
     if (e instanceof ApiError) return { ok: false, message: e.message, fieldErrors: e.fieldErrors, signIn: e.status === 401 };
     console.error(e);
-    return { ok: false, message: "Something went wrong. Please try again." };
+    return { ok: false, message: (await getT())("Something went wrong. Please try again.") };
   }
 }
 

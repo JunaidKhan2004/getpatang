@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/dashboard/dashboard-shell";
@@ -10,8 +11,12 @@ import { PRODUCT_STATUS_LABEL, type ProductStatus } from "@/lib/seller";
 import { getAccessToken } from "@/lib/session";
 
 import { ProductModeration } from "./product-moderation";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Products" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Products") };
+}
 
 interface ModerationRow {
   id: string;
@@ -32,6 +37,7 @@ interface ModerationRow {
 const TABS: ProductStatus[] = ["PENDING_APPROVAL", "ACTIVE", "HIDDEN", "REJECTED", "REMOVED"];
 
 export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string; page?: string }> }) {
+  const t = await getT();
   const params = await searchParams;
   const status = (params.status as ProductStatus | undefined) ?? "PENDING_APPROVAL";
   const result = await apiPage<ModerationRow>("/admin/products", { token: await getAccessToken(), query: { status, q: params.q, page: params.page, pageSize: 20 } }).catch(() => null);
@@ -39,23 +45,23 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <PageHeader title="Products" description="Approve new listings and act on reported or unsafe products." />
-      <nav aria-label="Product status" className="mb-4 flex gap-1 overflow-x-auto">
+      <PageHeader title={t("Products")} description={t("Approve new listings and act on reported or unsafe products.")} />
+      <nav aria-label={t("Product status")} className="mb-4 flex gap-1 overflow-x-auto">
         {TABS.map((s) => (
           <Link key={s} href={`/admin/products?status=${s}`} aria-current={status === s ? "page" : undefined} className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-muted hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary">
-            {PRODUCT_STATUS_LABEL[s]} <span className="tabular-nums">({counts[s] ?? 0})</span>
+            {t(PRODUCT_STATUS_LABEL[s])} <span className="tabular-nums">({counts[s] ?? 0})</span>
           </Link>
         ))}
       </nav>
       <form role="search" className="mb-4 flex max-w-md gap-2">
         <input type="hidden" name="status" value={status} />
-        <label htmlFor="mq" className="sr-only">Search products</label>
-        <input id="mq" name="q" defaultValue={params.q} placeholder="Product title or shop name" className="h-10 flex-1 rounded-md border border-border bg-surface px-3 text-sm" />
-        <button className="h-10 rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">Search</button>
+        <label htmlFor="mq" className="sr-only">{t("Search products")}</label>
+        <input id="mq" name="q" defaultValue={params.q} placeholder={t("Product title or shop name")} className="h-10 flex-1 rounded-md border border-border bg-surface px-3 text-sm" />
+        <button className="h-10 rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">{t("Search")}</button>
       </form>
 
-      {!result && <Alert tone="error">Products could not load. Please refresh the page.</Alert>}
-      {result && result.data.length === 0 && <EmptyState title="Nothing to review" message={status === "PENDING_APPROVAL" ? "The approval queue is empty." : "No products with this status."} />}
+      {!result && <Alert tone="error">{t("Products could not load. Please refresh the page.")}</Alert>}
+      {result && result.data.length === 0 && <EmptyState title={t("Nothing to review")} message={status === "PENDING_APPROVAL" ? t("The approval queue is empty.") : t("No products with this status.")} />}
       {result && result.data.length > 0 && (
         <>
           <ul className="grid gap-4">
@@ -69,11 +75,11 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                 <div className="grid min-w-0 content-start gap-1 text-sm">
                   <span className="font-display text-base font-semibold">{p.title}</span>
                   <span className="text-muted">
-                    <Link href={`/admin/sellers/${p.shop.id}`} className="text-primary hover:underline">{p.shop.name}</Link> · {p.category.name} · updated {formatDate(p.updatedAt, true)}
+                    <Link href={`/admin/sellers/${p.shop.id}`} className="text-primary hover:underline">{p.shop.name}</Link> {" "}{t("· {name} · updated {true}", { name: p.category.name, true: formatDate(p.updatedAt, true) })}
                   </span>
                   <span className="tabular-nums">{formatPKR(p.price)} · {p.variants.length ? `${p.variants.length} options (${p.variants.map((v) => v.name).join(", ")})` : `${p.stock} in stock`}</span>
                   <p className="mt-1 line-clamp-4 whitespace-pre-line text-muted">{p.description}</p>
-                  {p.reviewNote && <p className="text-danger">Note: {p.reviewNote}</p>}
+                  {p.reviewNote && <p className="text-danger">{t("Note: {reviewNote}", { reviewNote: p.reviewNote })}</p>}
                 </div>
                 <ProductModeration productId={p.id} status={p.status} slug={p.slug} />
               </li>

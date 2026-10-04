@@ -13,6 +13,7 @@ import { formatDate } from "@/lib/market";
 import { getAccessToken } from "@/lib/session";
 
 import { ProfileActions } from "./profile-actions";
+import { getT } from "@/lib/i18n/server";
 
 const getProfile = cache(async (id: string) => {
   try {
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function CommunityProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ page?: string }> }) {
+  const t = await getT();
   const { id } = await params;
   const { page } = await searchParams;
   const p = await getProfile(id);
@@ -42,7 +44,7 @@ export default async function CommunityProfilePage({ params, searchParams }: { p
             <h1 className="text-2xl font-bold">{p.name}</h1>
             <p className="flex flex-wrap items-center gap-3 text-sm text-muted">
               {p.city && <span className="flex items-center gap-1"><MapPin className="size-3.5" aria-hidden="true" />{p.city}</span>}
-              <span>Joined {formatDate(p.memberSince)}</span>
+              <span>{t("Joined {memberSince}", { memberSince: formatDate(p.memberSince) })}</span>
             </p>
           </div>
           {!p.isMe && <ProfileActions userId={p.id} isFollowing={p.isFollowing} isBlocked={p.isBlocked} />}
@@ -50,23 +52,23 @@ export default async function CommunityProfilePage({ params, searchParams }: { p
         {p.bio && <p>{p.bio}</p>}
         {!p.isBlocked && (
           <dl className="flex gap-6 text-sm">
-            <div><dt className="text-muted">Posts</dt><dd className="font-display text-lg font-bold tabular-nums">{p.posts}</dd></div>
-            <div><dt className="text-muted">Followers</dt><dd className="font-display text-lg font-bold tabular-nums">{p.followers}</dd></div>
-            <div><dt className="text-muted">Following</dt><dd className="font-display text-lg font-bold tabular-nums">{p.following}</dd></div>
+            <div><dt className="text-muted">{t("Posts")}</dt><dd className="font-display text-lg font-bold tabular-nums">{p.posts}</dd></div>
+            <div><dt className="text-muted">{t("Followers")}</dt><dd className="font-display text-lg font-bold tabular-nums">{p.followers}</dd></div>
+            <div><dt className="text-muted">{t("Following")}</dt><dd className="font-display text-lg font-bold tabular-nums">{p.following}</dd></div>
           </dl>
         )}
-        <Link href={`/players/${p.id}`} className="text-sm font-semibold text-primary hover:underline">Tournament record and rankings</Link>
+        <Link href={`/players/${p.id}`} className="text-sm font-semibold text-primary hover:underline">{t("Tournament record and rankings")}</Link>
       </header>
 
       {p.isBlocked ? (
-        <EmptyState title="You blocked this person" message="Unblock them to see their posts again." />
+        <EmptyState title={t("You blocked this person")} message={t("Unblock them to see their posts again.")} />
       ) : posts && posts.data.length > 0 ? (
         <>
           <div className="grid gap-4">{posts.data.map((post) => <PostCard key={post.id} post={post} />)}</div>
           <Pagination meta={posts.meta} basePath={`/community/u/${id}`} params={{}} />
         </>
       ) : (
-        <EmptyState title="No posts yet" message={p.isMe ? "Share your first post from the community feed." : "This person has not posted yet."} />
+        <EmptyState title={t("No posts yet")} message={p.isMe ? t("Share your first post from the community feed.") : t("This person has not posted yet.")} />
       )}
     </div>
   );

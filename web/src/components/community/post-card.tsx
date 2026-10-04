@@ -8,9 +8,10 @@ import { toast } from "sonner";
 
 import { deletePostAction, editPostAction, likeAction, shareAction } from "@/app/actions/community";
 import { Button } from "@/components/ui/button";
-import { type PostView, timeAgo } from "@/lib/community";
+import { type PostView } from "@/lib/community";
 
 import { ReportButton } from "./report-button";
+import { useT, useFormat } from "@/lib/i18n/client";
 
 export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
   const cls = { sm: "size-8 text-sm", md: "size-10 text-base", lg: "size-20 text-3xl" }[size];
@@ -18,13 +19,13 @@ export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md"
 }
 
 export function PostMedia({ media }: { media: PostView["media"] }) {
+  const t = useT();
   if (!media.length) return null;
   if (media[0].kind === "video") {
     return (
-      <video controls preload="metadata" className="max-h-[520px] w-full rounded-md bg-black" aria-label="Video attached to the post">
+      <video controls preload="metadata" className="max-h-[520px] w-full rounded-md bg-black" aria-label={t("Video attached to the post")}>
         <source src={media[0].url} type={media[0].mimeType} />
-        Your browser cannot play this video.
-      </video>
+        {t("Your browser cannot play this video.")}</video>
     );
   }
   return (
@@ -32,13 +33,15 @@ export function PostMedia({ media }: { media: PostView["media"] }) {
       {media.map((m, i) => (
         // Photos come from object storage; next/image remote patterns are configured with production storage.
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={m.url} src={m.url} alt={`Photo ${i + 1}`} loading="lazy" className={`w-full object-cover ${media.length > 1 ? "aspect-square" : "max-h-[520px]"}`} />
+        <img key={m.url} src={m.url} alt={t("Photo {i}", { i: i + 1 })} loading="lazy" className={`w-full object-cover ${media.length > 1 ? "aspect-square" : "max-h-[520px]"}`} />
       ))}
     </div>
   );
 }
 
 export function PostCard({ post: initial, linkToPost = true }: { post: PostView; linkToPost?: boolean }) {
+  const { timeAgo } = useFormat();
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   const [post, setPost] = useState(initial);
@@ -70,10 +73,10 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
       const url = `${window.location.origin}${res.data.path}`;
       setPost((p) => ({ ...p, shareCount: res.data!.shareCount }));
       try {
-        if (navigator.share) await navigator.share({ title: `Post by ${post.author.name}`, url });
+        if (navigator.share) await navigator.share({ title: t("Post by {name}", { name: post.author.name }), url });
         else {
           await navigator.clipboard.writeText(url);
-          toast.success("Link copied.");
+          toast.success(t("Link copied."));
         }
       } catch {
         // The share sheet was closed; nothing to do.
@@ -83,7 +86,7 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
   if (deleted) return null;
   const date = (
     <time dateTime={post.createdAt} title={new Date(post.createdAt).toLocaleString("en-PK")}>
-      {timeAgo(post.createdAt)}{post.editedAt && " · edited"}
+      {timeAgo(post.createdAt)}{post.editedAt && t("· edited")}
     </time>
   );
 
@@ -99,17 +102,17 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
           </p>
         </div>
         <div className="relative">
-          <button type="button" aria-label="Post options" aria-expanded={menu} onClick={() => setMenu((m) => !m)} className="rounded-md p-1.5 text-muted hover:bg-surface-2">
+          <button type="button" aria-label={t("Post options")} aria-expanded={menu} onClick={() => setMenu((m) => !m)} className="rounded-md p-1.5 text-muted hover:bg-surface-2">
             <MoreHorizontal className="size-5" />
           </button>
           {menu && (
-            <div className="absolute right-0 z-20 mt-1 w-64 rounded-md border border-border bg-surface p-2 shadow-lg">
+            <div className="absolute end-0 z-20 mt-1 w-64 rounded-md border border-border bg-surface p-2 shadow-lg">
               {post.isMine ? (
                 <>
-                  <button type="button" className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-surface-2" onClick={() => { setEditing(true); setMenu(false); }}>Edit post</button>
+                  <button type="button" className="block w-full rounded px-3 py-2 text-start text-sm hover:bg-surface-2" onClick={() => { setEditing(true); setMenu(false); }}>{t("Edit post")}</button>
                   <button
                     type="button"
-                    className="block w-full rounded px-3 py-2 text-left text-sm text-danger hover:bg-surface-2"
+                    className="block w-full rounded px-3 py-2 text-start text-sm text-danger hover:bg-surface-2"
                     onClick={() =>
                       start(async () => {
                         const res = await deletePostAction(post.id);
@@ -121,11 +124,10 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
                       })
                     }
                   >
-                    Delete post
-                  </button>
+                    {t("Delete post")}</button>
                 </>
               ) : (
-                <ReportButton targetType="post" targetId={post.id} label="Report post" />
+                <ReportButton targetType="post" targetId={post.id} label={t("Report post")} />
               )}
             </div>
           )}
@@ -147,9 +149,9 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
             });
           }}
         >
-          <label htmlFor={`edit-${post.id}`} className="sr-only">Edit post</label>
+          <label htmlFor={`edit-${post.id}`} className="sr-only">{t("Edit post")}</label>
           <textarea id={`edit-${post.id}`} value={draft} maxLength={2000} rows={4} onChange={(e) => setDraft(e.target.value)} className="rounded-md border border-border bg-surface px-3 py-2" />
-          <div className="flex gap-2"><Button type="submit" size="sm" loading={pending} disabled={!draft.trim()}>Save</Button><Button type="button" size="sm" variant="secondary" onClick={() => setEditing(false)}>Cancel</Button></div>
+          <div className="flex gap-2"><Button type="submit" size="sm" loading={pending} disabled={!draft.trim()}>{t("Save")}</Button><Button type="button" size="sm" variant="secondary" onClick={() => setEditing(false)}>{t("Cancel")}</Button></div>
         </form>
       ) : (
         <p className="whitespace-pre-line break-words">{post.body}</p>
@@ -159,13 +161,13 @@ export function PostCard({ post: initial, linkToPost = true }: { post: PostView;
 
       <footer className="flex items-center gap-1 border-t border-border pt-2 text-sm">
         <button type="button" onClick={toggleLike} aria-pressed={post.likedByMe} className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted hover:bg-surface-2 aria-pressed:text-primary">
-          <Heart className={`size-4 ${post.likedByMe ? "fill-current" : ""}`} aria-hidden="true" /> {post.likeCount}<span className="sr-only"> likes</span>
+          <Heart className={`size-4 ${post.likedByMe ? "fill-current" : ""}`} aria-hidden="true" /> {post.likeCount}<span className="sr-only"> {" "}{t("likes")}</span>
         </button>
         <Link href={`/community/posts/${post.id}#comments`} className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted hover:bg-surface-2">
-          <MessageCircle className="size-4" aria-hidden="true" /> {post.commentCount}<span className="sr-only"> comments</span>
+          <MessageCircle className="size-4" aria-hidden="true" /> {post.commentCount}<span className="sr-only"> {" "}{t("comments")}</span>
         </Link>
         <button type="button" onClick={share} className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted hover:bg-surface-2">
-          <Share2 className="size-4" aria-hidden="true" /> {post.shareCount > 0 ? post.shareCount : "Share"}<span className="sr-only"> shares</span>
+          <Share2 className="size-4" aria-hidden="true" /> {post.shareCount > 0 ? post.shareCount : t("Share")}<span className="sr-only"> {" "}{t("shares")}</span>
         </button>
       </footer>
     </article>

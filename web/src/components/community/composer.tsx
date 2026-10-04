@@ -10,6 +10,7 @@ import { uploadFile } from "@/components/seller/uploads";
 import { Button, Spinner } from "@/components/ui/button";
 
 import { Avatar } from "./post-card";
+import { useT } from "@/lib/i18n/client";
 
 interface Attached {
   id: string;
@@ -18,6 +19,7 @@ interface Attached {
 }
 
 export function Composer({ userName }: { userName: string }) {
+  const t = useT();
   const router = useRouter();
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<Attached[]>([]);
@@ -47,7 +49,7 @@ export function Composer({ userName }: { userName: string }) {
   return (
     <form
       className="grid gap-3 rounded-md border border-border bg-surface p-4"
-      aria-label="Create a post"
+      aria-label={t("Create a post")}
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
@@ -63,14 +65,14 @@ export function Composer({ userName }: { userName: string }) {
     >
       <div className="flex gap-3">
         <Avatar name={userName} />
-        <label htmlFor="new-post" className="sr-only">What&apos;s happening?</label>
+        <label htmlFor="new-post" className="sr-only">{t("What's happening?")}</label>
         <textarea
           id="new-post"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           maxLength={2000}
           rows={3}
-          placeholder="Share a flight, a kite you made, or a tip…"
+          placeholder={t("Share a flight, a kite you made, or a tip…")}
           className="min-w-0 flex-1 resize-y rounded-md border border-border bg-surface px-3 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
@@ -81,11 +83,11 @@ export function Composer({ userName }: { userName: string }) {
             <li key={m.id} className="relative aspect-square overflow-hidden rounded-md border border-border bg-surface-2">
               {m.kind === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.url} alt="Attached photo" className="h-full w-full object-cover" />
+                <img src={m.url} alt={t("Attached photo")} className="h-full w-full object-cover" />
               ) : (
-                <video src={m.url} muted className="h-full w-full object-cover" aria-label="Attached video" />
+                <video src={m.url} muted className="h-full w-full object-cover" aria-label={t("Attached video")} />
               )}
-              <button type="button" aria-label="Remove attachment" onClick={() => setMedia(media.filter((x) => x.id !== m.id))} className="absolute top-1 right-1 rounded-full bg-surface/90 p-1">
+              <button type="button" aria-label={t("Remove attachment")} onClick={() => setMedia(media.filter((x) => x.id !== m.id))} className="absolute top-1 end-1 rounded-full bg-surface/90 p-1">
                 <X className="size-3.5" />
               </button>
             </li>
@@ -95,16 +97,14 @@ export function Composer({ userName }: { userName: string }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" disabled={uploading || hasVideo || media.length >= 4} onClick={() => imageInput.current?.click()} className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted hover:bg-surface-2 disabled:opacity-40">
-          <ImagePlus className="size-4" aria-hidden="true" /> Photos
-        </button>
+          <ImagePlus className="size-4" aria-hidden="true" /> {" "}{t("Photos")}</button>
         <button type="button" disabled={uploading || media.length > 0} onClick={() => videoInput.current?.click()} className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted hover:bg-surface-2 disabled:opacity-40">
-          <Video className="size-4" aria-hidden="true" /> Video
-        </button>
-        {uploading && <span className="inline-flex items-center gap-2 text-sm text-muted"><Spinner /> Uploading…</span>}
-        <span className="ml-auto text-xs text-muted tabular-nums">{body.length}/2000</span>
-        <Button type="submit" size="sm" loading={pending} disabled={!body.trim() || uploading}>Post</Button>
+          <Video className="size-4" aria-hidden="true" /> {" "}{t("Video")}</button>
+        {uploading && <span className="inline-flex items-center gap-2 text-sm text-muted"><Spinner /> {" "}{t("Uploading…")}</span>}
+        <span className="ms-auto text-xs text-muted tabular-nums">{body.length}/2000</span>
+        <Button type="submit" size="sm" loading={pending} disabled={!body.trim() || uploading}>{t("Post")}</Button>
       </div>
-      <p className="text-xs text-muted">Up to 4 photos (8 MB each) or one video (50 MB). Posts promoting banned strings or unsafe flying are removed.</p>
+      <p className="text-xs text-muted">{t("Up to 4 photos (8 MB each) or one video (50 MB). Posts promoting banned strings or unsafe flying are removed.")}</p>
       <input ref={imageInput} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => attach(e.target.files, "image")} />
       <input ref={videoInput} type="file" accept="video/mp4,video/quicktime,video/webm" hidden onChange={(e) => attach(e.target.files, "video")} />
     </form>

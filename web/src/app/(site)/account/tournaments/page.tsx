@@ -8,8 +8,12 @@ import { api } from "@/lib/api";
 import { formatDate } from "@/lib/market";
 import { getAccessToken, requireUser } from "@/lib/session";
 import { PARTICIPANT_STATUS_LABEL, type ParticipantStatus, placementLabel, type TournamentCard } from "@/lib/tournaments";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "My tournaments" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("My tournaments") };
+}
 
 interface Entry {
   entryId: string;
@@ -20,19 +24,20 @@ interface Entry {
 }
 
 export default async function MyTournamentsPage() {
+  const t = await getT();
   const user = await requireUser("/account/tournaments");
   const entries = await api<Entry[]>("/tournaments/mine", { token: await getAccessToken() }).catch(() => null);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted"><Link href="/account" className="hover:text-primary">My account</Link> / Tournaments</nav>
+      <nav aria-label={t("Breadcrumb")} className="mb-4 text-sm text-muted"><Link href="/account" className="hover:text-primary">{t("My account")}</Link> / Tournaments</nav>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-3xl font-bold">My tournaments</h1>
-        <Link href={`/players/${user.id}`} className="text-sm font-semibold text-primary hover:underline">View my player profile</Link>
+        <h1 className="text-3xl font-bold">{t("My tournaments")}</h1>
+        <Link href={`/players/${user.id}`} className="text-sm font-semibold text-primary hover:underline">{t("View my player profile")}</Link>
       </div>
-      {!entries && <Alert tone="error">Your tournaments could not load. Please refresh the page.</Alert>}
+      {!entries && <Alert tone="error">{t("Your tournaments could not load. Please refresh the page.")}</Alert>}
       {entries && entries.length === 0 && (
-        <EmptyState title="No tournaments yet" message="Register for an approved tournament near you." action={<ButtonLink href="/tournaments?view=open">Find tournaments</ButtonLink>} />
+        <EmptyState title={t("No tournaments yet")} message={t("Register for an approved tournament near you.")} action={<ButtonLink href="/tournaments?view=open">{t("Find tournaments")}</ButtonLink>} />
       )}
       {entries && entries.length > 0 && (
         <ul className="grid gap-3">
@@ -46,7 +51,7 @@ export default async function MyTournamentsPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <TournamentStatusBadge t={e.tournament} />
-                  <Badge tone={e.status === "CONFIRMED" ? "success" : e.status === "PENDING" || e.status === "WAITLISTED" ? "warning" : "danger"}>{PARTICIPANT_STATUS_LABEL[e.status]}</Badge>
+                  <Badge tone={e.status === "CONFIRMED" ? "success" : e.status === "PENDING" || e.status === "WAITLISTED" ? "warning" : "danger"}>{t(PARTICIPANT_STATUS_LABEL[e.status])}</Badge>
                   {e.finalPlacement && <Badge tone="brand">{placementLabel(e.finalPlacement)}</Badge>}
                 </div>
               </Link>

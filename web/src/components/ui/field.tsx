@@ -1,6 +1,7 @@
 "use client";
 
 import { type ComponentProps, useId, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 const inputClass =
   "h-12 w-full rounded-md border bg-surface px-4 text-[15px] text-ink placeholder:text-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 aria-[invalid=true]:border-danger";
@@ -41,6 +42,7 @@ export function Field({
 }
 
 export function PasswordField(props: Omit<ComponentProps<typeof Field>, "type">) {
+  const t = useT();
   const [visible, setVisible] = useState(false);
   return (
     <div className="relative">
@@ -48,10 +50,10 @@ export function PasswordField(props: Omit<ComponentProps<typeof Field>, "type">)
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute right-3 top-[34px] rounded px-2 py-1 text-sm font-medium text-primary hover:bg-primary-soft"
-        aria-label={visible ? "Hide password" : "Show password"}
+        className="absolute end-3 top-[34px] rounded px-2 py-1 text-sm font-medium text-primary hover:bg-primary-soft"
+        aria-label={visible ? t("Hide password") : t("Show password")}
       >
-        {visible ? "Hide" : "Show"}
+        {visible ? t("Hide") : t("Show")}
       </button>
     </div>
   );
@@ -63,6 +65,7 @@ export function SelectField({
   options,
   ...props
 }: ComponentProps<"select"> & { label: string; error?: string; options: string[] }) {
+  const t = useT();
   const id = useId();
   return (
     <div className="grid gap-1.5">
@@ -76,10 +79,10 @@ export function SelectField({
         className={`${inputClass} ${error ? "border-danger" : "border-border focus:border-primary"}`}
         {...props}
       >
-        <option value="">Choose…</option>
+        <option value="">{t("Choose…")}</option>
         {options.map((o) => (
           <option key={o} value={o}>
-            {o}
+            {t(o)}
           </option>
         ))}
       </select>
