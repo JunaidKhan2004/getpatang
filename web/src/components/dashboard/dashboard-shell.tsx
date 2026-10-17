@@ -11,6 +11,7 @@ import { SELLER_NAV } from "@/app/seller/nav";
 import { Logo } from "@/components/ui/kite-mark";
 import { useT } from "@/lib/i18n/client";
 import { LanguageSwitch } from "@/components/site/language-switch";
+import { ThemeToggle } from "@/components/site/theme-toggle";
 
 export interface NavItem {
   href: string;
@@ -101,6 +102,7 @@ export function DashboardShell({
           <div className="ms-auto flex items-center gap-3">
             <span className="hidden text-sm text-muted sm:inline">{userName}</span>
             <LanguageSwitch compact />
+            <ThemeToggle compact />
             <form action={logoutAction}>
               <button type="submit" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-2">
                 <LogOut className="size-4" aria-hidden="true" />

@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/kite-mark";
 import { useT } from "@/lib/i18n/client";
 
 import { LanguageSwitch } from "./language-switch";
+import { ThemeToggle } from "./theme-toggle";
 
 export const SITE_NAV = [
   { href: "/", label: "Home" },
@@ -55,6 +56,7 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
 
         <div className="ms-auto flex items-center gap-1">
           <LanguageSwitch className="hidden sm:inline-flex" compact />
+          <ThemeToggle className="hidden sm:inline-flex" compact />
           <Link href="/search" className={iconBtn} aria-label={t("Search")}>
             <Search className="size-5" />
           </Link>
@@ -117,7 +119,10 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
           <Link href={userName ? "/account" : "/login"} className="rounded-md px-3 py-2.5 font-semibold text-primary">
             {userName ? t("My account") : t("Sign in")}
           </Link>
-          <LanguageSwitch className="inline-flex justify-start sm:hidden" />
+          <div className="flex items-center gap-2 px-3 py-1.5">
+            <LanguageSwitch className="inline-flex justify-start sm:hidden" />
+            <ThemeToggle className="inline-flex" />
+          </div>
         </nav>
       )}
     </header>

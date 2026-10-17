@@ -7,6 +7,7 @@ import '../auth/application/auth_controller.dart';
 import '../shell/main_shell.dart';
 import '../../core/i18n/i18n.dart';
 import '../../core/i18n/language.dart';
+import '../../core/theme/theme_mode_provider.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -49,7 +50,15 @@ class ProfileTab extends ConsumerWidget {
             ),
             const Padding(
               padding: EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
-              child: Card(child: LanguageTile()),
+              child: Card(
+                child: Column(
+                  children: [
+                    LanguageTile(),
+                    Divider(),
+                    ThemeModeTile(),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -156,6 +165,8 @@ class ProfileTab extends ConsumerWidget {
                 ),
                 const Divider(),
                 const LanguageTile(),
+                const Divider(),
+                const ThemeModeTile(),
               ],
             ),
           ),

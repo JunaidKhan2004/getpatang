@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/i18n/i18n.dart';
 import 'core/i18n/language.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'router/app_router.dart';
 
 Future<void> main() async {
@@ -27,7 +28,7 @@ class KiteApp extends ConsumerWidget {
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
     theme: AppTheme.light,
     darkTheme: AppTheme.dark,
-    themeMode: ThemeMode.system,
+    themeMode: ref.watch(themeModeProvider),
     routerConfig: ref.watch(routerProvider),
   );
 }
