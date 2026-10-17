@@ -46,7 +46,7 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
+              className={`${item.href === "/" ? "max-xl:hidden " : ""}rounded-md px-3 py-2 text-sm font-medium text-muted hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary`}
             >
               {t(item.label)}
             </Link>
@@ -54,7 +54,7 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
         </nav>
 
         <div className="ms-auto flex items-center gap-1">
-          <LanguageSwitch className="hidden sm:inline-flex" />
+          <LanguageSwitch className="hidden sm:inline-flex" compact />
           <Link href="/search" className={iconBtn} aria-label={t("Search")}>
             <Search className="size-5" />
           </Link>
@@ -117,7 +117,7 @@ export function SiteHeader({ userName, cartCount = 0, unreadCount = 0 }: { userN
           <Link href={userName ? "/account" : "/login"} className="rounded-md px-3 py-2.5 font-semibold text-primary">
             {userName ? t("My account") : t("Sign in")}
           </Link>
-          <LanguageSwitch className="justify-start sm:hidden" />
+          <LanguageSwitch className="inline-flex justify-start sm:hidden" />
         </nav>
       )}
     </header>

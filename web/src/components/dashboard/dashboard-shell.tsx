@@ -100,7 +100,7 @@ export function DashboardShell({
           <span className="font-display font-semibold">{t(area)}</span>
           <div className="ms-auto flex items-center gap-3">
             <span className="hidden text-sm text-muted sm:inline">{userName}</span>
-            <LanguageSwitch />
+            <LanguageSwitch compact />
             <form action={logoutAction}>
               <button type="submit" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-surface-2">
                 <LogOut className="size-4" aria-hidden="true" />
